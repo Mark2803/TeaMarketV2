@@ -1,0 +1,22 @@
+# Установленные зависимости
+node_modules/
+**/node_modules/
+
+# Сборки
+dist/
+**/dist/
+
+# Переменные окружения
+.env
+**/.env
+
+# Логи
+*.log
+npm-debug.log*
+
+# Prisma generated client
+backend/src/generated/prisma/
+
+# Служебные файлы
+.DS_Store
+Thumbs.db

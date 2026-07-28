@@ -1,0 +1,31 @@
+site_name: Tea Market V2 Documentation
+site_description: Техническая документация проекта Tea Market V2
+site_author: Mark Ivanchenko
+
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - tables
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Главная: index.md
+  - Автодокументация:
+      - Сводка: generated/overview.md
+      - Структура проекта: generated/structure.md
+      - База данных: generated/database.md
+      - Миграции: generated/migrations.md
+      - Зависимости и команды: generated/dependencies.md

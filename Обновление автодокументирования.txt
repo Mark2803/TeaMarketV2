@@ -1,0 +1,8 @@
+Запуск документирования
+PowerShell
+cd "D:\Different\Работа\Программы\Чайный Маркет V2\Код\docs-site"
+npm run docs
+python -m mkdocs serve
+
+Просмотр результата
+http://127.0.0.1:8000/

@@ -1,0 +1,18 @@
+{
+  "name": "tea-market-v2",
+  "version": "1.0.0",
+  "description": "Tea Market V2",
+  "keywords": [
+    "tea"
+  ],
+  "license": "MIT",
+  "author": "Mark Ivanchenko",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^18.1.0"
+  }
+}
