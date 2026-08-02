@@ -2,8 +2,8 @@
 
 Автоматически построенное дерево проекта. Служебные каталоги и зависимости исключены.
 
-- Каталогов: **55**
-- Файлов: **89**
+- Каталогов: **57**
+- Файлов: **94**
 
 ```text
 Код/
@@ -20,6 +20,11 @@
 │   │   │   ├── error-handler.ts
 │   │   │   └── not-found.ts
 │   │   ├── modules/
+│   │   │   ├── cart/
+│   │   │   │   ├── cart.controller.ts
+│   │   │   │   ├── cart.routes.ts
+│   │   │   │   ├── cart.schemas.ts
+│   │   │   │   └── cart.service.ts
 │   │   │   ├── categories/
 │   │   │   │   ├── categories.controller.ts
 │   │   │   │   ├── categories.routes.ts
@@ -122,7 +127,9 @@
 │   │   │   └── migration.sql
 │   │   ├── 090_seed/
 │   │   │   └── migration.sql
-│   │   └── 100_catalog_foundation/
+│   │   ├── 100_catalog_foundation/
+│   │   │   └── migration.sql
+│   │   └── 110_product_relations/
 │   │       └── migration.sql
 │   ├── scripts/
 │   ├── catalog-schema-review.md

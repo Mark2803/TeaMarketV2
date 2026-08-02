@@ -2,8 +2,8 @@
 
 Порядок и состав миграций базы данных.
 
-- Модулей: **11**
-- SQL-файлов: **39**
+- Модулей: **12**
+- SQL-файлов: **40**
 
 ## 001_extensions
 
@@ -98,3 +98,9 @@
 | SQL-файл | Создаваемые объекты |
 |---|---|
 | `database/migrations/100_catalog_foundation/migration.sql` | product_variants_catalog_idx, categories_catalog_idx, collections_catalog_idx, collections_dates_idx |
+
+## 110_product_relations
+
+| SQL-файл | Создаваемые объекты |
+|---|---|
+| `database/migrations/110_product_relations/migration.sql` | product_relations, product_relations_product_idx, product_relations_related_product_idx |

@@ -415,7 +415,10 @@ export const ModelName = {
   product_categories: 'product_categories',
   product_images: 'product_images',
   product_variants: 'product_variants',
-  products: 'products'
+  products: 'products',
+  product_relations: 'product_relations',
+  auth_codes: 'auth_codes',
+  auth_sessions: 'auth_sessions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products"
+    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1841,6 +1844,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    product_relations: {
+      payload: Prisma.$product_relationsPayload<ExtArgs>
+      fields: Prisma.product_relationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.product_relationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.product_relationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        findFirst: {
+          args: Prisma.product_relationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.product_relationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        findMany: {
+          args: Prisma.product_relationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>[]
+        }
+        create: {
+          args: Prisma.product_relationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        createMany: {
+          args: Prisma.product_relationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.product_relationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>[]
+        }
+        delete: {
+          args: Prisma.product_relationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        update: {
+          args: Prisma.product_relationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.product_relationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.product_relationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.product_relationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.product_relationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$product_relationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Product_relationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProduct_relations>
+        }
+        groupBy: {
+          args: Prisma.product_relationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Product_relationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.product_relationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Product_relationsCountAggregateOutputType> | number
+        }
+      }
+    }
+    auth_codes: {
+      payload: Prisma.$auth_codesPayload<ExtArgs>
+      fields: Prisma.auth_codesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.auth_codesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.auth_codesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        findFirst: {
+          args: Prisma.auth_codesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.auth_codesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        findMany: {
+          args: Prisma.auth_codesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>[]
+        }
+        create: {
+          args: Prisma.auth_codesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        createMany: {
+          args: Prisma.auth_codesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.auth_codesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>[]
+        }
+        delete: {
+          args: Prisma.auth_codesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        update: {
+          args: Prisma.auth_codesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        deleteMany: {
+          args: Prisma.auth_codesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.auth_codesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.auth_codesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>[]
+        }
+        upsert: {
+          args: Prisma.auth_codesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_codesPayload>
+        }
+        aggregate: {
+          args: Prisma.Auth_codesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuth_codes>
+        }
+        groupBy: {
+          args: Prisma.auth_codesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auth_codesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.auth_codesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auth_codesCountAggregateOutputType> | number
+        }
+      }
+    }
+    auth_sessions: {
+      payload: Prisma.$auth_sessionsPayload<ExtArgs>
+      fields: Prisma.auth_sessionsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.auth_sessionsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.auth_sessionsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        findFirst: {
+          args: Prisma.auth_sessionsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.auth_sessionsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        findMany: {
+          args: Prisma.auth_sessionsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>[]
+        }
+        create: {
+          args: Prisma.auth_sessionsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        createMany: {
+          args: Prisma.auth_sessionsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.auth_sessionsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>[]
+        }
+        delete: {
+          args: Prisma.auth_sessionsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        update: {
+          args: Prisma.auth_sessionsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        deleteMany: {
+          args: Prisma.auth_sessionsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.auth_sessionsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.auth_sessionsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>[]
+        }
+        upsert: {
+          args: Prisma.auth_sessionsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
+        }
+        aggregate: {
+          args: Prisma.Auth_sessionsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuth_sessions>
+        }
+        groupBy: {
+          args: Prisma.auth_sessionsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auth_sessionsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.auth_sessionsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auth_sessionsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2182,6 +2407,45 @@ export const ProductsScalarFieldEnum = {
 export type ProductsScalarFieldEnum = (typeof ProductsScalarFieldEnum)[keyof typeof ProductsScalarFieldEnum]
 
 
+export const Product_relationsScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  related_product_id: 'related_product_id',
+  relation_type: 'relation_type',
+  sort_order: 'sort_order',
+  created_at: 'created_at'
+} as const
+
+export type Product_relationsScalarFieldEnum = (typeof Product_relationsScalarFieldEnum)[keyof typeof Product_relationsScalarFieldEnum]
+
+
+export const Auth_codesScalarFieldEnum = {
+  id: 'id',
+  phone: 'phone',
+  code_hash: 'code_hash',
+  expires_at: 'expires_at',
+  attempts: 'attempts',
+  max_attempts: 'max_attempts',
+  used_at: 'used_at',
+  created_at: 'created_at'
+} as const
+
+export type Auth_codesScalarFieldEnum = (typeof Auth_codesScalarFieldEnum)[keyof typeof Auth_codesScalarFieldEnum]
+
+
+export const Auth_sessionsScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  revoked_at: 'revoked_at',
+  last_used_at: 'last_used_at',
+  created_at: 'created_at'
+} as const
+
+export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2489,6 +2753,9 @@ export type GlobalOmitConfig = {
   product_images?: Prisma.product_imagesOmit
   product_variants?: Prisma.product_variantsOmit
   products?: Prisma.productsOmit
+  product_relations?: Prisma.product_relationsOmit
+  auth_codes?: Prisma.auth_codesOmit
+  auth_sessions?: Prisma.auth_sessionsOmit
 }
 
 /* Types for Logging */

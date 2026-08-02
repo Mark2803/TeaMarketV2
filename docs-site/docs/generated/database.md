@@ -2,10 +2,10 @@
 
 Документация автоматически построена по SQL-миграциям PostgreSQL.
 
-- Таблиц: **19**
-- Полей: **169**
-- Внешних ключей: **21**
-- Индексов: **33**
+- Таблиц: **20**
+- Полей: **175**
+- Внешних ключей: **23**
+- Индексов: **35**
 
 ## ER-диаграмма
 
@@ -31,6 +31,8 @@ erDiagram
   products ||--o{ product_categories : "product_id"
   categories ||--o{ product_categories : "category_id"
   products ||--o{ product_images : "product_id"
+  products ||--o{ product_relations : "product_id"
+  products ||--o{ product_relations : "related_product_id"
   products ||--o{ product_variants : "product_id"
 ```
 
@@ -71,6 +73,8 @@ erDiagram
 | categories_catalog_idx | categories | is_visible, sort_order, slug | нет | btree |
 | collections_catalog_idx | collections | is_active, show_on_home, sort_order | нет | btree |
 | collections_dates_idx | collections | starts_at, ends_at | нет | btree |
+| product_relations_product_idx | product_relations | product_id, relation_type, sort_order | нет | btree |
+| product_relations_related_product_idx | product_relations | related_product_id | нет | btree |
 
 ## cart_items
 
@@ -552,6 +556,36 @@ erDiagram
 - `CONSTRAINT product_images_product_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE`
 - `CONSTRAINT product_images_product_url_uq UNIQUE (product_id, image_url)`
 - `CONSTRAINT product_images_sort_order_check CHECK (sort_order >= 0)`
+
+
+## product_relations
+
+_Описание таблицы отсутствует._
+
+Источник: `database/migrations/110_product_relations/migration.sql`
+
+| Поле | Тип | NULL | Значение по умолчанию | Ключи |
+|---|---|---:|---|---|
+| id | UUID | нет | gen_random_uuid() | PK |
+| product_id | UUID | нет |  |  |
+| related_product_id | UUID | нет |  |  |
+| relation_type | VARCHAR(32) | нет |  |  |
+| sort_order | INTEGER | нет | 0 |  |
+| created_at | TIMESTAMPTZ | нет | NOW() |  |
+### Внешние ключи
+
+| Поле | Связанная таблица | Поле назначения |
+|---|---|---|
+| product_id | products | id |
+| related_product_id | products | id |
+
+### Ограничения
+
+- `CONSTRAINT product_relations_product_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE`
+- `CONSTRAINT product_relations_related_product_fk FOREIGN KEY (related_product_id) REFERENCES products(id) ON DELETE CASCADE`
+- `CONSTRAINT product_relations_type_check CHECK ( relation_type IN ( 'related', 'similar' ) )`
+- `CONSTRAINT product_relations_not_self_check CHECK ( product_id <> related_product_id )`
+- `CONSTRAINT product_relations_unique UNIQUE ( product_id, related_product_id, relation_type )`
 
 
 ## product_variants

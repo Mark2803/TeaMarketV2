@@ -179,48 +179,136 @@ if (additionalWhere) {
 export async function getProductBySlug(
   slug: string
 ) {
-  return prisma.products.findFirst({
-    where: {
-      slug,
-      is_active: true
-    },
-
-    include: {
-      product_images: {
-        orderBy: {
-          sort_order: "asc"
-        }
+  const product =
+    await prisma.products.findFirst({
+      where: {
+        slug,
+        is_active: true
       },
 
-      product_variants: {
-        where: {
-          status: "active"
+      include: {
+        product_images: {
+          orderBy: {
+            sort_order: "asc"
+          }
         },
 
-        orderBy: {
-          sort_order: "asc"
-        }
-      },
+        product_variants: {
+          where: {
+            status: "active"
+          },
 
-      product_categories: {
-        include: {
-          categories: true
+          orderBy: {
+            sort_order: "asc"
+          }
         },
 
-        orderBy: {
-          sort_order: "asc"
-        }
-      },
+        product_categories: {
+          include: {
+            categories: true
+          },
 
-      collection_products: {
-        include: {
-          collections: true
+          orderBy: {
+            sort_order: "asc"
+          }
         },
 
-        orderBy: {
-          sort_order: "asc"
+        collection_products: {
+          include: {
+            collections: true
+          },
+
+          orderBy: {
+            sort_order: "asc"
+          }
         }
       }
+    });
+
+  if (!product) {
+    return null;
+  }
+
+  const relationProductInclude = {
+    product_images: {
+      orderBy: {
+        sort_order: "asc" as const
+      },
+
+      take: 1
+    },
+
+    product_variants: {
+      where: {
+        status: "active"
+      },
+
+      orderBy: {
+        sort_order: "asc" as const
+      }
     }
-  });
+  };
+
+  const [
+    relatedRelations,
+    similarRelations
+  ] = await Promise.all([
+    prisma.product_relations.findMany({
+      where: {
+        product_id: product.id,
+        relation_type: "related",
+
+        related_product: {
+          is_active: true
+        }
+      },
+
+      orderBy: {
+        sort_order: "asc"
+      },
+
+      include: {
+        related_product: {
+          include: relationProductInclude
+        }
+      }
+    }),
+
+    prisma.product_relations.findMany({
+      where: {
+        product_id: product.id,
+        relation_type: "similar",
+
+        related_product: {
+          is_active: true
+        }
+      },
+
+      orderBy: {
+        sort_order: "asc"
+      },
+
+      include: {
+        related_product: {
+          include: relationProductInclude
+        }
+      }
+    })
+  ]);
+
+  return {
+    ...product,
+
+    relatedProducts:
+      relatedRelations.map(
+        (relation) =>
+          relation.related_product
+      ),
+
+    similarProducts:
+      similarRelations.map(
+        (relation) =>
+          relation.related_product
+      )
+  };
 }

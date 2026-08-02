@@ -69,7 +69,10 @@ export const ModelName = {
   product_categories: 'product_categories',
   product_images: 'product_images',
   product_variants: 'product_variants',
-  products: 'products'
+  products: 'products',
+  product_relations: 'product_relations',
+  auth_codes: 'auth_codes',
+  auth_sessions: 'auth_sessions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -388,6 +391,45 @@ export const ProductsScalarFieldEnum = {
 } as const
 
 export type ProductsScalarFieldEnum = (typeof ProductsScalarFieldEnum)[keyof typeof ProductsScalarFieldEnum]
+
+
+export const Product_relationsScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  related_product_id: 'related_product_id',
+  relation_type: 'relation_type',
+  sort_order: 'sort_order',
+  created_at: 'created_at'
+} as const
+
+export type Product_relationsScalarFieldEnum = (typeof Product_relationsScalarFieldEnum)[keyof typeof Product_relationsScalarFieldEnum]
+
+
+export const Auth_codesScalarFieldEnum = {
+  id: 'id',
+  phone: 'phone',
+  code_hash: 'code_hash',
+  expires_at: 'expires_at',
+  attempts: 'attempts',
+  max_attempts: 'max_attempts',
+  used_at: 'used_at',
+  created_at: 'created_at'
+} as const
+
+export type Auth_codesScalarFieldEnum = (typeof Auth_codesScalarFieldEnum)[keyof typeof Auth_codesScalarFieldEnum]
+
+
+export const Auth_sessionsScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  revoked_at: 'revoked_at',
+  last_used_at: 'last_used_at',
+  created_at: 'created_at'
+} as const
+
+export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
 
 
 export const SortOrder = {

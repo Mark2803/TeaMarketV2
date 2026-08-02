@@ -32,11 +32,16 @@
 | `backend/src/generated/prisma/models/payment_methods.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
 | `backend/src/generated/prisma/models/product_categories.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
 | `backend/src/generated/prisma/models/product_images.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
+| `backend/src/generated/prisma/models/product_relations.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
 | `backend/src/generated/prisma/models/product_variants.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
 | `backend/src/generated/prisma/models/products.ts` | `../enums.js`, `../internal/prismaNamespace.js`, `@prisma/client/runtime/client` |
-| `backend/src/generated/prisma/models.ts` | `./commonInputTypes.js`, `./models/cart_items.js`, `./models/carts.js`, `./models/categories.js`, `./models/collection_products.js`, `./models/collections.js`, `./models/customer_addresses.js`, `./models/customers.js`, `./models/delivery_methods.js`, `./models/favorites.js`, `./models/order_deliveries.js`, `./models/order_items.js`, `./models/order_payments.js`, `./models/order_status_history.js`, `./models/orders.js`, `./models/payment_methods.js`, `./models/product_categories.js`, `./models/product_images.js`, `./models/product_variants.js`, `./models/products.js` |
+| `backend/src/generated/prisma/models.ts` | `./commonInputTypes.js`, `./models/cart_items.js`, `./models/carts.js`, `./models/categories.js`, `./models/collection_products.js`, `./models/collections.js`, `./models/customer_addresses.js`, `./models/customers.js`, `./models/delivery_methods.js`, `./models/favorites.js`, `./models/order_deliveries.js`, `./models/order_items.js`, `./models/order_payments.js`, `./models/order_status_history.js`, `./models/orders.js`, `./models/payment_methods.js`, `./models/product_categories.js`, `./models/product_images.js`, `./models/product_relations.js`, `./models/product_variants.js`, `./models/products.js` |
 | `backend/src/middleware/error-handler.ts` | `express` |
 | `backend/src/middleware/not-found.ts` | `express` |
+| `backend/src/modules/cart/cart.controller.ts` | `./cart.schemas.js`, `./cart.service.js`, `express` |
+| `backend/src/modules/cart/cart.routes.ts` | `./cart.controller.js`, `express` |
+| `backend/src/modules/cart/cart.schemas.ts` | `zod` |
+| `backend/src/modules/cart/cart.service.ts` | `../../database/prisma.js`, `../../generated/prisma/client.js`, `./cart.schemas.js` |
 | `backend/src/modules/categories/categories.controller.ts` | `../products/products.query.js`, `./categories.service.js`, `express` |
 | `backend/src/modules/categories/categories.routes.ts` | `./categories.controller.js`, `express` |
 | `backend/src/modules/categories/categories.service.ts` | `../../database/prisma.js`, `../products/products.query.js`, `../products/products.service.js` |
@@ -51,7 +56,7 @@
 | `backend/src/modules/search/search.routes.ts` | `./search.controller.js`, `express` |
 | `backend/src/modules/search/search.service.ts` | `../../database/prisma.js` |
 | `backend/src/routes/health.ts` | `../database/prisma.js`, `express` |
-| `backend/src/routes/index.ts` | `../modules/categories/categories.routes.js`, `../modules/collections/collections.routes.js`, `../modules/products/products.routes.js`, `../modules/search/search.routes.js`, `./health.js`, `express` |
+| `backend/src/routes/index.ts` | `../modules/cart/cart.routes.js`, `../modules/categories/categories.routes.js`, `../modules/collections/collections.routes.js`, `../modules/products/products.routes.js`, `../modules/search/search.routes.js`, `./health.js`, `express` |
 | `backend/src/server.ts` | `./app.js`, `./config/env.js`, `./database/prisma.js` |
 | `docs-site/tools/build-docs.js` | `./generators/database`, `./generators/dependencies`, `./generators/migrations`, `./generators/structure`, `./generators/utils`, `fs`, `path` |
 

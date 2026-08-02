@@ -17,6 +17,8 @@ BEGIN;
 \ir migrations/080_triggers/migration.sql
 \ir migrations/090_seed/migration.sql
 \ir migrations/100_catalog_foundation/migration.sql
+\ir migrations/110_product_relations/migration.sql
+\ir migrations/120_auth/migration.sql
 
 COMMIT;
 

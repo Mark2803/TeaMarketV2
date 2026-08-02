@@ -135,18 +135,19 @@ model customer_addresses {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model customers {
-  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  phone              String              @unique(map: "customers_phone_uq") @db.VarChar(32)
-  name               String?             @db.VarChar(255)
-  email              String?             @unique(map: "customers_email_uq", where: raw("(email IS NOT NULL)")) @db.VarChar(320)
-  username           String?             @db.VarChar(255)
-  birth_date         DateTime?           @db.Date
-  created_at         DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime            @default(now()) @db.Timestamptz(6)
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phone              String               @unique(map: "customers_phone_uq") @db.VarChar(32)
+  name               String?              @db.VarChar(255)
+  email              String?              @unique(map: "customers_email_uq", where: raw("(email IS NOT NULL)")) @db.VarChar(320)
+  username           String?              @db.VarChar(255)
+  birth_date         DateTime?            @db.Date
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime             @default(now()) @db.Timestamptz(6)
   carts              carts[]
   customer_addresses customer_addresses[]
   favorites          favorites[]
   orders             orders[]
+  auth_sessions      auth_sessions[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -378,10 +379,64 @@ model products {
   product_categories    product_categories[]
   product_images        product_images[]
   product_variants      product_variants[]
+  related_from          product_relations[]   @relation("ProductRelations")
+  related_to            product_relations[]   @relation("RelatedProducts")
 
   @@index([is_active], map: "products_active_idx")
   @@index([country])
   @@index([manufacturer])
   @@index([region])
   @@index([tea_type])
+}
+
+/// Ручные связи между товарами, назначаемые модератором магазина.
+/// relation_type:
+/// related — связанные товары;
+/// similar — похожие товары.
+model product_relations {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_id         String   @db.Uuid
+  related_product_id String   @db.Uuid
+  relation_type      String   @db.VarChar(32)
+  sort_order         Int      @default(0)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  product         products @relation("ProductRelations", fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_relations_product_fk")
+  related_product products @relation("RelatedProducts", fields: [related_product_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "product_relations_related_product_fk")
+
+  @@unique([product_id, related_product_id, relation_type], map: "product_relations_unique")
+  @@index([product_id, relation_type, sort_order], map: "product_relations_product_idx")
+  @@index([related_product_id], map: "product_relations_related_product_idx")
+}
+
+/// Одноразовые коды подтверждения телефона.
+/// В базе хранится только SHA-256 хеш кода.
+model auth_codes {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  phone        String    @db.VarChar(32)
+  code_hash    String    @db.VarChar(64)
+  expires_at   DateTime  @db.Timestamptz(6)
+  attempts     Int       @default(0)
+  max_attempts Int       @default(5)
+  used_at      DateTime? @db.Timestamptz(6)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([phone, created_at(sort: Desc)], map: "auth_codes_phone_created_idx")
+  @@index([phone, expires_at], map: "auth_codes_active_idx", where: raw("(used_at IS NULL)"))
+}
+
+/// Сессии авторизованных покупателей.
+/// Клиент получает случайный токен, а в базе хранится только его SHA-256 хеш.
+model auth_sessions {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_id  String    @db.Uuid
+  token_hash   String    @unique(map: "auth_sessions_token_unique") @db.VarChar(64)
+  expires_at   DateTime  @db.Timestamptz(6)
+  revoked_at   DateTime? @db.Timestamptz(6)
+  last_used_at DateTime? @db.Timestamptz(6)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  customers    customers @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "auth_sessions_customer_fk")
+
+  @@index([customer_id, created_at(sort: Desc)], map: "auth_sessions_customer_idx")
+  @@index([token_hash, expires_at], map: "auth_sessions_active_idx", where: raw("(revoked_at IS NULL)"))
 }

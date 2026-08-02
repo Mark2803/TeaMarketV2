@@ -211,6 +211,7 @@ export type customersWhereInput = {
   customer_addresses?: Prisma.Customer_addressesListRelationFilter
   favorites?: Prisma.FavoritesListRelationFilter
   orders?: Prisma.OrdersListRelationFilter
+  auth_sessions?: Prisma.Auth_sessionsListRelationFilter
 }
 
 export type customersOrderByWithRelationInput = {
@@ -226,6 +227,7 @@ export type customersOrderByWithRelationInput = {
   customer_addresses?: Prisma.customer_addressesOrderByRelationAggregateInput
   favorites?: Prisma.favoritesOrderByRelationAggregateInput
   orders?: Prisma.ordersOrderByRelationAggregateInput
+  auth_sessions?: Prisma.auth_sessionsOrderByRelationAggregateInput
 }
 
 export type customersWhereUniqueInput = Prisma.AtLeast<{
@@ -244,6 +246,7 @@ export type customersWhereUniqueInput = Prisma.AtLeast<{
   customer_addresses?: Prisma.Customer_addressesListRelationFilter
   favorites?: Prisma.FavoritesListRelationFilter
   orders?: Prisma.OrdersListRelationFilter
+  auth_sessions?: Prisma.Auth_sessionsListRelationFilter
 }, "id" | "phone" | "email">
 
 export type customersOrderByWithAggregationInput = {
@@ -287,6 +290,7 @@ export type customersCreateInput = {
   customer_addresses?: Prisma.customer_addressesCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUncheckedCreateInput = {
@@ -302,6 +306,7 @@ export type customersUncheckedCreateInput = {
   customer_addresses?: Prisma.customer_addressesUncheckedCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersUncheckedCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUpdateInput = {
@@ -317,6 +322,7 @@ export type customersUpdateInput = {
   customer_addresses?: Prisma.customer_addressesUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersUncheckedUpdateInput = {
@@ -332,6 +338,7 @@ export type customersUncheckedUpdateInput = {
   customer_addresses?: Prisma.customer_addressesUncheckedUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUncheckedUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersCreateManyInput = {
@@ -470,6 +477,20 @@ export type customersUpdateOneWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.customersUpdateToOneWithWhereWithoutOrdersInput, Prisma.customersUpdateWithoutOrdersInput>, Prisma.customersUncheckedUpdateWithoutOrdersInput>
 }
 
+export type customersCreateNestedOneWithoutAuth_sessionsInput = {
+  create?: Prisma.XOR<Prisma.customersCreateWithoutAuth_sessionsInput, Prisma.customersUncheckedCreateWithoutAuth_sessionsInput>
+  connectOrCreate?: Prisma.customersCreateOrConnectWithoutAuth_sessionsInput
+  connect?: Prisma.customersWhereUniqueInput
+}
+
+export type customersUpdateOneRequiredWithoutAuth_sessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.customersCreateWithoutAuth_sessionsInput, Prisma.customersUncheckedCreateWithoutAuth_sessionsInput>
+  connectOrCreate?: Prisma.customersCreateOrConnectWithoutAuth_sessionsInput
+  upsert?: Prisma.customersUpsertWithoutAuth_sessionsInput
+  connect?: Prisma.customersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.customersUpdateToOneWithWhereWithoutAuth_sessionsInput, Prisma.customersUpdateWithoutAuth_sessionsInput>, Prisma.customersUncheckedUpdateWithoutAuth_sessionsInput>
+}
+
 export type customersCreateWithoutCartsInput = {
   id?: string
   phone: string
@@ -482,6 +503,7 @@ export type customersCreateWithoutCartsInput = {
   customer_addresses?: Prisma.customer_addressesCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUncheckedCreateWithoutCartsInput = {
@@ -496,6 +518,7 @@ export type customersUncheckedCreateWithoutCartsInput = {
   customer_addresses?: Prisma.customer_addressesUncheckedCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersUncheckedCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutCustomersInput
 }
 
 export type customersCreateOrConnectWithoutCartsInput = {
@@ -526,6 +549,7 @@ export type customersUpdateWithoutCartsInput = {
   customer_addresses?: Prisma.customer_addressesUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersUncheckedUpdateWithoutCartsInput = {
@@ -540,6 +564,7 @@ export type customersUncheckedUpdateWithoutCartsInput = {
   customer_addresses?: Prisma.customer_addressesUncheckedUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUncheckedUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersCreateWithoutCustomer_addressesInput = {
@@ -554,6 +579,7 @@ export type customersCreateWithoutCustomer_addressesInput = {
   carts?: Prisma.cartsCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUncheckedCreateWithoutCustomer_addressesInput = {
@@ -568,6 +594,7 @@ export type customersUncheckedCreateWithoutCustomer_addressesInput = {
   carts?: Prisma.cartsUncheckedCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersUncheckedCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutCustomersInput
 }
 
 export type customersCreateOrConnectWithoutCustomer_addressesInput = {
@@ -598,6 +625,7 @@ export type customersUpdateWithoutCustomer_addressesInput = {
   carts?: Prisma.cartsUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersUncheckedUpdateWithoutCustomer_addressesInput = {
@@ -612,6 +640,7 @@ export type customersUncheckedUpdateWithoutCustomer_addressesInput = {
   carts?: Prisma.cartsUncheckedUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUncheckedUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersCreateWithoutFavoritesInput = {
@@ -626,6 +655,7 @@ export type customersCreateWithoutFavoritesInput = {
   carts?: Prisma.cartsCreateNestedManyWithoutCustomersInput
   customer_addresses?: Prisma.customer_addressesCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUncheckedCreateWithoutFavoritesInput = {
@@ -640,6 +670,7 @@ export type customersUncheckedCreateWithoutFavoritesInput = {
   carts?: Prisma.cartsUncheckedCreateNestedManyWithoutCustomersInput
   customer_addresses?: Prisma.customer_addressesUncheckedCreateNestedManyWithoutCustomersInput
   orders?: Prisma.ordersUncheckedCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutCustomersInput
 }
 
 export type customersCreateOrConnectWithoutFavoritesInput = {
@@ -670,6 +701,7 @@ export type customersUpdateWithoutFavoritesInput = {
   carts?: Prisma.cartsUpdateManyWithoutCustomersNestedInput
   customer_addresses?: Prisma.customer_addressesUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersUncheckedUpdateWithoutFavoritesInput = {
@@ -684,6 +716,7 @@ export type customersUncheckedUpdateWithoutFavoritesInput = {
   carts?: Prisma.cartsUncheckedUpdateManyWithoutCustomersNestedInput
   customer_addresses?: Prisma.customer_addressesUncheckedUpdateManyWithoutCustomersNestedInput
   orders?: Prisma.ordersUncheckedUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersCreateWithoutOrdersInput = {
@@ -698,6 +731,7 @@ export type customersCreateWithoutOrdersInput = {
   carts?: Prisma.cartsCreateNestedManyWithoutCustomersInput
   customer_addresses?: Prisma.customer_addressesCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutCustomersInput
 }
 
 export type customersUncheckedCreateWithoutOrdersInput = {
@@ -712,6 +746,7 @@ export type customersUncheckedCreateWithoutOrdersInput = {
   carts?: Prisma.cartsUncheckedCreateNestedManyWithoutCustomersInput
   customer_addresses?: Prisma.customer_addressesUncheckedCreateNestedManyWithoutCustomersInput
   favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutCustomersInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutCustomersInput
 }
 
 export type customersCreateOrConnectWithoutOrdersInput = {
@@ -742,6 +777,7 @@ export type customersUpdateWithoutOrdersInput = {
   carts?: Prisma.cartsUpdateManyWithoutCustomersNestedInput
   customer_addresses?: Prisma.customer_addressesUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutCustomersNestedInput
 }
 
 export type customersUncheckedUpdateWithoutOrdersInput = {
@@ -756,6 +792,83 @@ export type customersUncheckedUpdateWithoutOrdersInput = {
   carts?: Prisma.cartsUncheckedUpdateManyWithoutCustomersNestedInput
   customer_addresses?: Prisma.customer_addressesUncheckedUpdateManyWithoutCustomersNestedInput
   favorites?: Prisma.favoritesUncheckedUpdateManyWithoutCustomersNestedInput
+  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutCustomersNestedInput
+}
+
+export type customersCreateWithoutAuth_sessionsInput = {
+  id?: string
+  phone: string
+  name?: string | null
+  email?: string | null
+  username?: string | null
+  birth_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  carts?: Prisma.cartsCreateNestedManyWithoutCustomersInput
+  customer_addresses?: Prisma.customer_addressesCreateNestedManyWithoutCustomersInput
+  favorites?: Prisma.favoritesCreateNestedManyWithoutCustomersInput
+  orders?: Prisma.ordersCreateNestedManyWithoutCustomersInput
+}
+
+export type customersUncheckedCreateWithoutAuth_sessionsInput = {
+  id?: string
+  phone: string
+  name?: string | null
+  email?: string | null
+  username?: string | null
+  birth_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  carts?: Prisma.cartsUncheckedCreateNestedManyWithoutCustomersInput
+  customer_addresses?: Prisma.customer_addressesUncheckedCreateNestedManyWithoutCustomersInput
+  favorites?: Prisma.favoritesUncheckedCreateNestedManyWithoutCustomersInput
+  orders?: Prisma.ordersUncheckedCreateNestedManyWithoutCustomersInput
+}
+
+export type customersCreateOrConnectWithoutAuth_sessionsInput = {
+  where: Prisma.customersWhereUniqueInput
+  create: Prisma.XOR<Prisma.customersCreateWithoutAuth_sessionsInput, Prisma.customersUncheckedCreateWithoutAuth_sessionsInput>
+}
+
+export type customersUpsertWithoutAuth_sessionsInput = {
+  update: Prisma.XOR<Prisma.customersUpdateWithoutAuth_sessionsInput, Prisma.customersUncheckedUpdateWithoutAuth_sessionsInput>
+  create: Prisma.XOR<Prisma.customersCreateWithoutAuth_sessionsInput, Prisma.customersUncheckedCreateWithoutAuth_sessionsInput>
+  where?: Prisma.customersWhereInput
+}
+
+export type customersUpdateToOneWithWhereWithoutAuth_sessionsInput = {
+  where?: Prisma.customersWhereInput
+  data: Prisma.XOR<Prisma.customersUpdateWithoutAuth_sessionsInput, Prisma.customersUncheckedUpdateWithoutAuth_sessionsInput>
+}
+
+export type customersUpdateWithoutAuth_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  carts?: Prisma.cartsUpdateManyWithoutCustomersNestedInput
+  customer_addresses?: Prisma.customer_addressesUpdateManyWithoutCustomersNestedInput
+  favorites?: Prisma.favoritesUpdateManyWithoutCustomersNestedInput
+  orders?: Prisma.ordersUpdateManyWithoutCustomersNestedInput
+}
+
+export type customersUncheckedUpdateWithoutAuth_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  carts?: Prisma.cartsUncheckedUpdateManyWithoutCustomersNestedInput
+  customer_addresses?: Prisma.customer_addressesUncheckedUpdateManyWithoutCustomersNestedInput
+  favorites?: Prisma.favoritesUncheckedUpdateManyWithoutCustomersNestedInput
+  orders?: Prisma.ordersUncheckedUpdateManyWithoutCustomersNestedInput
 }
 
 
@@ -768,6 +881,7 @@ export type CustomersCountOutputType = {
   customer_addresses: number
   favorites: number
   orders: number
+  auth_sessions: number
 }
 
 export type CustomersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -775,6 +889,7 @@ export type CustomersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   customer_addresses?: boolean | CustomersCountOutputTypeCountCustomer_addressesArgs
   favorites?: boolean | CustomersCountOutputTypeCountFavoritesArgs
   orders?: boolean | CustomersCountOutputTypeCountOrdersArgs
+  auth_sessions?: boolean | CustomersCountOutputTypeCountAuth_sessionsArgs
 }
 
 /**
@@ -815,6 +930,13 @@ export type CustomersCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Type
   where?: Prisma.ordersWhereInput
 }
 
+/**
+ * CustomersCountOutputType without action
+ */
+export type CustomersCountOutputTypeCountAuth_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.auth_sessionsWhereInput
+}
+
 
 export type customersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -829,6 +951,7 @@ export type customersSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   customer_addresses?: boolean | Prisma.customers$customer_addressesArgs<ExtArgs>
   favorites?: boolean | Prisma.customers$favoritesArgs<ExtArgs>
   orders?: boolean | Prisma.customers$ordersArgs<ExtArgs>
+  auth_sessions?: boolean | Prisma.customers$auth_sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customers"]>
 
@@ -871,6 +994,7 @@ export type customersInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   customer_addresses?: boolean | Prisma.customers$customer_addressesArgs<ExtArgs>
   favorites?: boolean | Prisma.customers$favoritesArgs<ExtArgs>
   orders?: boolean | Prisma.customers$ordersArgs<ExtArgs>
+  auth_sessions?: boolean | Prisma.customers$auth_sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type customersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -883,6 +1007,7 @@ export type $customersPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     customer_addresses: Prisma.$customer_addressesPayload<ExtArgs>[]
     favorites: Prisma.$favoritesPayload<ExtArgs>[]
     orders: Prisma.$ordersPayload<ExtArgs>[]
+    auth_sessions: Prisma.$auth_sessionsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1291,6 +1416,7 @@ export interface Prisma__customersClient<T, Null = never, ExtArgs extends runtim
   customer_addresses<T extends Prisma.customers$customer_addressesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.customers$customer_addressesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$customer_addressesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   favorites<T extends Prisma.customers$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.customers$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$favoritesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.customers$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.customers$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ordersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auth_sessions<T extends Prisma.customers$auth_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.customers$auth_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1814,6 +1940,30 @@ export type customers$ordersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.OrdersScalarFieldEnum | Prisma.OrdersScalarFieldEnum[]
+}
+
+/**
+ * customers.auth_sessions
+ */
+export type customers$auth_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the auth_sessions
+   */
+  select?: Prisma.auth_sessionsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the auth_sessions
+   */
+  omit?: Prisma.auth_sessionsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.auth_sessionsInclude<ExtArgs> | null
+  where?: Prisma.auth_sessionsWhereInput
+  orderBy?: Prisma.auth_sessionsOrderByWithRelationInput | Prisma.auth_sessionsOrderByWithRelationInput[]
+  cursor?: Prisma.auth_sessionsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Auth_sessionsScalarFieldEnum | Prisma.Auth_sessionsScalarFieldEnum[]
 }
 
 /**

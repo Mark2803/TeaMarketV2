@@ -152,3 +152,23 @@ export type product_variants = Prisma.product_variantsModel
  * This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
  */
 export type products = Prisma.productsModel
+/**
+ * Model product_relations
+ * Ручные связи между товарами, назначаемые модератором магазина.
+ * relation_type:
+ * related — связанные товары;
+ * similar — похожие товары.
+ */
+export type product_relations = Prisma.product_relationsModel
+/**
+ * Model auth_codes
+ * Одноразовые коды подтверждения телефона.
+ * В базе хранится только SHA-256 хеш кода.
+ */
+export type auth_codes = Prisma.auth_codesModel
+/**
+ * Model auth_sessions
+ * Сессии авторизованных покупателей.
+ * Клиент получает случайный токен, а в базе хранится только его SHA-256 хеш.
+ */
+export type auth_sessions = Prisma.auth_sessionsModel
