@@ -1,149 +1,58 @@
+import "../shared/styles/home-favorites.css";
+import "../shared/styles/home-db-only.css";
+import "../shared/styles/home-hero-carousel.css";
+
 import {
   ArrowRight,
   BookOpen,
-  Clock3,
   Coffee,
   Flower2,
-  Gift,
   Heart,
   Leaf,
-  Mountain,
-  PackageOpen,
-  Search,
-  Sparkles,
-  Zap
+  Sparkles
 } from "lucide-react";
 
 import {
-  useEffect,
-  useMemo,
-  useState
+  useMemo
 } from "react";
+
+import HomeHeroCarousel from "../features/home/components/HomeHeroCarousel";
 
 import {
   Link
 } from "react-router-dom";
 
-import heroImage from "../assets/hero.png";
+import {
+  useFavorites
+} from "../features/favorites/useFavorites";
+
+import {
+  useCategories,
+  useCollections
+} from "../shared/hooks/useCatalog";
 
 import {
   useProducts
 } from "../shared/hooks/useProducts";
 
-const heroSlides = [
-  {
-    eyebrow: "Китайский чай",
-    title: "Натуральный чай для каждого момента",
-    text: "Чистый вкус природы и душевное равновесие",
-    linkLabel: "Перейти в каталог",
-    linkTo: "/catalog"
-  },
-  {
-    eyebrow: "Новые поступления",
-    title: "Откройте чай, который подходит именно вам",
-    text: "Улуны, пуэры и зелёные чаи из проверенных регионов",
-    linkLabel: "Смотреть новинки",
-    linkTo: "/catalog"
-  },
-  {
-    eyebrow: "Подарочные наборы",
-    title: "Чайный подарок с настроением",
-    text: "Готовые наборы для близких, друзей и коллег",
-    linkLabel: "Выбрать подарок",
-    linkTo: "/catalog"
-  }
-];
+import {
+  useArticles
+} from "../shared/hooks/useArticles";
 
-const collections = [
-  {
-    title: "Новинки",
-    icon: Sparkles
-  },
-  {
-    title: "Хиты продаж",
-    icon: Heart
-  },
-  {
-    title: "Для расслабления",
-    icon: Flower2
-  },
-  {
-    title: "Для бодрости",
-    icon: Zap
-  },
-  {
-    title: "Подарочные наборы",
-    icon: Gift
-  }
-];
-
-const categories = [
-  { name: "Улуны", slug: "oolong", icon: Leaf },
-  { name: "Пуэры", slug: "shu-puer", icon: Coffee },
-  { name: "Зелёный чай", slug: "green-tea", icon: Flower2 },
-  { name: "Красный чай", slug: "red-tea", icon: Sparkles },
-  { name: "Белый чай", slug: "white-tea", icon: Leaf },
-  { name: "Жёлтый чай", slug: "yellow-tea", icon: Flower2 },
-  { name: "Матча", slug: "matcha", icon: Coffee },
-  { name: "Травяной", slug: "herbal-tea", icon: Flower2 }
-];
-
-const fallbackProducts = [
-  {
-    id: "demo-gaba",
-    slug: "gaba-alishan",
-    name: "Габа Алишань",
-    subtitle: "50 г · Тайвань",
-    price: "535",
-    imageUrl: null
-  },
-  {
-    id: "demo-mango",
-    slug: "oolong-mango",
-    name: "Улун с манго",
-    subtitle: "50 г · Китай",
-    price: "135",
-    imageUrl: null
-  },
-  {
-    id: "demo-jasmine",
-    slug: "moli-hua-cha",
-    name: "Моли Хуа Ча",
-    subtitle: "100 г · Китай",
-    price: "205",
-    imageUrl: null
-  },
-  {
-    id: "demo-longjing",
-    slug: "longjing",
-    name: "Лунцзин",
-    subtitle: "100 г · Китай",
-    price: "360",
-    imageUrl: null
-  }
-];
-
-const articles = [
-  {
-    title: "Как правильно заваривать улун",
-    readingTime: "5 мин чтения",
-    icon: Coffee
-  },
-  {
-    title: "Польза зелёного чая для организма",
-    readingTime: "4 мин чтения",
-    icon: Leaf
-  },
-  {
-    title: "История чая в Китае",
-    readingTime: "6 мин чтения",
-    icon: BookOpen
-  }
-];
+import { useHomeBanners } from "../shared/hooks/useHomeBanners";
 
 export default function HomePage() {
-  const [activeHeroSlide, setActiveHeroSlide] =
-    useState(0);
+  const articlesQuery =
+    useArticles(true);
+
+  const homeBannersQuery =
+    useHomeBanners();
+
+  const {
+    isFavorite,
+    toggle: toggleFavoriteProduct,
+    isMutating: isFavoriteMutating
+  } = useFavorites();
 
   const productsQuery =
     useProducts({
@@ -152,28 +61,15 @@ export default function HomePage() {
       sort: "newest"
     });
 
-  useEffect(() => {
-    const intervalId =
-      window.setInterval(() => {
-        setActiveHeroSlide(
-          (currentSlide) =>
-            (currentSlide + 1)
-            % heroSlides.length
-        );
-      }, 6000);
+  const categoriesQuery =
+    useCategories();
 
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
+  const collectionsQuery =
+    useCollections();
 
   const products = useMemo(() => {
     const apiProducts =
       productsQuery.data?.data ?? [];
-
-    if (apiProducts.length === 0) {
-      return fallbackProducts;
-    }
 
     return apiProducts.map(
       (product) => {
@@ -205,98 +101,61 @@ export default function HomePage() {
           subtitle:
             subtitleParts.join(" · ")
             || product.short_description
-            || "Китайский чай",
-          price: firstVariant?.price ?? "—",
-          imageUrl: image?.image_url ?? null
+            || "Описание не указано",
+          price:
+            firstVariant?.price
+            ?? null,
+          imageUrl:
+            image?.image_url
+            ?? null
         };
       }
     );
   }, [productsQuery.data]);
 
-  const heroSlide =
-    heroSlides[activeHeroSlide];
+  const homeCategories =
+    categoriesQuery.data?.data
+      .slice(0, 8)
+    ?? [];
+
+  const homeCollections =
+    (collectionsQuery.data?.data ?? [])
+      .filter(
+        (collection) =>
+          collection.show_on_home
+      )
+      .slice(0, 8);
+
+  const hasCatalogError =
+    Boolean(productsQuery.error)
+    || Boolean(categoriesQuery.error)
+    || Boolean(collectionsQuery.error);
 
   return (
     <div className="home-page">
-      <Link
-        to="/search"
-        className="home-search"
-        aria-label="Открыть поиск"
-      >
-        <Search
-          size={18}
-          strokeWidth={1.7}
-          aria-hidden="true"
-        />
+      {homeBannersQuery.isLoading ? (
+        <div className="home-data-state">Загружаем плашки…</div>
+      ) : (homeBannersQuery.data?.data.length ?? 0) > 0 ? (
+        <HomeHeroCarousel banners={homeBannersQuery.data?.data ?? []} />
+      ) : (
+        <header className="home-db-heading">
+          <p>Каталог Tea Market</p>
+          <h1>Китайский чай из реальной базы данных</h1>
+          <span>Hero-плашки пока не добавлены в базу данных.</span>
+        </header>
+      )}
 
-        <span>
-          Поиск чая, вкуса, эффекта...
-        </span>
+      {hasCatalogError && (
+        <section className="home-data-state home-data-state--error">
+          <h2>
+            Не удалось загрузить данные магазина
+          </h2>
 
-        <ArrowRight
-          size={18}
-          strokeWidth={1.7}
-          aria-hidden="true"
-        />
-      </Link>
-
-      <section
-        className="home-hero"
-        aria-label="Главные предложения"
-      >
-        <img
-          src={heroImage}
-          alt=""
-          className="home-hero__image"
-        />
-
-        <div className="home-hero__content">
-          <p className="home-hero__eyebrow">
-            {heroSlide.eyebrow}
+          <p>
+            Проверьте, что backend и PostgreSQL запущены, затем обновите страницу.
           </p>
-
-          <h1 className="home-hero__title">
-            {heroSlide.title}
-          </h1>
-
-          <p className="home-hero__text">
-            {heroSlide.text}
-          </p>
-
-          <Link
-            to={heroSlide.linkTo}
-            className="home-hero__link"
-          >
-            {heroSlide.linkLabel}
-          </Link>
-        </div>
-
-        <div
-          className="home-carousel-dots"
-          aria-label="Переключение баннеров"
-        >
-          {heroSlides.map(
-            (slide, index) => (
-              <button
-                key={slide.title}
-                type="button"
-                className={
-                  index === activeHeroSlide
-                    ? "home-carousel-dot home-carousel-dot--active"
-                    : "home-carousel-dot"
-                }
-                aria-label={`Показать баннер ${index + 1}`}
-                aria-pressed={
-                  index === activeHeroSlide
-                }
-                onClick={() => {
-                  setActiveHeroSlide(index);
-                }}
-              />
-            )
-          )}
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="home-content-section">
         <div className="home-section-heading">
@@ -304,7 +163,7 @@ export default function HomePage() {
             Подборки
           </h2>
 
-          <Link to="/catalog">
+          <Link to="/collections">
             Смотреть все
             <ArrowRight
               size={15}
@@ -313,30 +172,52 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="home-horizontal-scroll home-collections">
-          {collections.map(
-            ({
-              title,
-              icon: Icon
-            }) => (
-              <Link
-                key={title}
-                to="/catalog"
-                className="home-collection-card"
-              >
-                <Icon
-                  size={27}
-                  strokeWidth={1.45}
-                  aria-hidden="true"
-                />
+        {collectionsQuery.isLoading ? (
+          <div className="home-data-state">
+            Загружаем подборки…
+          </div>
+        ) : homeCollections.length > 0 ? (
+          <div className="home-horizontal-scroll home-collections">
+            {homeCollections.map(
+              (collection, index) => {
+                const collectionIcons = [
+                  Sparkles,
+                  Heart,
+                  Flower2,
+                  Leaf
+                ];
 
-                <span>
-                  {title}
-                </span>
-              </Link>
-            )
-          )}
-        </div>
+                const Icon =
+                  collectionIcons[
+                    index
+                    % collectionIcons.length
+                  ];
+
+                return (
+                  <Link
+                    key={collection.id}
+                    to={`/collections/${collection.slug}`}
+                    className="home-collection-card"
+                  >
+                    <Icon
+                      size={27}
+                      strokeWidth={1.45}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      {collection.name}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+        ) : (
+          <div className="home-data-state">
+            Активных подборок для Главной пока нет.
+          </div>
+        )}
       </section>
 
       <section className="home-content-section">
@@ -354,33 +235,54 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="home-horizontal-scroll home-categories">
-          {categories.map(
-            ({
-              name,
-              slug,
-              icon: Icon
-            }) => (
-              <Link
-                key={slug}
-                to={`/catalog/${slug}`}
-                className="home-category"
-              >
-                <span className="home-category__icon">
-                  <Icon
-                    size={22}
-                    strokeWidth={1.45}
-                    aria-hidden="true"
-                  />
-                </span>
+        {categoriesQuery.isLoading ? (
+          <div className="home-data-state">
+            Загружаем категории…
+          </div>
+        ) : homeCategories.length > 0 ? (
+          <div className="home-horizontal-scroll home-categories">
+            {homeCategories.map(
+              (category, index) => {
+                const categoryIcons = [
+                  Leaf,
+                  Coffee,
+                  Flower2,
+                  Sparkles
+                ];
 
-                <span>
-                  {name}
-                </span>
-              </Link>
-            )
-          )}
-        </div>
+                const Icon =
+                  categoryIcons[
+                    index
+                    % categoryIcons.length
+                  ];
+
+                return (
+                  <Link
+                    key={category.id}
+                    to={`/catalog/${category.slug}`}
+                    className="home-category"
+                  >
+                    <span className="home-category__icon">
+                      <Icon
+                        size={22}
+                        strokeWidth={1.45}
+                        aria-hidden="true"
+                      />
+                    </span>
+
+                    <span>
+                      {category.name}
+                    </span>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+        ) : (
+          <div className="home-data-state">
+            Категории в базе данных пока отсутствуют.
+          </div>
+        )}
       </section>
 
       <section className="home-content-section">
@@ -398,112 +300,102 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="home-horizontal-scroll home-products">
-          {products.map(
-            (product) => (
-              <Link
-                key={product.id}
-                to={`/products/${product.slug}`}
-                className="home-product-card"
-                aria-label={`Открыть товар ${product.name}`}
-              >
-                <div className="home-product-card__image">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                    />
-                  ) : (
-                    <Leaf
-                      size={42}
-                      strokeWidth={1.05}
-                      aria-hidden="true"
-                    />
-                  )}
+        {productsQuery.isLoading ? (
+          <div className="home-data-state">
+            Загружаем товары…
+          </div>
+        ) : products.length > 0 ? (
+          <div className="home-horizontal-scroll home-products">
+            {products.map(
+              (product) => {
+                const favorite =
+                  isFavorite(product.id);
 
-                  <span
-                    className="home-product-card__favorite"
-                    aria-hidden="true"
+                return (
+                  <article
+                    key={product.id}
+                    className="home-product-card"
                   >
-                    <Heart
-                      size={17}
-                      strokeWidth={1.55}
+                    <Link
+                      to={`/products/${product.slug}`}
+                      className="home-product-card__link"
+                      aria-label={`Открыть товар ${product.name}`}
                     />
-                  </span>
-                </div>
 
-                <h3>
-                  {product.name}
-                </h3>
+                    <div className="home-product-card__image">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                        />
+                      ) : (
+                        <Leaf
+                          size={42}
+                          strokeWidth={1.05}
+                          aria-hidden="true"
+                        />
+                      )}
 
-                <p>
-                  {product.subtitle}
-                </p>
+                      <button
+                        type="button"
+                        className={
+                          favorite
+                            ? "home-product-card__favorite home-product-card__favorite--active"
+                            : "home-product-card__favorite"
+                        }
+                        aria-label={
+                          favorite
+                            ? `Удалить ${product.name} из избранного`
+                            : `Добавить ${product.name} в избранное`
+                        }
+                        aria-pressed={favorite}
+                        disabled={
+                          isFavoriteMutating
+                        }
+                        onClick={() => {
+                          void toggleFavoriteProduct(
+                            product.id
+                          );
+                        }}
+                      >
+                        <Heart
+                          size={17}
+                          strokeWidth={1.55}
+                          fill={
+                            favorite
+                              ? "currentColor"
+                              : "none"
+                          }
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
 
-                <strong>
-                  от {product.price} ₽
-                </strong>
-              </Link>
-            )
-          )}
-        </div>
+                    <h3>
+                      {product.name}
+                    </h3>
+
+                    <p>
+                      {product.subtitle}
+                    </p>
+
+                    <strong>
+                      {product.price
+                        ? `от ${product.price} ₽`
+                        : "Цена не указана"}
+                    </strong>
+                  </article>
+                );
+              }
+            )}
+          </div>
+        ) : (
+          <div className="home-data-state">
+            Активных товаров с доступными вариантами пока нет.
+          </div>
+        )}
       </section>
 
-      <section className="home-content-section">
-        <div className="home-section-heading">
-          <h2>
-            Для вас
-          </h2>
-
-          <Link to="/catalog">
-            Смотреть все
-            <ArrowRight
-              size={15}
-              aria-hidden="true"
-            />
-          </Link>
-        </div>
-
-        <div className="home-horizontal-scroll home-promo-grid">
-          <Link
-            to="/catalog"
-            className="home-promo-card home-promo-card--mountains"
-          >
-            <Mountain
-              size={28}
-              strokeWidth={1.35}
-              aria-hidden="true"
-            />
-
-            <span>
-              Высокогорные чаи
-            </span>
-
-            <small>
-              Чистота горного воздуха в каждой чашке
-            </small>
-          </Link>
-
-          <Link
-            to="/catalog"
-            className="home-promo-card home-promo-card--gifts"
-          >
-            <PackageOpen
-              size={28}
-              strokeWidth={1.35}
-              aria-hidden="true"
-            />
-
-            <span>
-              Подарочные наборы
-            </span>
-
-            <small>
-              Красивые наборы для особых случаев
-            </small>
-          </Link>
-        </div>
-      </section>
 
       <section className="home-content-section">
         <div className="home-section-heading">
@@ -511,7 +403,7 @@ export default function HomePage() {
             Статьи о чае
           </h2>
 
-          <Link to="/">
+          <Link to="/articles">
             Смотреть все
             <ArrowRight
               size={15}
@@ -520,45 +412,58 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="home-horizontal-scroll home-articles">
-          {articles.map(
-            ({
-              title,
-              readingTime,
-              icon: Icon
-            }) => (
-              <article
-                key={title}
-                className="home-article-card"
-              >
-                <div className="home-article-card__image">
-                  <Icon
-                    size={28}
-                    strokeWidth={1.25}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <div className="home-article-card__content">
-                  <h3>
-                    {title}
-                  </h3>
-
-                  <span>
-                    <Clock3
-                      size={13}
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-
-                    {readingTime}
+        {articlesQuery.isLoading ? (
+          <div className="home-data-state">
+            Загружаем статьи…
+          </div>
+        ) : articlesQuery.isError ? (
+          <div className="home-data-state home-data-state--error">
+            Не удалось загрузить статьи.
+          </div>
+        ) : (articlesQuery.data?.data.length ?? 0) > 0 ? (
+          <div className="home-articles">
+            {articlesQuery.data?.data.map(
+              (article) => (
+                <Link
+                  key={article.id}
+                  to={`/articles/${article.slug}`}
+                  className="home-article-card"
+                >
+                  <span className="home-article-card__media">
+                    {article.cover_url ? (
+                      <img
+                        src={article.cover_url}
+                        alt={article.cover_alt ?? article.title}
+                      />
+                    ) : (
+                      <BookOpen
+                        size={30}
+                        strokeWidth={1.35}
+                        aria-hidden="true"
+                      />
+                    )}
                   </span>
-                </div>
-              </article>
-            )
-          )}
-        </div>
+
+                  <span className="home-article-card__body">
+                    <h3>
+                      {article.title}
+                    </h3>
+
+                    <span>
+                      {article.reading_time_minutes} мин чтения
+                    </span>
+                  </span>
+                </Link>
+              )
+            )}
+          </div>
+        ) : (
+          <div className="home-data-state">
+            Опубликованных статей пока нет.
+          </div>
+        )}
       </section>
+
     </div>
   );
 }

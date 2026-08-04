@@ -1,9 +1,11 @@
 import {
+  useEffect,
   useMemo,
   useState
 } from "react";
 
 import {
+  Link,
   useParams
 } from "react-router-dom";
 
@@ -14,118 +16,170 @@ import ProductInfo from "../features/product/components/ProductInfo";
 import ProductPurchase from "../features/product/components/ProductPurchase";
 import ProductRecommendations from "../features/product/components/ProductRecommendations";
 import ProductSpecs from "../features/product/components/ProductSpecs";
-import ProductToolbar from "../features/product/components/ProductToolbar";
 import ProductVariants from "../features/product/components/ProductVariants";
 import StockNotification from "../features/product/components/StockNotification";
 
 import {
-  categoryCatalog
-} from "../features/category/category.data";
+  mapProductDetailsToView
+} from "../features/product/product.mapper";
 
 import {
-  productDemo
-} from "../features/product/product.data";
+  useFavorites
+} from "../features/favorites/useFavorites";
 
-function getNumericPrice(
-  value: string
-): number {
-  const parsed =
-    Number(
-      value.replace(/[^0-9]/g, "")
-    );
+import {
+  useCart
+} from "../features/cart/useCart";
 
-  return Number.isFinite(parsed)
-    ? parsed
-    : productDemo.variants[1].price;
-}
+import {
+  useProduct
+} from "../shared/hooks/useProduct";
 
-export default function ProductPage() {
-  const {
-    slug = productDemo.slug
-  } = useParams<{
-    slug: string;
-  }>();
+import type {
+  ProductView
+} from "../features/product/product.types";
 
-  const product = useMemo(() => {
-    const categoryEntry =
-      Object.entries(categoryCatalog)
-        .map(([categorySlug, category]) => ({
-          categorySlug,
-          category,
-          item: category.products.find(
-            (candidate) => candidate.slug === slug
-          )
-        }))
-        .find((entry) => entry.item);
+type ProductPageContentProps = {
+  product: ProductView;
+};
 
-    if (!categoryEntry?.item) {
-      return productDemo;
-    }
-
-    const basePrice =
-      getNumericPrice(categoryEntry.item.price);
-
-    return {
-      ...productDemo,
-      slug,
-      name: categoryEntry.item.name,
-      subtitle: categoryEntry.item.details,
-      article:
-        slug
-          .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, "-")
-          .slice(0, 16),
-      teaType: categoryEntry.category.name,
-      variants: productDemo.variants.map(
-        (variant, index) => ({
-          ...variant,
-          price:
-            Math.round(
-              basePrice
-              * [0.62, 1, 1.82, 3.55][index]
-            ),
-          oldPrice:
-            index === 1
-              ? Math.round(basePrice * 1.28)
-              : null
-        })
-      )
-    };
-  }, [slug]);
+function ProductPageContent({
+  product
+}: ProductPageContentProps) {
+  const initialVariant =
+    product.variants.find(
+      (variant) =>
+        variant.status !== "unavailable"
+    )
+    ?? product.variants[0];
 
   const [activeImage, setActiveImage] =
     useState(0);
 
   const [selectedVariantId, setSelectedVariantId] =
-    useState("50");
+    useState(initialVariant?.id ?? "");
 
   const [quantity, setQuantity] =
     useState(1);
 
-  const [favorite, setFavorite] =
-    useState(false);
+  const {
+    isFavorite,
+    toggle: toggleFavoriteProduct,
+    isMutating: isFavoriteMutating
+  } = useFavorites();
+
+  const favorite =
+    isFavorite(product.id);
+
+  const [message, setMessage] =
+    useState<string | null>(null);
+
+  const {
+    addItem,
+    isMutating: isAddingToCart
+  } = useCart();
+
+  useEffect(() => {
+    document.title =
+      product.seoTitle;
+
+    return () => {
+      document.title = "Tea Market";
+    };
+  }, [product.seoTitle]);
 
   const selectedVariant = useMemo(
     () =>
       product.variants.find(
-        (variant) => variant.id === selectedVariantId
+        (variant) =>
+          variant.id === selectedVariantId
       )
       ?? product.variants[0],
-    [product, selectedVariantId]
+    [product.variants, selectedVariantId]
   );
+
+  const toggleFavorite = () => {
+    if (isFavoriteMutating) {
+      return;
+    }
+
+    void toggleFavoriteProduct(
+      product.id
+    );
+  };
+
+  const shareProduct = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.subtitle,
+          url: window.location.href
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(
+        window.location.href
+      );
+
+      setMessage("Ссылка скопирована");
+    }
+    catch {
+      setMessage(
+        "Не удалось поделиться ссылкой"
+      );
+    }
+  };
+
+  const addToCart = async () => {
+    if (!selectedVariant) {
+      return;
+    }
+
+    setMessage(null);
+
+    try {
+      await addItem(
+        selectedVariant.id,
+        quantity
+      );
+
+      setMessage(
+        "Товар добавлен в корзину"
+      );
+    } catch (requestError) {
+      setMessage(
+        requestError instanceof Error
+          ? requestError.message
+          : "Не удалось добавить товар"
+      );
+    }
+  };
+
+  if (!selectedVariant) {
+    return (
+      <section className="product-page-state">
+        <h1>
+          У товара нет доступных вариантов
+        </h1>
+
+        <p>
+          В backend не найдено ни одного активного варианта товара.
+        </p>
+
+        <Link to="/catalog">
+          Вернуться в каталог
+        </Link>
+      </section>
+    );
+  }
 
   return (
     <div
       className="product-page"
-      data-product-slug={slug}
+      data-product-slug={product.slug}
     >
-      <ProductToolbar
-        favorite={favorite}
-        onToggleFavorite={() =>
-          setFavorite((value) => !value)
-        }
-      />
-
       <div className="product-page__columns">
         <div className="product-page__primary">
           <ProductGallery
@@ -141,7 +195,11 @@ export default function ProductPage() {
             reviews={product.reviews}
             price={selectedVariant.price}
             oldPrice={selectedVariant.oldPrice}
-            article={product.article}
+            article={selectedVariant.sku}
+            available={
+              selectedVariant.status
+              !== "unavailable"
+            }
           />
 
           <ProductVariants
@@ -157,29 +215,138 @@ export default function ProductPage() {
               selectedVariant.status
               === "unavailable"
             }
+            isAdding={isAddingToCart}
+            message={message}
             onDecrease={() =>
-              setQuantity(
-                (value) => Math.max(1, value - 1)
+              setQuantity((value) =>
+                Math.max(1, value - 1)
               )
             }
             onIncrease={() =>
-              setQuantity((value) => value + 1)
+              setQuantity((value) =>
+                Math.min(
+                  Math.max(
+                    selectedVariant.stock,
+                    1
+                  ),
+                  value + 1
+                )
+              )
             }
-            onToggleFavorite={() =>
-              setFavorite((value) => !value)
-            }
+            onToggleFavorite={toggleFavorite}
+            onAddToCart={() => {
+              void addToCart();
+            }}
+            onShare={shareProduct}
           />
 
           <ProductSpecs product={product} />
         </div>
 
         <div className="product-page__secondary">
-          <ProductDescription />
-          <BrewingGuide />
-          <StockNotification />
-          <ProductRecommendations />
+          <ProductDescription
+            aboutTea={product.aboutTea}
+            taste={product.taste}
+            aroma={product.aroma}
+            effect={product.effect}
+            beneficialProperties={product.beneficialProperties}
+          />
+
+          <BrewingGuide
+            waterTemperature={product.brewing.waterTemperature}
+            teaAmount={product.brewing.teaAmount}
+            brewingTime={product.brewing.brewingTime}
+            infusionCount={product.brewing.infusionCount}
+            tips={product.brewing.tips}
+          />
+
+          {product.variants.some(
+            (variant) =>
+              variant.status === "unavailable"
+          ) && (
+            <StockNotification />
+          )}
+
+          <ProductRecommendations
+            similarProducts={product.similarProducts}
+            relatedProducts={product.relatedProducts}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductPage() {
+  const {
+    slug = ""
+  } = useParams<{
+    slug: string;
+  }>();
+
+  const {
+    data,
+    error,
+    isPending,
+    refetch
+  } = useProduct(slug);
+
+  const product = useMemo(
+    () =>
+      data
+        ? mapProductDetailsToView(
+            data.data
+          )
+        : null,
+    [data]
+  );
+
+  if (isPending) {
+    return (
+      <section
+        className="product-page-state"
+        aria-busy="true"
+        aria-label="Загрузка товара"
+      >
+        <div className="product-page-skeleton" />
+        <div className="product-page-skeleton product-page-skeleton--short" />
+      </section>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <section className="product-page-state">
+        <h1>
+          Не удалось загрузить товар
+        </h1>
+
+        <p>
+          {error instanceof Error
+            ? error.message
+            : "Backend не вернул данные товара."}
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            void refetch();
+          }}
+        >
+          Повторить запрос
+        </button>
+
+        <Link to="/catalog">
+          Вернуться в каталог
+        </Link>
+      </section>
+    );
+  }
+
+  return (
+    <ProductPageContent
+      key={product.id}
+      product={product}
+    />
   );
 }

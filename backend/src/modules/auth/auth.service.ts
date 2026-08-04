@@ -411,3 +411,23 @@ export async function verifyAuthCode(
     customer
   };
 }
+
+/**
+ * Отзывает текущую пользовательскую сессию.
+ */
+export async function revokeAuthSession(
+  token: string
+): Promise<void> {
+  const tokenHash =
+    createSha256Hash(token);
+
+  await prisma.auth_sessions.updateMany({
+    where: {
+      token_hash: tokenHash,
+      revoked_at: null
+    },
+    data: {
+      revoked_at: new Date()
+    }
+  });
+}

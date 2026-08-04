@@ -104,6 +104,7 @@ model collections {
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
   updated_at          DateTime              @default(now()) @db.Timestamptz(6)
   collection_products collection_products[]
+  home_banners        home_banners[]
 
   @@index([sort_order])
   @@index([is_active, show_on_home, sort_order], map: "collections_catalog_idx")
@@ -439,4 +440,49 @@ model auth_sessions {
 
   @@index([customer_id, created_at(sort: Desc)], map: "auth_sessions_customer_idx")
   @@index([token_hash, expires_at], map: "auth_sessions_active_idx", where: raw("(revoked_at IS NULL)"))
+}
+
+/// Публичные статьи о чае для Главной и раздела материалов.
+model articles {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                 String    @unique(map: "articles_slug_uq") @db.VarChar(255)
+  title                String    @db.VarChar(255)
+  excerpt              String
+  content              String
+  cover_url            String?
+  cover_alt            String?   @db.VarChar(500)
+  reading_time_minutes Int       @default(5)
+  status               String    @default("draft") @db.VarChar(32)
+  is_featured          Boolean   @default(false)
+  sort_order           Int       @default(0)
+  published_at         DateTime? @db.Timestamptz(6)
+  seo_title            String?   @db.VarChar(255)
+  seo_description      String?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([status, published_at], map: "articles_status_published_idx")
+  @@index([is_featured, sort_order], map: "articles_featured_sort_idx")
+}
+
+/// Управляемые Hero-плашки Главной, каждая ведёт в тематическую подборку.
+model home_banners {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  collection_id String      @db.Uuid
+  eyebrow       String?     @db.VarChar(120)
+  title         String      @db.VarChar(255)
+  subtitle      String?
+  image_url     String?
+  image_alt     String?     @db.VarChar(500)
+  is_active     Boolean     @default(true)
+  sort_order    Int         @default(0)
+  starts_at     DateTime?   @db.Timestamptz(6)
+  ends_at       DateTime?   @db.Timestamptz(6)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime    @default(now()) @db.Timestamptz(6)
+  collections   collections @relation(fields: [collection_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "home_banners_collection_fk")
+
+  @@index([is_active, sort_order], map: "home_banners_active_sort_idx")
+  @@index([collection_id], map: "home_banners_collection_idx")
+  @@index([starts_at, ends_at], map: "home_banners_dates_idx")
 }

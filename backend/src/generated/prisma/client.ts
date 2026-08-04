@@ -172,3 +172,13 @@ export type auth_codes = Prisma.auth_codesModel
  * Клиент получает случайный токен, а в базе хранится только его SHA-256 хеш.
  */
 export type auth_sessions = Prisma.auth_sessionsModel
+/**
+ * Model articles
+ * Публичные статьи о чае для Главной и раздела материалов.
+ */
+export type articles = Prisma.articlesModel
+/**
+ * Model home_banners
+ * Управляемые Hero-плашки Главной, каждая ведёт в тематическую подборку.
+ */
+export type home_banners = Prisma.home_bannersModel

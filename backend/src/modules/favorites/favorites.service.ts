@@ -26,7 +26,14 @@ export async function getCustomerFavorites(
 
         products: {
           is_active:
-            true
+            true,
+
+          product_variants: {
+            some: {
+              status:
+                "active"
+            }
+          }
         }
       },
 
@@ -90,7 +97,14 @@ export async function addCustomerFavorite(
           productId,
 
         is_active:
-          true
+          true,
+
+        product_variants: {
+          some: {
+            status:
+              "active"
+          }
+        }
       },
 
       select: {

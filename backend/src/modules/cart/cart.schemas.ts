@@ -57,7 +57,23 @@ export const updateCartItemSchema =
       .positive(
         "Количество должно быть больше нуля"
       )
-  });
+      .optional(),
+
+    productVariantId: z.string()
+      .uuid(
+        "Некорректный ID варианта товара"
+      )
+      .optional()
+  })
+    .refine(
+      (value) =>
+        value.quantity !== undefined
+        || value.productVariantId !== undefined,
+      {
+        message:
+          "Необходимо передать количество или вариант товара"
+      }
+    );
 
 export type AddCartItemInput =
   z.infer<typeof addCartItemSchema>;

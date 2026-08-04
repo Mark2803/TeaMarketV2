@@ -9,12 +9,20 @@ import {
 } from "./order.schemas.js";
 
 import {
-  createGuestOrder
+  createOrder
 } from "./order.service.js";
 
-function getGuestToken(
-  req: Request
+function getOrderOwner(
+  req: Request,
+  res: Response
 ) {
+  if (req.customer) {
+    return {
+      customerId:
+        req.customer.id
+    } as const;
+  }
+
   const tokenHeader =
     req.headers["x-guest-token"];
 
@@ -23,125 +31,10 @@ function getGuestToken(
       ? tokenHeader[0]
       : tokenHeader;
 
-  return guestOrderTokenSchema.safeParse(
-    token
-  );
-}
-
-function sendCreateOrderError(
-  res: Response,
-  result:
-    | {
-        success: false;
-        error:
-          "CART_NOT_FOUND"
-          | "CART_EMPTY"
-          | "DELIVERY_METHOD_NOT_FOUND"
-          | "PAYMENT_METHOD_NOT_FOUND"
-          | "PRODUCT_VARIANT_NOT_FOUND"
-          | "INSUFFICIENT_STOCK";
-        productVariantId?: string;
-        availableQuantity?: number;
-      }
-) {
-  switch (result.error) {
-    case "CART_NOT_FOUND":
-      res.status(404).json({
-        error: {
-          code:
-            "CART_NOT_FOUND",
-
-          message:
-            "Активная корзина не найдена"
-        }
-      });
-
-      return;
-
-    case "CART_EMPTY":
-      res.status(409).json({
-        error: {
-          code:
-            "CART_EMPTY",
-
-          message:
-            "Нельзя оформить пустую корзину"
-        }
-      });
-
-      return;
-
-    case "DELIVERY_METHOD_NOT_FOUND":
-      res.status(404).json({
-        error: {
-          code:
-            "DELIVERY_METHOD_NOT_FOUND",
-
-          message:
-            "Способ доставки не найден или недоступен"
-        }
-      });
-
-      return;
-
-    case "PAYMENT_METHOD_NOT_FOUND":
-      res.status(404).json({
-        error: {
-          code:
-            "PAYMENT_METHOD_NOT_FOUND",
-
-          message:
-            "Способ оплаты не найден или недоступен"
-        }
-      });
-
-      return;
-
-    case "PRODUCT_VARIANT_NOT_FOUND":
-      res.status(409).json({
-        error: {
-          code:
-            "PRODUCT_VARIANT_NOT_FOUND",
-
-          message:
-            "Один из вариантов товара больше недоступен",
-
-          details: {
-            productVariantId:
-              result.productVariantId
-          }
-        }
-      });
-
-      return;
-
-    case "INSUFFICIENT_STOCK":
-      res.status(409).json({
-        error: {
-          code:
-            "INSUFFICIENT_STOCK",
-
-          message:
-            "Недостаточное количество товара в наличии",
-
-          details: {
-            productVariantId:
-              result.productVariantId,
-
-            availableQuantity:
-              result.availableQuantity
-          }
-        }
-      });
-  }
-}
-
-export async function createOrderController(
-  req: Request,
-  res: Response
-): Promise<void> {
   const tokenResult =
-    getGuestToken(req);
+    guestOrderTokenSchema.safeParse(
+      token
+    );
 
   if (!tokenResult.success) {
     res.status(400).json({
@@ -157,6 +50,116 @@ export async function createOrderController(
       }
     });
 
+    return null;
+  }
+
+  return {
+    guestToken:
+      tokenResult.data
+  } as const;
+}
+
+function sendCreateOrderError(
+  res: Response,
+  result: {
+    success: false;
+    error:
+      | "CART_NOT_FOUND"
+      | "CART_EMPTY"
+      | "DELIVERY_METHOD_NOT_FOUND"
+      | "PAYMENT_METHOD_NOT_FOUND"
+      | "PRODUCT_VARIANT_NOT_FOUND"
+      | "INSUFFICIENT_STOCK";
+    productVariantId?: string;
+    availableQuantity?: number;
+  }
+) {
+  switch (result.error) {
+    case "CART_NOT_FOUND":
+      res.status(404).json({
+        error: {
+          code:
+            "CART_NOT_FOUND",
+          message:
+            "Активная корзина не найдена"
+        }
+      });
+      return;
+
+    case "CART_EMPTY":
+      res.status(409).json({
+        error: {
+          code:
+            "CART_EMPTY",
+          message:
+            "Нельзя оформить пустую корзину"
+        }
+      });
+      return;
+
+    case "DELIVERY_METHOD_NOT_FOUND":
+      res.status(404).json({
+        error: {
+          code:
+            "DELIVERY_METHOD_NOT_FOUND",
+          message:
+            "Способ доставки не найден или недоступен"
+        }
+      });
+      return;
+
+    case "PAYMENT_METHOD_NOT_FOUND":
+      res.status(404).json({
+        error: {
+          code:
+            "PAYMENT_METHOD_NOT_FOUND",
+          message:
+            "Способ оплаты не найден или недоступен"
+        }
+      });
+      return;
+
+    case "PRODUCT_VARIANT_NOT_FOUND":
+      res.status(409).json({
+        error: {
+          code:
+            "PRODUCT_VARIANT_NOT_FOUND",
+          message:
+            "Один из вариантов товара больше недоступен",
+          details: {
+            productVariantId:
+              result.productVariantId
+          }
+        }
+      });
+      return;
+
+    case "INSUFFICIENT_STOCK":
+      res.status(409).json({
+        error: {
+          code:
+            "INSUFFICIENT_STOCK",
+          message:
+            "Недостаточное количество товара в наличии",
+          details: {
+            productVariantId:
+              result.productVariantId,
+            availableQuantity:
+              result.availableQuantity
+          }
+        }
+      });
+  }
+}
+
+export async function createOrderController(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const owner =
+    getOrderOwner(req, res);
+
+  if (!owner) {
     return;
   }
 
@@ -170,35 +173,51 @@ export async function createOrderController(
       error: {
         code:
           "INVALID_ORDER_DATA",
-
         message:
           "Некорректные данные заказа",
-
         details:
           bodyResult.error.flatten()
       }
     });
-
     return;
   }
 
-  const result =
-  await createGuestOrder(
-    tokenResult.data,
-    bodyResult.data,
-    req.customer?.id
-  );
+  try {
+    const result =
+      await createOrder(
+        owner,
+        bodyResult.data
+      );
 
-  if (!result.success) {
-    sendCreateOrderError(
-      res,
-      result
-    );
+    if (!result.success) {
+      sendCreateOrderError(
+        res,
+        result
+      );
+      return;
+    }
 
-    return;
+    res.status(201).json({
+      data: result.order
+    });
+  } catch (error) {
+    if (
+      error instanceof Error
+      && error.message.startsWith(
+        "INSUFFICIENT_STOCK:"
+      )
+    ) {
+      res.status(409).json({
+        error: {
+          code:
+            "INSUFFICIENT_STOCK",
+          message:
+            "Остаток товара изменился во время оформления заказа"
+        }
+      });
+      return;
+    }
+
+    throw error;
   }
-
-  res.status(201).json({
-    data: result.order
-  });
 }

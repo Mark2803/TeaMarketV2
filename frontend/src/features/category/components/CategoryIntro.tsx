@@ -1,12 +1,12 @@
 import {
-  ChevronDown
+  ChevronDown,
+  ImageOff
 } from "lucide-react";
-
-import heroImage from "../../../assets/hero.png";
 
 type CategoryIntroProps = {
   categoryName: string;
   description: string;
+  imageUrl?: string | null;
   isDescriptionOpen: boolean;
   onToggleDescription: () => void;
 };
@@ -14,16 +14,30 @@ type CategoryIntroProps = {
 export default function CategoryIntro({
   categoryName,
   description,
+  imageUrl,
   isDescriptionOpen,
   onToggleDescription
 }: CategoryIntroProps) {
   return (
     <section className="category-intro">
       <div className="category-intro__media">
-        <img
-          src={heroImage}
-          alt="Чай и чайная посуда"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={categoryName}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="category-intro__placeholder"
+            aria-hidden="true"
+          >
+            <ImageOff
+              size={48}
+              strokeWidth={1.5}
+            />
+          </div>
+        )}
       </div>
 
       <h2>

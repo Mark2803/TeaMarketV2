@@ -1,37 +1,18 @@
+import "../../shared/styles/unified-header.css";
+
 import {
-  Outlet,
-  useLocation
+  Outlet
 } from "react-router-dom";
 
-import AppHeader from "../../widgets/AppHeader";
-import BottomNavigation from "../../widgets/BottomNavigation";
+import AppHeader from "../../shared/widgets/AppHeader";
+import BottomNavigation from "../../shared/widgets/BottomNavigation";
 
 export default function ClientLayout() {
-  const location = useLocation();
-
-  const isCatalogPage =
-    location.pathname === "/catalog"
-    || location.pathname.startsWith("/catalog/");
-
-  const isProductPage =
-    location.pathname.startsWith("/products/");
-
-  const usesOwnHeader =
-    isCatalogPage
-    || isProductPage;
-
-  const contentClassName =
-    isProductPage
-      ? "client-layout__content client-layout__content--product"
-      : isCatalogPage
-        ? "client-layout__content client-layout__content--catalog"
-        : "client-layout__content";
-
   return (
     <div className="client-layout">
-      {!usesOwnHeader && <AppHeader />}
+      <AppHeader />
 
-      <main className={contentClassName}>
+      <main className="client-layout__content">
         <Outlet />
       </main>
 

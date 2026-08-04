@@ -1,0 +1,64 @@
+/*
+ * Кликабельное сердечко в блоке «Новинки».
+ */
+
+.home-product-card {
+  position: relative;
+}
+
+.home-product-card__link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.home-product-card__image,
+.home-product-card h3,
+.home-product-card p,
+.home-product-card strong {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.home-product-card__favorite {
+  position: absolute;
+  z-index: 3;
+
+  display: grid;
+  place-items: center;
+
+  width: 2.35rem;
+  height: 2.35rem;
+
+  padding: 0;
+
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+
+  color: var(--color-primary);
+  background: rgb(255 255 255 / 0.9);
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  backdrop-filter: blur(0.35rem);
+
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.home-product-card__favorite:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.04);
+}
+
+.home-product-card__favorite--active {
+  color: var(--color-primary-text);
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}

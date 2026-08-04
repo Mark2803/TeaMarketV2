@@ -7,6 +7,9 @@ import {
   QueryClientProvider
 } from "@tanstack/react-query";
 
+import AuthProvider from "../../features/auth/AuthProvider";
+import DeliveryProvider from "../../features/delivery/DeliveryProvider";
+
 const queryClient =
   new QueryClient({
     defaultOptions: {
@@ -30,7 +33,11 @@ export default function AppProviders({
     <QueryClientProvider
       client={queryClient}
     >
-      {children}
+      <AuthProvider>
+        <DeliveryProvider>
+          {children}
+        </DeliveryProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

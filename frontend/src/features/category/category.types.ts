@@ -5,13 +5,24 @@ export type SortOption = {
 };
 
 export type CategoryProduct = {
+  id?: string;
   slug: string;
   name: string;
   details: string;
   weight: string;
   price: string;
   badge: string | null;
-  imageClass: string;
+
+  /*
+   * Поля ниже оставлены временно для совместимости
+   * со старым локальным поисковым индексом.
+   * Каталог и категории их больше не используют.
+   */
+  subcategory?: string;
+  imageClass?: string;
+
+  imageUrl?: string | null;
+  imageAlt?: string;
 };
 
 export type CategoryDefinition = {
@@ -22,4 +33,4 @@ export type CategoryDefinition = {
   products: CategoryProduct[];
 };
 
-export type ActiveCatalogPanel = "filters" | "sort" | null;
+export type ActiveCatalogPanel = "sort" | null;

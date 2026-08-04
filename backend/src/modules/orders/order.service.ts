@@ -36,6 +36,16 @@ const orderInclude = {
   }
 } satisfies Prisma.ordersInclude;
 
+type OrderOwner =
+  | {
+      customerId: string;
+      guestToken?: never;
+    }
+  | {
+      customerId?: never;
+      guestToken: string;
+    };
+
 export type CreateOrderError =
   | "CART_NOT_FOUND"
   | "CART_EMPTY"
@@ -58,9 +68,6 @@ export type CreateOrderResult =
       availableQuantity?: number;
     };
 
-/**
- * Формирует уникальный номер заказа.
- */
 function createOrderNumber() {
   const date =
     new Date()
@@ -77,24 +84,41 @@ function createOrderNumber() {
   return `TM-${date}-${suffix}`;
 }
 
+function cartWhere(
+  owner: OrderOwner
+): Prisma.cartsWhereInput {
+  return "customerId" in owner
+    ? {
+        customer_id:
+          owner.customerId,
+        status: "active"
+      }
+    : {
+        guest_token:
+          owner.guestToken,
+        status: "active"
+      };
+}
+
 /**
  * Создаёт заказ из активной корзины.
- *
- * customerId передаётся для авторизованного покупателя.
- * Для гостевого заказа остаётся null.
+ * Источник корзины определяется владельцем:
+ * customer_id для авторизованного покупателя
+ * или guest_token для гостя.
  */
-export async function createGuestOrder(
-  guestToken: string,
-  input: CreateOrderInput,
-  customerId?: string
+export async function createOrder(
+  owner: OrderOwner,
+  input: CreateOrderInput
 ): Promise<CreateOrderResult> {
   return prisma.$transaction(
     async (transaction) => {
       const cart =
         await transaction.carts.findFirst({
-          where: {
-            guest_token: guestToken,
-            status: "active"
+          where:
+            cartWhere(owner),
+
+          orderBy: {
+            updated_at: "desc"
           },
 
           include: {
@@ -166,19 +190,31 @@ export async function createGuestOrder(
 
       for (const item of cart.cart_items) {
         const variant =
-          item.product_variants;
+          await transaction
+            .product_variants
+            .findFirst({
+              where: {
+                id:
+                  item.product_variant_id,
+                status: "active",
+                is_available: true,
+                products: {
+                  is_active: true
+                }
+              },
 
-        if (
-          variant.status !== "active"
-          || !variant.is_available
-          || !variant.products.is_active
-        ) {
+              include: {
+                products: true
+              }
+            });
+
+        if (!variant) {
           return {
             success: false,
             error:
               "PRODUCT_VARIANT_NOT_FOUND",
             productVariantId:
-              variant.id
+              item.product_variant_id
           };
         }
 
@@ -198,8 +234,27 @@ export async function createGuestOrder(
         }
       }
 
+      const freshItems =
+        await transaction.cart_items.findMany({
+          where: {
+            cart_id: cart.id
+          },
+
+          include: {
+            product_variants: {
+              include: {
+                products: true
+              }
+            }
+          },
+
+          orderBy: {
+            created_at: "asc"
+          }
+        });
+
       const itemsTotal =
-        cart.cart_items.reduce(
+        freshItems.reduce(
           (sum, item) =>
             sum
             + Number(
@@ -216,11 +271,16 @@ export async function createGuestOrder(
       const totalAmount =
         itemsTotal + deliveryCost;
 
+      const customerId =
+        "customerId" in owner
+          ? owner.customerId
+          : null;
+
       const order =
         await transaction.orders.create({
           data: {
             customer_id:
-              customerId ?? null,
+              customerId,
 
             order_number:
               createOrderNumber(),
@@ -254,7 +314,7 @@ export async function createGuestOrder(
 
             order_items: {
               create:
-                cart.cart_items.map(
+                freshItems.map(
                   (item) => {
                     const variant =
                       item.product_variants;
@@ -343,33 +403,48 @@ export async function createGuestOrder(
           }
         });
 
-      for (const item of cart.cart_items) {
-        await transaction
-          .product_variants
-          .update({
-            where: {
-              id:
-                item.product_variant_id
-            },
+      /*
+       * Уменьшение остатка выполняется условным updateMany,
+       * чтобы исключить отрицательный остаток при конкурентных заказах.
+       */
+      for (const item of freshItems) {
+        const updateResult =
+          await transaction
+            .product_variants
+            .updateMany({
+              where: {
+                id:
+                  item.product_variant_id,
+                stock_quantity: {
+                  gte:
+                    item.quantity
+                }
+              },
 
-            data: {
-              stock_quantity: {
-                decrement:
-                  item.quantity
+              data: {
+                stock_quantity: {
+                  decrement:
+                    item.quantity
+                }
               }
-            }
-          });
+            });
+
+        if (updateResult.count !== 1) {
+          throw new Error(
+            `INSUFFICIENT_STOCK:${item.product_variant_id}`
+          );
+        }
       }
 
       await transaction.carts.update({
-  where: {
-    id: cart.id
-  },
+        where: {
+          id: cart.id
+        },
 
-  data: {
-    status: "converted"
-  }
-});
+        data: {
+          status: "converted"
+        }
+      });
 
       const createdOrder =
         await transaction

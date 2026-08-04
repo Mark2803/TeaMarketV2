@@ -418,7 +418,9 @@ export const ModelName = {
   products: 'products',
   product_relations: 'product_relations',
   auth_codes: 'auth_codes',
-  auth_sessions: 'auth_sessions'
+  auth_sessions: 'auth_sessions',
+  articles: 'articles',
+  home_banners: 'home_banners'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -434,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions"
+    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions" | "articles" | "home_banners"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2066,6 +2068,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    articles: {
+      payload: Prisma.$articlesPayload<ExtArgs>
+      fields: Prisma.articlesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.articlesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.articlesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        findFirst: {
+          args: Prisma.articlesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.articlesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        findMany: {
+          args: Prisma.articlesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>[]
+        }
+        create: {
+          args: Prisma.articlesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        createMany: {
+          args: Prisma.articlesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.articlesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>[]
+        }
+        delete: {
+          args: Prisma.articlesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        update: {
+          args: Prisma.articlesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        deleteMany: {
+          args: Prisma.articlesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.articlesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.articlesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>[]
+        }
+        upsert: {
+          args: Prisma.articlesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$articlesPayload>
+        }
+        aggregate: {
+          args: Prisma.ArticlesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticles>
+        }
+        groupBy: {
+          args: Prisma.articlesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticlesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.articlesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArticlesCountAggregateOutputType> | number
+        }
+      }
+    }
+    home_banners: {
+      payload: Prisma.$home_bannersPayload<ExtArgs>
+      fields: Prisma.home_bannersFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.home_bannersFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.home_bannersFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        findFirst: {
+          args: Prisma.home_bannersFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.home_bannersFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        findMany: {
+          args: Prisma.home_bannersFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>[]
+        }
+        create: {
+          args: Prisma.home_bannersCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        createMany: {
+          args: Prisma.home_bannersCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.home_bannersCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>[]
+        }
+        delete: {
+          args: Prisma.home_bannersDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        update: {
+          args: Prisma.home_bannersUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        deleteMany: {
+          args: Prisma.home_bannersDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.home_bannersUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.home_bannersUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>[]
+        }
+        upsert: {
+          args: Prisma.home_bannersUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$home_bannersPayload>
+        }
+        aggregate: {
+          args: Prisma.Home_bannersAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHome_banners>
+        }
+        groupBy: {
+          args: Prisma.home_bannersGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Home_bannersGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.home_bannersCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Home_bannersCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2446,6 +2596,47 @@ export const Auth_sessionsScalarFieldEnum = {
 export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
 
 
+export const ArticlesScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  excerpt: 'excerpt',
+  content: 'content',
+  cover_url: 'cover_url',
+  cover_alt: 'cover_alt',
+  reading_time_minutes: 'reading_time_minutes',
+  status: 'status',
+  is_featured: 'is_featured',
+  sort_order: 'sort_order',
+  published_at: 'published_at',
+  seo_title: 'seo_title',
+  seo_description: 'seo_description',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ArticlesScalarFieldEnum = (typeof ArticlesScalarFieldEnum)[keyof typeof ArticlesScalarFieldEnum]
+
+
+export const Home_bannersScalarFieldEnum = {
+  id: 'id',
+  collection_id: 'collection_id',
+  eyebrow: 'eyebrow',
+  title: 'title',
+  subtitle: 'subtitle',
+  image_url: 'image_url',
+  image_alt: 'image_alt',
+  is_active: 'is_active',
+  sort_order: 'sort_order',
+  starts_at: 'starts_at',
+  ends_at: 'ends_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Home_bannersScalarFieldEnum = (typeof Home_bannersScalarFieldEnum)[keyof typeof Home_bannersScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2756,6 +2947,8 @@ export type GlobalOmitConfig = {
   product_relations?: Prisma.product_relationsOmit
   auth_codes?: Prisma.auth_codesOmit
   auth_sessions?: Prisma.auth_sessionsOmit
+  articles?: Prisma.articlesOmit
+  home_banners?: Prisma.home_bannersOmit
 }
 
 /* Types for Logging */

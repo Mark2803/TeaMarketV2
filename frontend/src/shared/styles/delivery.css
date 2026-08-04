@@ -1,0 +1,263 @@
+.delivery-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.delivery-page__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.delivery-page__header h1,
+.delivery-preference h2,
+.delivery-locations h2,
+.delivery-form-card h2 {
+  font-family: var(--font-family-heading);
+  line-height: var(--line-height-heading);
+}
+
+.delivery-page__header h1 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+}
+
+.delivery-page__header p,
+.delivery-empty p,
+.delivery-location-card p,
+.delivery-location-card small,
+.delivery-form-card__hint {
+  color: var(--color-text-muted);
+}
+
+.delivery-page__back {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.delivery-preference,
+.delivery-locations,
+.delivery-form-card {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.delivery-preference,
+.delivery-locations,
+.delivery-form-card,
+.delivery-form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.delivery-preference h2,
+.delivery-locations h2,
+.delivery-form-card h2,
+.delivery-empty h3 {
+  margin: 0;
+}
+
+.delivery-preference__options,
+.delivery-add-actions,
+.delivery-form-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.delivery-preference__option,
+.delivery-add-actions button,
+.delivery-form-card__actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delivery-preference__option--active,
+.delivery-add-actions button:first-child,
+.delivery-form-card__actions button:first-child {
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+  background: var(--color-primary);
+}
+
+.delivery-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.delivery-empty svg {
+  color: var(--color-primary);
+}
+
+.delivery-location-list,
+.delivery-pickup-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.delivery-location-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.delivery-location-card__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: var(--color-surface-muted);
+}
+
+.delivery-location-card__content,
+.delivery-location-card__title {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.delivery-location-card__content {
+  flex-direction: column;
+  min-width: 0;
+}
+
+.delivery-location-card__title {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.delivery-location-card__title span {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-surface-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.delivery-location-card p,
+.delivery-location-card small {
+  margin: 0;
+}
+
+.delivery-location-card__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.delivery-location-card__actions button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  cursor: pointer;
+}
+
+.delivery-form-card label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.delivery-form-card input,
+.delivery-form-card textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: var(--color-background);
+  padding: 0.8rem 0.9rem;
+}
+
+.delivery-form-card__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  gap: var(--space-3);
+}
+
+.delivery-form-card__error {
+  margin: 0;
+  color: var(--color-danger);
+}
+
+.delivery-pickup-card {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3) !important;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.delivery-pickup-card--selected {
+  border-color: var(--color-primary);
+  background: var(--color-surface-muted);
+}
+
+.delivery-pickup-card span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.delivery-pickup-card small {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+@media (max-width: 42rem) {
+  .delivery-preference,
+  .delivery-locations,
+  .delivery-form-card {
+    padding: var(--space-4);
+  }
+
+  .delivery-preference__options,
+  .delivery-add-actions,
+  .delivery-form-card__actions,
+  .delivery-form-card__row {
+    grid-template-columns: 1fr;
+  }
+
+  .delivery-location-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .delivery-location-card__actions {
+    grid-column: 2;
+  }
+}

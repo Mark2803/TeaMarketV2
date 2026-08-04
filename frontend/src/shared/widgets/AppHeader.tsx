@@ -1,6 +1,5 @@
 import {
-  Search,
-  ShoppingCart
+  Search
 } from "lucide-react";
 
 import {
@@ -31,18 +30,6 @@ export default function AppHeader() {
           aria-label="Поиск"
         >
           <Search
-            size={22}
-            strokeWidth={1.8}
-            aria-hidden="true"
-          />
-        </Link>
-
-        <Link
-          to="/cart"
-          className="app-header__action"
-          aria-label="Корзина"
-        >
-          <ShoppingCart
             size={22}
             strokeWidth={1.8}
             aria-hidden="true"

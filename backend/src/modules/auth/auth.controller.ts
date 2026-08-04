@@ -10,6 +10,7 @@ import {
 
 import {
   requestAuthCode,
+  revokeAuthSession,
   verifyAuthCode
 } from "./auth.service.js";
 
@@ -158,6 +159,38 @@ export async function verifyAuthCodeController(
 
       customer:
         result.customer
+    }
+  });
+}
+
+export async function logoutAuthController(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const authorization =
+    req.headers.authorization;
+
+  if (
+    !req.customer
+    || !authorization?.startsWith("Bearer ")
+  ) {
+    res.status(401).json({
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Требуется авторизация"
+      }
+    });
+    return;
+  }
+
+  const token =
+    authorization.substring(7);
+
+  await revokeAuthSession(token);
+
+  res.json({
+    data: {
+      success: true
     }
   });
 }

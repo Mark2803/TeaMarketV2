@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { authMiddleware } from "../auth/auth.middleware.js";
+import { create, list, remove, update } from "./customer-addresses.controller.js";
+const router=Router();
+router.use(authMiddleware);
+router.get("/",list);
+router.post("/",create);
+router.patch("/:id",update);
+router.delete("/:id",remove);
+export default router;

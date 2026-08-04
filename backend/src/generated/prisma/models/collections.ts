@@ -318,6 +318,7 @@ export type collectionsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"collections"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"collections"> | Date | string
   collection_products?: Prisma.Collection_productsListRelationFilter
+  home_banners?: Prisma.Home_bannersListRelationFilter
 }
 
 export type collectionsOrderByWithRelationInput = {
@@ -340,6 +341,7 @@ export type collectionsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   collection_products?: Prisma.collection_productsOrderByRelationAggregateInput
+  home_banners?: Prisma.home_bannersOrderByRelationAggregateInput
 }
 
 export type collectionsWhereUniqueInput = Prisma.AtLeast<{
@@ -365,6 +367,7 @@ export type collectionsWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"collections"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"collections"> | Date | string
   collection_products?: Prisma.Collection_productsListRelationFilter
+  home_banners?: Prisma.Home_bannersListRelationFilter
 }, "id" | "slug">
 
 export type collectionsOrderByWithAggregationInput = {
@@ -437,6 +440,7 @@ export type collectionsCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   collection_products?: Prisma.collection_productsCreateNestedManyWithoutCollectionsInput
+  home_banners?: Prisma.home_bannersCreateNestedManyWithoutCollectionsInput
 }
 
 export type collectionsUncheckedCreateInput = {
@@ -459,6 +463,7 @@ export type collectionsUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   collection_products?: Prisma.collection_productsUncheckedCreateNestedManyWithoutCollectionsInput
+  home_banners?: Prisma.home_bannersUncheckedCreateNestedManyWithoutCollectionsInput
 }
 
 export type collectionsUpdateInput = {
@@ -481,6 +486,7 @@ export type collectionsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   collection_products?: Prisma.collection_productsUpdateManyWithoutCollectionsNestedInput
+  home_banners?: Prisma.home_bannersUpdateManyWithoutCollectionsNestedInput
 }
 
 export type collectionsUncheckedUpdateInput = {
@@ -503,6 +509,7 @@ export type collectionsUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   collection_products?: Prisma.collection_productsUncheckedUpdateManyWithoutCollectionsNestedInput
+  home_banners?: Prisma.home_bannersUncheckedUpdateManyWithoutCollectionsNestedInput
 }
 
 export type collectionsCreateManyInput = {
@@ -660,6 +667,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type collectionsCreateNestedOneWithoutHome_bannersInput = {
+  create?: Prisma.XOR<Prisma.collectionsCreateWithoutHome_bannersInput, Prisma.collectionsUncheckedCreateWithoutHome_bannersInput>
+  connectOrCreate?: Prisma.collectionsCreateOrConnectWithoutHome_bannersInput
+  connect?: Prisma.collectionsWhereUniqueInput
+}
+
+export type collectionsUpdateOneRequiredWithoutHome_bannersNestedInput = {
+  create?: Prisma.XOR<Prisma.collectionsCreateWithoutHome_bannersInput, Prisma.collectionsUncheckedCreateWithoutHome_bannersInput>
+  connectOrCreate?: Prisma.collectionsCreateOrConnectWithoutHome_bannersInput
+  upsert?: Prisma.collectionsUpsertWithoutHome_bannersInput
+  connect?: Prisma.collectionsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.collectionsUpdateToOneWithWhereWithoutHome_bannersInput, Prisma.collectionsUpdateWithoutHome_bannersInput>, Prisma.collectionsUncheckedUpdateWithoutHome_bannersInput>
+}
+
 export type collectionsCreateWithoutCollection_productsInput = {
   id?: string
   name: string
@@ -679,6 +700,7 @@ export type collectionsCreateWithoutCollection_productsInput = {
   is_indexed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  home_banners?: Prisma.home_bannersCreateNestedManyWithoutCollectionsInput
 }
 
 export type collectionsUncheckedCreateWithoutCollection_productsInput = {
@@ -700,6 +722,7 @@ export type collectionsUncheckedCreateWithoutCollection_productsInput = {
   is_indexed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  home_banners?: Prisma.home_bannersUncheckedCreateNestedManyWithoutCollectionsInput
 }
 
 export type collectionsCreateOrConnectWithoutCollection_productsInput = {
@@ -737,6 +760,7 @@ export type collectionsUpdateWithoutCollection_productsInput = {
   is_indexed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  home_banners?: Prisma.home_bannersUpdateManyWithoutCollectionsNestedInput
 }
 
 export type collectionsUncheckedUpdateWithoutCollection_productsInput = {
@@ -758,6 +782,111 @@ export type collectionsUncheckedUpdateWithoutCollection_productsInput = {
   is_indexed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  home_banners?: Prisma.home_bannersUncheckedUpdateManyWithoutCollectionsNestedInput
+}
+
+export type collectionsCreateWithoutHome_bannersInput = {
+  id?: string
+  name: string
+  slug: string
+  description?: string | null
+  image_url?: string | null
+  collection_type?: string
+  automation_rules?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: boolean
+  show_on_home?: boolean
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
+  sort_order?: number
+  seo_title?: string | null
+  seo_description?: string | null
+  canonical_url?: string | null
+  is_indexed?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  collection_products?: Prisma.collection_productsCreateNestedManyWithoutCollectionsInput
+}
+
+export type collectionsUncheckedCreateWithoutHome_bannersInput = {
+  id?: string
+  name: string
+  slug: string
+  description?: string | null
+  image_url?: string | null
+  collection_type?: string
+  automation_rules?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: boolean
+  show_on_home?: boolean
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
+  sort_order?: number
+  seo_title?: string | null
+  seo_description?: string | null
+  canonical_url?: string | null
+  is_indexed?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  collection_products?: Prisma.collection_productsUncheckedCreateNestedManyWithoutCollectionsInput
+}
+
+export type collectionsCreateOrConnectWithoutHome_bannersInput = {
+  where: Prisma.collectionsWhereUniqueInput
+  create: Prisma.XOR<Prisma.collectionsCreateWithoutHome_bannersInput, Prisma.collectionsUncheckedCreateWithoutHome_bannersInput>
+}
+
+export type collectionsUpsertWithoutHome_bannersInput = {
+  update: Prisma.XOR<Prisma.collectionsUpdateWithoutHome_bannersInput, Prisma.collectionsUncheckedUpdateWithoutHome_bannersInput>
+  create: Prisma.XOR<Prisma.collectionsCreateWithoutHome_bannersInput, Prisma.collectionsUncheckedCreateWithoutHome_bannersInput>
+  where?: Prisma.collectionsWhereInput
+}
+
+export type collectionsUpdateToOneWithWhereWithoutHome_bannersInput = {
+  where?: Prisma.collectionsWhereInput
+  data: Prisma.XOR<Prisma.collectionsUpdateWithoutHome_bannersInput, Prisma.collectionsUncheckedUpdateWithoutHome_bannersInput>
+}
+
+export type collectionsUpdateWithoutHome_bannersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  automation_rules?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  show_on_home?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonical_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_indexed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collection_products?: Prisma.collection_productsUpdateManyWithoutCollectionsNestedInput
+}
+
+export type collectionsUncheckedUpdateWithoutHome_bannersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  automation_rules?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  show_on_home?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  canonical_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_indexed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  collection_products?: Prisma.collection_productsUncheckedUpdateManyWithoutCollectionsNestedInput
 }
 
 
@@ -767,10 +896,12 @@ export type collectionsUncheckedUpdateWithoutCollection_productsInput = {
 
 export type CollectionsCountOutputType = {
   collection_products: number
+  home_banners: number
 }
 
 export type CollectionsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection_products?: boolean | CollectionsCountOutputTypeCountCollection_productsArgs
+  home_banners?: boolean | CollectionsCountOutputTypeCountHome_bannersArgs
 }
 
 /**
@@ -788,6 +919,13 @@ export type CollectionsCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
  */
 export type CollectionsCountOutputTypeCountCollection_productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.collection_productsWhereInput
+}
+
+/**
+ * CollectionsCountOutputType without action
+ */
+export type CollectionsCountOutputTypeCountHome_bannersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.home_bannersWhereInput
 }
 
 
@@ -811,6 +949,7 @@ export type collectionsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   collection_products?: boolean | Prisma.collections$collection_productsArgs<ExtArgs>
+  home_banners?: boolean | Prisma.collections$home_bannersArgs<ExtArgs>
   _count?: boolean | Prisma.CollectionsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["collections"]>
 
@@ -880,6 +1019,7 @@ export type collectionsSelectScalar = {
 export type collectionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "image_url" | "collection_type" | "automation_rules" | "is_active" | "show_on_home" | "starts_at" | "ends_at" | "sort_order" | "seo_title" | "seo_description" | "canonical_url" | "is_indexed" | "created_at" | "updated_at", ExtArgs["result"]["collections"]>
 export type collectionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection_products?: boolean | Prisma.collections$collection_productsArgs<ExtArgs>
+  home_banners?: boolean | Prisma.collections$home_bannersArgs<ExtArgs>
   _count?: boolean | Prisma.CollectionsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type collectionsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -889,6 +1029,7 @@ export type $collectionsPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "collections"
   objects: {
     collection_products: Prisma.$collection_productsPayload<ExtArgs>[]
+    home_banners: Prisma.$home_bannersPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1304,6 +1445,7 @@ readonly fields: collectionsFieldRefs;
 export interface Prisma__collectionsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   collection_products<T extends Prisma.collections$collection_productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.collections$collection_productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$collection_productsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  home_banners<T extends Prisma.collections$home_bannersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.collections$home_bannersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$home_bannersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1765,6 +1907,30 @@ export type collections$collection_productsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.Collection_productsScalarFieldEnum | Prisma.Collection_productsScalarFieldEnum[]
+}
+
+/**
+ * collections.home_banners
+ */
+export type collections$home_bannersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the home_banners
+   */
+  select?: Prisma.home_bannersSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the home_banners
+   */
+  omit?: Prisma.home_bannersOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.home_bannersInclude<ExtArgs> | null
+  where?: Prisma.home_bannersWhereInput
+  orderBy?: Prisma.home_bannersOrderByWithRelationInput | Prisma.home_bannersOrderByWithRelationInput[]
+  cursor?: Prisma.home_bannersWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Home_bannersScalarFieldEnum | Prisma.Home_bannersScalarFieldEnum[]
 }
 
 /**

@@ -72,7 +72,9 @@ export const ModelName = {
   products: 'products',
   product_relations: 'product_relations',
   auth_codes: 'auth_codes',
-  auth_sessions: 'auth_sessions'
+  auth_sessions: 'auth_sessions',
+  articles: 'articles',
+  home_banners: 'home_banners'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -430,6 +432,47 @@ export const Auth_sessionsScalarFieldEnum = {
 } as const
 
 export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
+
+
+export const ArticlesScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  excerpt: 'excerpt',
+  content: 'content',
+  cover_url: 'cover_url',
+  cover_alt: 'cover_alt',
+  reading_time_minutes: 'reading_time_minutes',
+  status: 'status',
+  is_featured: 'is_featured',
+  sort_order: 'sort_order',
+  published_at: 'published_at',
+  seo_title: 'seo_title',
+  seo_description: 'seo_description',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ArticlesScalarFieldEnum = (typeof ArticlesScalarFieldEnum)[keyof typeof ArticlesScalarFieldEnum]
+
+
+export const Home_bannersScalarFieldEnum = {
+  id: 'id',
+  collection_id: 'collection_id',
+  eyebrow: 'eyebrow',
+  title: 'title',
+  subtitle: 'subtitle',
+  image_url: 'image_url',
+  image_alt: 'image_alt',
+  is_active: 'is_active',
+  sort_order: 'sort_order',
+  starts_at: 'starts_at',
+  ends_at: 'ends_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Home_bannersScalarFieldEnum = (typeof Home_bannersScalarFieldEnum)[keyof typeof Home_bannersScalarFieldEnum]
 
 
 export const SortOrder = {

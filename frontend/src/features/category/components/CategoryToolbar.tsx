@@ -7,6 +7,10 @@ import {
   Link
 } from "react-router-dom";
 
+import {
+  useCart
+} from "../../cart/useCart";
+
 type CategoryToolbarProps = {
   categoryName: string;
 };
@@ -14,6 +18,8 @@ type CategoryToolbarProps = {
 export default function CategoryToolbar({
   categoryName
 }: CategoryToolbarProps) {
+  const { totalQuantity } = useCart();
+
   return (
     <header className="category-toolbar">
       <Link
@@ -43,9 +49,11 @@ export default function CategoryToolbar({
           aria-hidden="true"
         />
 
-        <span>
-          2
-        </span>
+        {totalQuantity > 0 && (
+          <span>
+            {totalQuantity}
+          </span>
+        )}
       </Link>
     </header>
   );

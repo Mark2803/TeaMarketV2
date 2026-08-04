@@ -67,7 +67,12 @@ if (query.inStock === true) {
 }
 
 const where: Prisma.productsWhereInput = {
-  is_active: true
+  is_active: true,
+  product_variants: {
+    some: {
+      status: "active"
+    }
+  }
 };
 
 if (query.teaType) {
@@ -183,7 +188,12 @@ export async function getProductBySlug(
     await prisma.products.findFirst({
       where: {
         slug,
-        is_active: true
+        is_active: true,
+        product_variants: {
+          some: {
+            status: "active"
+          }
+        }
       },
 
       include: {

@@ -11,10 +11,12 @@ import {
 } from "./cart.schemas.js";
 
 import {
-  addGuestCartItem,
-  getGuestCart,
-  removeGuestCartItem,
-  updateGuestCartItem
+  addCartItem,
+  clearCart,
+  getCart,
+  mergeGuestCart,
+  removeCartItem,
+  updateCartItem
 } from "./cart.service.js";
 
 function getGuestToken(
@@ -33,17 +35,51 @@ function getGuestToken(
   );
 }
 
+function getCartOwner(
+  req: Request,
+  res: Response
+) {
+  if (req.customer) {
+    return {
+      customerId:
+        req.customer.id
+    } as const;
+  }
+
+  const tokenResult =
+    getGuestToken(req);
+
+  if (!tokenResult.success) {
+    res.status(400).json({
+      error: {
+        code:
+          "INVALID_GUEST_TOKEN",
+        message:
+          "Некорректный токен гостевой корзины",
+        details:
+          tokenResult.error.flatten()
+      }
+    });
+
+    return null;
+  }
+
+  return {
+    guestToken:
+      tokenResult.data
+  } as const;
+}
+
 function sendCartOperationError(
   res: Response,
-  result:
-    | {
-        success: false;
-        error:
-          "PRODUCT_VARIANT_NOT_FOUND"
-          | "CART_ITEM_NOT_FOUND"
-          | "INSUFFICIENT_STOCK";
-        availableQuantity?: number;
-      }
+  result: {
+    success: false;
+    error:
+      | "PRODUCT_VARIANT_NOT_FOUND"
+      | "CART_ITEM_NOT_FOUND"
+      | "INSUFFICIENT_STOCK";
+    availableQuantity?: number;
+  }
 ) {
   switch (result.error) {
     case "PRODUCT_VARIANT_NOT_FOUND":
@@ -51,12 +87,10 @@ function sendCartOperationError(
         error: {
           code:
             "PRODUCT_VARIANT_NOT_FOUND",
-
           message:
             "Вариант товара не найден или недоступен"
         }
       });
-
       return;
 
     case "CART_ITEM_NOT_FOUND":
@@ -64,12 +98,10 @@ function sendCartOperationError(
         error: {
           code:
             "CART_ITEM_NOT_FOUND",
-
           message:
             "Позиция корзины не найдена"
         }
       });
-
       return;
 
     case "INSUFFICIENT_STOCK":
@@ -77,10 +109,8 @@ function sendCartOperationError(
         error: {
           code:
             "INSUFFICIENT_STOCK",
-
           message:
             "Недостаточное количество товара в наличии",
-
           details: {
             availableQuantity:
               result.availableQuantity
@@ -94,57 +124,27 @@ export async function getCartController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const tokenResult =
-    getGuestToken(req);
+  const owner =
+    getCartOwner(req, res);
 
-  if (!tokenResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_GUEST_TOKEN",
-
-        message:
-          "Некорректный токен гостевой корзины",
-
-        details:
-          tokenResult.error.flatten()
-      }
-    });
-
+  if (!owner) {
     return;
   }
 
   const cart =
-    await getGuestCart(
-      tokenResult.data
-    );
+    await getCart(owner);
 
-  res.json({
-    data: cart
-  });
+  res.json({ data: cart });
 }
 
 export async function addCartItemController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const tokenResult =
-    getGuestToken(req);
+  const owner =
+    getCartOwner(req, res);
 
-  if (!tokenResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_GUEST_TOKEN",
-
-        message:
-          "Некорректный токен гостевой корзины",
-
-        details:
-          tokenResult.error.flatten()
-      }
-    });
-
+  if (!owner) {
     return;
   }
 
@@ -158,21 +158,18 @@ export async function addCartItemController(
       error: {
         code:
           "INVALID_CART_ITEM_DATA",
-
         message:
           "Некорректные данные позиции корзины",
-
         details:
           bodyResult.error.flatten()
       }
     });
-
     return;
   }
 
   const result =
-    await addGuestCartItem(
-      tokenResult.data,
+    await addCartItem(
+      owner,
       bodyResult.data
     );
 
@@ -181,7 +178,6 @@ export async function addCartItemController(
       res,
       result
     );
-
     return;
   }
 
@@ -194,23 +190,10 @@ export async function updateCartItemController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const tokenResult =
-    getGuestToken(req);
+  const owner =
+    getCartOwner(req, res);
 
-  if (!tokenResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_GUEST_TOKEN",
-
-        message:
-          "Некорректный токен гостевой корзины",
-
-        details:
-          tokenResult.error.flatten()
-      }
-    });
-
+  if (!owner) {
     return;
   }
 
@@ -224,15 +207,12 @@ export async function updateCartItemController(
       error: {
         code:
           "INVALID_CART_ITEM_ID",
-
         message:
           "Некорректный ID позиции корзины",
-
         details:
           paramsResult.error.flatten()
       }
     });
-
     return;
   }
 
@@ -246,21 +226,18 @@ export async function updateCartItemController(
       error: {
         code:
           "INVALID_CART_ITEM_DATA",
-
         message:
           "Некорректные данные позиции корзины",
-
         details:
           bodyResult.error.flatten()
       }
     });
-
     return;
   }
 
   const result =
-    await updateGuestCartItem(
-      tokenResult.data,
+    await updateCartItem(
+      owner,
       paramsResult.data.itemId,
       bodyResult.data
     );
@@ -270,36 +247,20 @@ export async function updateCartItemController(
       res,
       result
     );
-
     return;
   }
 
-  res.json({
-    data: result.cart
-  });
+  res.json({ data: result.cart });
 }
 
 export async function removeCartItemController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const tokenResult =
-    getGuestToken(req);
+  const owner =
+    getCartOwner(req, res);
 
-  if (!tokenResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_GUEST_TOKEN",
-
-        message:
-          "Некорректный токен гостевой корзины",
-
-        details:
-          tokenResult.error.flatten()
-      }
-    });
-
+  if (!owner) {
     return;
   }
 
@@ -313,21 +274,18 @@ export async function removeCartItemController(
       error: {
         code:
           "INVALID_CART_ITEM_ID",
-
         message:
           "Некорректный ID позиции корзины",
-
         details:
           paramsResult.error.flatten()
       }
     });
-
     return;
   }
 
   const result =
-    await removeGuestCartItem(
-      tokenResult.data,
+    await removeCartItem(
+      owner,
       paramsResult.data.itemId
     );
 
@@ -336,11 +294,67 @@ export async function removeCartItemController(
       res,
       result
     );
-
     return;
   }
 
-  res.json({
-    data: result.cart
-  });
+  res.json({ data: result.cart });
+}
+
+export async function clearCartController(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const owner =
+    getCartOwner(req, res);
+
+  if (!owner) {
+    return;
+  }
+
+  const cart =
+    await clearCart(owner);
+
+  res.json({ data: cart });
+}
+
+export async function mergeCartController(
+  req: Request,
+  res: Response
+): Promise<void> {
+  if (!req.customer) {
+    res.status(401).json({
+      error: {
+        code:
+          "AUTH_REQUIRED",
+        message:
+          "Для объединения корзины требуется авторизация"
+      }
+    });
+    return;
+  }
+
+  const tokenResult =
+    getGuestToken(req);
+
+  if (!tokenResult.success) {
+    res.status(400).json({
+      error: {
+        code:
+          "INVALID_GUEST_TOKEN",
+        message:
+          "Некорректный токен гостевой корзины",
+        details:
+          tokenResult.error.flatten()
+      }
+    });
+    return;
+  }
+
+  const cart =
+    await mergeGuestCart(
+      req.customer.id,
+      tokenResult.data
+    );
+
+  res.json({ data: cart });
 }

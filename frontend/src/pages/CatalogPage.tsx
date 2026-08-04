@@ -4,8 +4,6 @@ import {
   Flower2,
   Gift,
   Leaf,
-  Search,
-  ShoppingCart,
   Sparkles
 } from "lucide-react";
 
@@ -13,178 +11,93 @@ import {
   Link
 } from "react-router-dom";
 
-type CatalogCategory = {
-  slug: string;
-  name: string;
-  productCount: number;
-  icon: typeof Leaf;
-  accent: string;
-};
+import {
+  useCategories
+} from "../shared/hooks/useCatalog";
 
-const catalogCategories: CatalogCategory[] = [
-  {
-    slug: "shu-puer",
-    name: "Шу Пуэр",
-    productCount: 128,
-    icon: Coffee,
-    accent: "catalog-category-item__image--brown"
-  },
-  {
-    slug: "sheng-puer",
-    name: "Шен Пуэр",
-    productCount: 96,
-    icon: Leaf,
-    accent: "catalog-category-item__image--olive"
-  },
-  {
-    slug: "oolong",
-    name: "Улуны",
-    productCount: 84,
-    icon: Leaf,
-    accent: "catalog-category-item__image--green"
-  },
-  {
-    slug: "red-tea",
-    name: "Красный чай",
-    productCount: 112,
-    icon: Sparkles,
-    accent: "catalog-category-item__image--red"
-  },
-  {
-    slug: "green-tea",
-    name: "Зелёный чай",
-    productCount: 92,
-    icon: Leaf,
-    accent: "catalog-category-item__image--fresh"
-  },
-  {
-    slug: "white-tea",
-    name: "Белый чай",
-    productCount: 68,
-    icon: Flower2,
-    accent: "catalog-category-item__image--light"
-  },
-  {
-    slug: "yellow-tea",
-    name: "Жёлтый чай",
-    productCount: 24,
-    icon: Flower2,
-    accent: "catalog-category-item__image--yellow"
-  },
-  {
-    slug: "matcha",
-    name: "Матча",
-    productCount: 46,
-    icon: Coffee,
-    accent: "catalog-category-item__image--matcha"
-  },
-  {
-    slug: "herbal-tea",
-    name: "Травяной чай",
-    productCount: 73,
-    icon: Flower2,
-    accent: "catalog-category-item__image--herbal"
-  },
-  {
-    slug: "tea-paste",
-    name: "Чайные смолы",
-    productCount: 28,
-    icon: Sparkles,
-    accent: "catalog-category-item__image--dark"
-  },
-  {
-    slug: "tea-sets",
-    name: "Чайные наборы",
-    productCount: 36,
-    icon: Gift,
-    accent: "catalog-category-item__image--gift"
-  },
-  {
-    slug: "tea-ware",
-    name: "Посуда",
-    productCount: 52,
-    icon: Coffee,
-    accent: "catalog-category-item__image--ware"
-  }
+const fallbackIcons = [
+  Coffee,
+  Leaf,
+  Sparkles,
+  Flower2,
+  Gift
+];
+
+const accentClasses = [
+  "catalog-category-item__image--brown",
+  "catalog-category-item__image--olive",
+  "catalog-category-item__image--green",
+  "catalog-category-item__image--red",
+  "catalog-category-item__image--light"
 ];
 
 export default function CatalogPage() {
+  const categoriesQuery = useCategories();
+
+  const categories =
+    categoriesQuery.data?.data ?? [];
+
   return (
     <div className="catalog-page">
-      <header className="catalog-toolbar">
-        <div>
-          <p className="catalog-toolbar__eyebrow">
-            Выберите направление
-          </p>
-
-          <h1>
-            Каталог
-          </h1>
-        </div>
-
-        <Link
-          to="/cart"
-          className="catalog-toolbar__cart"
-          aria-label="Открыть корзину"
-        >
-          <ShoppingCart
-            size={24}
-            strokeWidth={1.7}
-            aria-hidden="true"
-          />
-
-          <span>
-            2
-          </span>
-        </Link>
+      <header className="catalog-page__heading">
+        <p>Выберите направление</p>
+        <h1>Каталог</h1>
       </header>
 
-      <Link
-        to="/search"
-        className="catalog-search"
-      >
-        <Search
-          size={19}
-          strokeWidth={1.7}
-          aria-hidden="true"
-        />
+      {categoriesQuery.isLoading && (
+        <div className="catalog-state">
+          Загрузка категорий…
+        </div>
+      )}
 
-        <span>
-          Поиск чая...
-        </span>
-      </Link>
+      {categoriesQuery.isError && (
+        <div className="catalog-state catalog-state--error">
+          {categoriesQuery.error.message}
+        </div>
+      )}
+
+      {!categoriesQuery.isLoading
+        && !categoriesQuery.isError
+        && categories.length === 0 && (
+          <div className="catalog-state">
+            В каталоге пока нет категорий.
+          </div>
+        )}
 
       <div className="catalog-category-list">
-        {catalogCategories.map(
-          ({
-            slug,
-            name,
-            productCount,
-            icon: Icon,
-            accent
-          }) => (
+        {categories.map((category, index) => {
+          const Icon =
+            fallbackIcons[index % fallbackIcons.length];
+          const accent =
+            accentClasses[index % accentClasses.length];
+
+          return (
             <Link
-              key={slug}
-              to={`/catalog/${slug}`}
+              key={category.id}
+              to={`/catalog/${category.slug}`}
               className="catalog-category-item"
             >
               <span
                 className={`catalog-category-item__image ${accent}`}
               >
-                <Icon
-                  size={22}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
+                {category.image_url ? (
+                  <img
+                    src={category.image_url}
+                    alt=""
+                  />
+                ) : (
+                  <Icon
+                    size={22}
+                    strokeWidth={1.5}
+                    aria-hidden="true"
+                  />
+                )}
               </span>
 
               <span className="catalog-category-item__content">
-                <strong>
-                  {name}
-                </strong>
-
+                <strong>{category.name}</strong>
                 <small>
-                  {productCount} товаров
+                  {category.product_count} товаров
                 </small>
               </span>
 
@@ -194,8 +107,8 @@ export default function CatalogPage() {
                 aria-hidden="true"
               />
             </Link>
-          )
-        )}
+          );
+        })}
       </div>
     </div>
   );

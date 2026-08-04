@@ -26,6 +26,16 @@ const cartInclude = {
                 },
 
                 take: 1
+              },
+
+              product_variants: {
+                where: {
+                  status: "active"
+                },
+
+                orderBy: {
+                  weight_g: "asc" as const
+                }
               }
             }
           }
@@ -39,6 +49,16 @@ type CartWithItems =
   Prisma.cartsGetPayload<{
     include: typeof cartInclude;
   }>;
+
+type CartOwner =
+  | {
+      customerId: string;
+      guestToken?: never;
+    }
+  | {
+      customerId?: never;
+      guestToken: string;
+    };
 
 export type CartOperationError =
   | "PRODUCT_VARIANT_NOT_FOUND"
@@ -58,9 +78,6 @@ export type CartOperationResult =
       availableQuantity?: number;
     };
 
-/**
- * Приводит корзину к формату ответа API.
- */
 function formatCart(
   cart: CartWithItems
 ) {
@@ -88,10 +105,30 @@ function formatCart(
             id: product.id,
             name: product.name,
             slug: product.slug,
+            shortDescription:
+              product.short_description,
 
             image:
               product.product_images[0]
-                ?? null
+                ?? null,
+
+            variants:
+              product.product_variants.map(
+                (productVariant) => ({
+                  id: productVariant.id,
+                  sku: productVariant.sku,
+                  weightG:
+                    productVariant.weight_g,
+                  price:
+                    productVariant.price,
+                  oldPrice:
+                    productVariant.old_price,
+                  stockQuantity:
+                    productVariant.stock_quantity,
+                  isAvailable:
+                    productVariant.is_available
+                })
+              )
           },
 
           variant: {
@@ -134,6 +171,7 @@ function formatCart(
 
   return {
     id: cart.id,
+    customerId: cart.customer_id,
     guestToken: cart.guest_token,
     status: cart.status,
     items,
@@ -145,53 +183,95 @@ function formatCart(
   };
 }
 
-/**
- * Получает существующую гостевую корзину
- * или создаёт новую пустую корзину.
- */
-async function getOrCreateGuestCart(
-  guestToken: string
-) {
-  return prisma.carts.upsert({
-    where: {
-      guest_token: guestToken
-    },
+function ownerCartWhere(
+  owner: CartOwner
+): Prisma.cartsWhereInput {
+  return "customerId" in owner
+    ? {
+        customer_id:
+          owner.customerId,
+        status: "active"
+      }
+    : {
+        guest_token:
+          owner.guestToken,
+        status: "active"
+      };
+}
 
+async function getOrCreateCart(
+  client:
+    | typeof prisma
+    | Prisma.TransactionClient,
+  owner: CartOwner,
+  includeItems = true
+) {
+  if ("customerId" in owner) {
+    const existingCart =
+      await client.carts.findFirst({
+        where: {
+          customer_id:
+            owner.customerId,
+          status: "active"
+        },
+        orderBy: {
+          updated_at: "desc"
+        },
+        ...(includeItems
+          ? { include: cartInclude }
+          : {})
+      });
+
+    if (existingCart) {
+      return existingCart;
+    }
+
+    return client.carts.create({
+      data: {
+        customer_id:
+          owner.customerId,
+        status: "active"
+      },
+      ...(includeItems
+        ? { include: cartInclude }
+        : {})
+    });
+  }
+
+  return client.carts.upsert({
+    where: {
+      guest_token:
+        owner.guestToken
+    },
     update: {
       status: "active"
     },
-
     create: {
-      guest_token: guestToken,
+      guest_token:
+        owner.guestToken,
       status: "active"
     },
-
-    include: cartInclude
+    ...(includeItems
+      ? { include: cartInclude }
+      : {})
   });
 }
 
-/**
- * Получает гостевую корзину.
- */
-export async function getGuestCart(
-  guestToken: string
+export async function getCart(
+  owner: CartOwner
 ) {
   const cart =
-    await getOrCreateGuestCart(
-      guestToken
-    );
+    await getOrCreateCart(
+      prisma,
+      owner,
+      true
+    ) as CartWithItems;
 
   return formatCart(cart);
 }
 
-/**
- * Добавляет вариант товара в корзину.
- *
- * Если такой вариант уже есть,
- * увеличивает его количество.
- */
-export async function addGuestCartItem(
-  guestToken: string,
+export async function addCartItem(
+  owner: CartOwner,
   input: AddCartItemInput
 ): Promise<CartOperationResult> {
   return prisma.$transaction(
@@ -203,10 +283,8 @@ export async function addGuestCartItem(
             where: {
               id:
                 input.productVariantId,
-
               status: "active",
               is_available: true,
-
               products: {
                 is_active: true
               }
@@ -222,20 +300,11 @@ export async function addGuestCartItem(
       }
 
       const cart =
-        await transaction.carts.upsert({
-          where: {
-            guest_token: guestToken
-          },
-
-          update: {
-            status: "active"
-          },
-
-          create: {
-            guest_token: guestToken,
-            status: "active"
-          }
-        });
+        await getOrCreateCart(
+          transaction,
+          owner,
+          false
+        );
 
       const existingItem =
         await transaction
@@ -244,7 +313,6 @@ export async function addGuestCartItem(
             where: {
               cart_id_product_variant_id: {
                 cart_id: cart.id,
-
                 product_variant_id:
                   variant.id
               }
@@ -275,7 +343,6 @@ export async function addGuestCartItem(
             where: {
               id: existingItem.id
             },
-
             data: {
               quantity: newQuantity,
               price_at_addition:
@@ -288,13 +355,10 @@ export async function addGuestCartItem(
           .create({
             data: {
               cart_id: cart.id,
-
               product_variant_id:
                 variant.id,
-
               quantity:
                 input.quantity,
-
               price_at_addition:
                 variant.price
             }
@@ -308,7 +372,6 @@ export async function addGuestCartItem(
             where: {
               id: cart.id
             },
-
             include: cartInclude
           });
 
@@ -321,11 +384,8 @@ export async function addGuestCartItem(
   );
 }
 
-/**
- * Изменяет количество позиции корзины.
- */
-export async function updateGuestCartItem(
-  guestToken: string,
+export async function updateCartItem(
+  owner: CartOwner,
   itemId: string,
   input: UpdateCartItemInput
 ): Promise<CartOperationResult> {
@@ -337,13 +397,9 @@ export async function updateGuestCartItem(
           .findFirst({
             where: {
               id: itemId,
-
-              carts: {
-                guest_token: guestToken,
-                status: "active"
-              }
+              carts:
+                ownerCartWhere(owner)
             },
-
             include: {
               product_variants: true
             }
@@ -357,12 +413,28 @@ export async function updateGuestCartItem(
         };
       }
 
-      const variant =
-        item.product_variants;
+      const targetVariantId =
+        input.productVariantId
+        ?? item.product_variant_id;
+
+      const targetVariant =
+        await transaction
+          .product_variants
+          .findFirst({
+            where: {
+              id: targetVariantId,
+              status: "active",
+              is_available: true,
+              products: {
+                is_active: true
+              }
+            }
+          });
 
       if (
-        variant.status !== "active"
-        || !variant.is_available
+        !targetVariant
+        || targetVariant.product_id
+          !== item.product_variants.product_id
       ) {
         return {
           success: false,
@@ -371,31 +443,82 @@ export async function updateGuestCartItem(
         };
       }
 
+      const requestedQuantity =
+        input.quantity
+        ?? item.quantity;
+
+      const existingTargetItem =
+        targetVariantId
+        === item.product_variant_id
+          ? null
+          : await transaction
+              .cart_items
+              .findUnique({
+                where: {
+                  cart_id_product_variant_id: {
+                    cart_id: item.cart_id,
+                    product_variant_id:
+                      targetVariantId
+                  }
+                }
+              });
+
+      const finalQuantity =
+        requestedQuantity
+        + (existingTargetItem?.quantity ?? 0);
+
       if (
-        input.quantity >
-        variant.stock_quantity
+        finalQuantity >
+        targetVariant.stock_quantity
       ) {
         return {
           success: false,
           error:
             "INSUFFICIENT_STOCK",
           availableQuantity:
-            variant.stock_quantity
+            targetVariant.stock_quantity
         };
       }
 
-      await transaction
-        .cart_items
-        .update({
-          where: {
-            id: item.id
-          },
+      if (existingTargetItem) {
+        await transaction
+          .cart_items
+          .update({
+            where: {
+              id: existingTargetItem.id
+            },
+            data: {
+              quantity:
+                finalQuantity,
+              price_at_addition:
+                targetVariant.price
+            }
+          });
 
-          data: {
-            quantity:
-              input.quantity
-          }
-        });
+        await transaction
+          .cart_items
+          .delete({
+            where: {
+              id: item.id
+            }
+          });
+      } else {
+        await transaction
+          .cart_items
+          .update({
+            where: {
+              id: item.id
+            },
+            data: {
+              product_variant_id:
+                targetVariant.id,
+              quantity:
+                requestedQuantity,
+              price_at_addition:
+                targetVariant.price
+            }
+          });
+      }
 
       const updatedCart =
         await transaction
@@ -404,7 +527,6 @@ export async function updateGuestCartItem(
             where: {
               id: item.cart_id
             },
-
             include: cartInclude
           });
 
@@ -417,11 +539,8 @@ export async function updateGuestCartItem(
   );
 }
 
-/**
- * Удаляет позицию из корзины.
- */
-export async function removeGuestCartItem(
-  guestToken: string,
+export async function removeCartItem(
+  owner: CartOwner,
   itemId: string
 ): Promise<CartOperationResult> {
   return prisma.$transaction(
@@ -432,11 +551,8 @@ export async function removeGuestCartItem(
           .findFirst({
             where: {
               id: itemId,
-
-              carts: {
-                guest_token: guestToken,
-                status: "active"
-              }
+              carts:
+                ownerCartWhere(owner)
             }
           });
 
@@ -463,7 +579,6 @@ export async function removeGuestCartItem(
             where: {
               id: item.cart_id
             },
-
             include: cartInclude
           });
 
@@ -472,6 +587,171 @@ export async function removeGuestCartItem(
         cart:
           formatCart(updatedCart)
       };
+    }
+  );
+}
+
+export async function clearCart(
+  owner: CartOwner
+) {
+  const cart =
+    await getOrCreateCart(
+      prisma,
+      owner,
+      false
+    );
+
+  await prisma.cart_items.deleteMany({
+    where: {
+      cart_id: cart.id
+    }
+  });
+
+  const updatedCart =
+    await prisma.carts
+      .findUniqueOrThrow({
+        where: {
+          id: cart.id
+        },
+        include: cartInclude
+      });
+
+  return formatCart(updatedCart);
+}
+
+/**
+ * Переносит гостевую корзину в активную корзину покупателя.
+ * Одинаковые варианты объединяются, количество ограничивается остатком.
+ * Метод идемпотентен: отсутствие гостевой корзины не считается ошибкой.
+ */
+export async function mergeGuestCart(
+  customerId: string,
+  guestToken: string
+) {
+  return prisma.$transaction(
+    async (transaction) => {
+      const customerCart =
+        await getOrCreateCart(
+          transaction,
+          { customerId },
+          false
+        );
+
+      const guestCart =
+        await transaction
+          .carts
+          .findUnique({
+            where: {
+              guest_token:
+                guestToken
+            },
+            include: {
+              cart_items: {
+                include: {
+                  product_variants: {
+                    include: {
+                      products: true
+                    }
+                  }
+                }
+              }
+            }
+          });
+
+      if (
+        guestCart
+        && guestCart.id
+          !== customerCart.id
+      ) {
+        for (
+          const item
+          of guestCart.cart_items
+        ) {
+          const variant =
+            item.product_variants;
+
+          if (
+            variant.status !== "active"
+            || !variant.is_available
+            || !variant.products.is_active
+            || variant.stock_quantity <= 0
+          ) {
+            continue;
+          }
+
+          const existingItem =
+            await transaction
+              .cart_items
+              .findUnique({
+                where: {
+                  cart_id_product_variant_id: {
+                    cart_id:
+                      customerCart.id,
+                    product_variant_id:
+                      variant.id
+                  }
+                }
+              });
+
+          const mergedQuantity =
+            Math.min(
+              (existingItem?.quantity ?? 0)
+              + item.quantity,
+              variant.stock_quantity
+            );
+
+          if (existingItem) {
+            await transaction
+              .cart_items
+              .update({
+                where: {
+                  id: existingItem.id
+                },
+                data: {
+                  quantity:
+                    mergedQuantity,
+                  price_at_addition:
+                    variant.price
+                }
+              });
+          } else {
+            await transaction
+              .cart_items
+              .create({
+                data: {
+                  cart_id:
+                    customerCart.id,
+                  product_variant_id:
+                    variant.id,
+                  quantity:
+                    mergedQuantity,
+                  price_at_addition:
+                    variant.price
+                }
+              });
+          }
+        }
+
+        await transaction
+          .carts
+          .delete({
+            where: {
+              id: guestCart.id
+            }
+          });
+      }
+
+      const updatedCart =
+        await transaction
+          .carts
+          .findUniqueOrThrow({
+            where: {
+              id: customerCart.id
+            },
+            include: cartInclude
+          });
+
+      return formatCart(updatedCart);
     }
   );
 }

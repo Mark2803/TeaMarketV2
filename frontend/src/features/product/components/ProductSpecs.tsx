@@ -1,4 +1,15 @@
-import { Box, Globe2, Leaf, MapPin, RotateCcw, UserRound } from "lucide-react";
+import {
+  Box,
+  Globe2,
+  Leaf,
+  MapPin,
+  RotateCcw,
+  UserRound
+} from "lucide-react";
+
+import type {
+  LucideIcon
+} from "lucide-react";
 
 type ProductSpecsProps = {
   product: {
@@ -11,25 +22,57 @@ type ProductSpecsProps = {
   };
 };
 
-const rows = [
-  [Leaf, "Вид чая", "teaType"],
-  [Globe2, "Страна", "country"],
-  [MapPin, "Регион", "region"],
-  [UserRound, "Производитель", "producer"],
-  [RotateCcw, "Степень ферментации", "fermentation"],
-  [Box, "Форма продукта", "form"]
-] as const;
+type SpecRow = readonly [
+  LucideIcon,
+  string,
+  string
+];
 
-export default function ProductSpecs({ product }: ProductSpecsProps) {
+export default function ProductSpecs({
+  product
+}: ProductSpecsProps) {
+  const allRows: SpecRow[] = [
+    [Leaf, "Вид чая", product.teaType],
+    [Globe2, "Страна", product.country],
+    [MapPin, "Регион", product.region],
+    [UserRound, "Производитель", product.producer],
+    [RotateCcw, "Степень ферментации", product.fermentation],
+    [Box, "Форма продукта", product.form]
+  ];
+
+  const rows = allRows.filter(
+    ([, , value]) =>
+      value.trim().length > 0
+  );
+
+  if (rows.length === 0) {
+    return null;
+  }
+
   return (
     <section className="product-detail-section">
-      <h2>Характеристики</h2>
+      <h2>
+        Характеристики
+      </h2>
+
       <div className="product-specs">
-        {rows.map(([Icon, label, key]) => (
-          <div key={key} className="product-spec-row">
-            <Icon size={18} strokeWidth={1.6} />
-            <span>{label}</span>
-            <strong>{product[key]}</strong>
+        {rows.map(([Icon, label, value]) => (
+          <div
+            key={label}
+            className="product-spec-row"
+          >
+            <Icon
+              size={18}
+              strokeWidth={1.6}
+            />
+
+            <span>
+              {label}
+            </span>
+
+            <strong>
+              {value}
+            </strong>
           </div>
         ))}
       </div>

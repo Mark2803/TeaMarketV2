@@ -3,18 +3,21 @@ import {
 } from "./client";
 
 import type {
+  ProductDetailsResponse,
   ProductsResponse
 } from "../types/product";
 
 export type GetProductsParams = {
   page?: number;
   limit?: number;
-  search?: string;
-  category?: string;
-  collection?: string;
-  sort?: string;
+  teaType?: string;
+  country?: string;
+  region?: string;
+  manufacturer?: string;
+  sort?: "newest" | "name-asc" | "name-desc";
   minPrice?: number;
   maxPrice?: number;
+  inStock?: boolean;
 };
 
 export function getProducts(
@@ -25,5 +28,13 @@ export function getProducts(
     {
       query: params
     }
+  );
+}
+
+export function getProductBySlug(
+  slug: string
+): Promise<ProductDetailsResponse> {
+  return apiRequest<ProductDetailsResponse>(
+    `/products/${encodeURIComponent(slug)}`
   );
 }
