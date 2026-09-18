@@ -1,34 +1,22 @@
 import { Router } from "express";
-
-import {
-  authMiddleware
-} from "../auth/auth.middleware.js";
-
+import { authMiddleware } from "../auth/auth.middleware.js";
 import {
   addFavoriteController,
   getFavoritesController,
-  removeFavoriteController
+  mergeFavoritesController,
+  removeFavoriteController,
+  resolveFavoritesController
 } from "./favorites.controller.js";
 
 const router = Router();
 
-router.use(
-  authMiddleware
-);
+// Гостевой endpoint: читает только публичные данные товаров, ничего не пишет в БД.
+router.post("/resolve", resolveFavoritesController);
 
-router.get(
-  "/",
-  getFavoritesController
-);
-
-router.post(
-  "/:productId",
-  addFavoriteController
-);
-
-router.delete(
-  "/:productId",
-  removeFavoriteController
-);
+router.use(authMiddleware);
+router.get("/", getFavoritesController);
+router.post("/merge", mergeFavoritesController);
+router.post("/:productId", addFavoriteController);
+router.delete("/:productId", removeFavoriteController);
 
 export default router;

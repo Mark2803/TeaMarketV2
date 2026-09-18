@@ -119,6 +119,82 @@ if (additionalWhere) {
   ];
 }
 
+  const include = {
+    product_images: { orderBy: { sort_order: "asc" as const } },
+    product_variants: {
+      where: { status: "active" },
+      orderBy: { sort_order: "asc" as const }
+    },
+    product_categories: {
+      include: { categories: true },
+      orderBy: { sort_order: "asc" as const }
+    }
+  };
+
+  // Новинки задаются модератором флагом products.is_new в БД.
+  // Prisma Client в текущем архиве сгенерирован до этой миграции, поэтому
+  // IDs новинок читаем безопасным SQL; после prisma generate это также останется валидно.
+  if (query.isNew === true) {
+    const candidates = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id::text AS id
+      FROM products p
+      WHERE p.is_new = true
+        AND p.is_active = true
+        AND EXISTS (
+          SELECT 1 FROM product_variants pv
+          WHERE pv.product_id = p.id AND pv.status = 'active'
+        )
+    `;
+
+    let orderedIds = candidates.map(({ id }) => id);
+
+    if (query.rotation === "daily") {
+      const daySeed = new Date().toISOString().slice(0, 10);
+      const hash = (value: string) => {
+        let h = 2166136261;
+        for (let i = 0; i < value.length; i += 1) {
+          h ^= value.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      };
+      orderedIds = orderedIds.sort(
+        (a, b) => hash(`${daySeed}:${a}`) - hash(`${daySeed}:${b}`)
+      );
+    } else {
+      const dated = await prisma.products.findMany({
+        where: { id: { in: orderedIds } },
+        select: { id: true, created_at: true },
+        orderBy: getOrderBy(query.sort)
+      });
+      orderedIds = dated.map(({ id }) => id);
+    }
+
+    const total = orderedIds.length;
+    const pageIds = orderedIds.slice(skip, skip + query.limit);
+    const rows = pageIds.length === 0
+      ? []
+      : await prisma.products.findMany({
+          where: { id: { in: pageIds } },
+          include
+        });
+    const byId = new Map(rows.map((item) => [item.id, item]));
+    const items = pageIds.flatMap((id) => {
+      const item = byId.get(id);
+      return item ? [item] : [];
+    });
+
+    return {
+      items,
+      pagination: {
+        page: query.page,
+        limit: query.limit,
+        total,
+        totalPages: Math.ceil(total / query.limit)
+      }
+    };
+  }
+
   const [items, total] =
     await prisma.$transaction([
       prisma.products.findMany({

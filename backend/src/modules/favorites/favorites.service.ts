@@ -166,3 +166,37 @@ export async function removeCustomerFavorite(
     }
   });
 }
+/** Возвращает актуальные карточки товаров для гостевого избранного. */
+export async function resolveFavoriteProducts(productIds: string[]) {
+  if (productIds.length === 0) return [];
+
+  const products = await prisma.products.findMany({
+    where: {
+      id: { in: productIds },
+      is_active: true,
+      product_variants: { some: { status: "active" } }
+    },
+    include: {
+      product_images: { orderBy: { sort_order: "asc" }, take: 1 },
+      product_variants: { where: { status: "active" }, orderBy: { sort_order: "asc" } }
+    }
+  });
+
+  const byId = new Map(products.map((product) => [product.id, product]));
+  return productIds.flatMap((id) => {
+    const product = byId.get(id);
+    return product ? [{ addedAt: new Date(0), product }] : [];
+  });
+}
+
+/** Переносит гостевое избранное в профиль без создания дублей. */
+export async function mergeCustomerFavorites(customerId: string, productIds: string[]) {
+  const resolved = await resolveFavoriteProducts(productIds);
+  if (resolved.length > 0) {
+    await prisma.favorites.createMany({
+      data: resolved.map(({ product }) => ({ customer_id: customerId, product_id: product.id })),
+      skipDuplicates: true
+    });
+  }
+  return getCustomerFavorites(customerId);
+}

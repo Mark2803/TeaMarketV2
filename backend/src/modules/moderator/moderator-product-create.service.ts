@@ -235,6 +235,12 @@ export async function createModeratorProduct(
       }
     });
 
+  if (input.isNew) {
+    await prisma.$executeRaw`
+      UPDATE products SET is_new = true WHERE id = ${product.id}::uuid
+    `;
+  }
+
   return {
     success: true,
 

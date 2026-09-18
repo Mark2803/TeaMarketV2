@@ -56,6 +56,15 @@ export const productsQuerySchema = z.object({
     .nonnegative()
     .optional(),
 
+  isNew: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
+
+  rotation: z
+    .enum(["daily"])
+    .optional(),
+
   inStock: z
     .enum(["true", "false"])
     .transform((value) => value === "true")

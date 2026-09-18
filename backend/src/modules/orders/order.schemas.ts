@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+function validPhone(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  return /^[+\d\s()\-]+$/.test(value) && digits.length >= 10 && digits.length <= 15;
+}
+
 /**
  * Проверяет токен гостевой корзины.
  */
@@ -30,13 +35,14 @@ export const createOrderSchema =
       z.string()
         .trim()
         .min(
-          5,
+          10,
           "Укажите номер телефона"
         )
         .max(
           32,
           "Номер телефона слишком длинный"
-        ),
+        )
+        .refine(validPhone, "Телефон должен содержать 10–15 цифр"),
 
     email:
       z.string()
@@ -86,13 +92,14 @@ export const createOrderSchema =
           z.string()
             .trim()
             .min(
-              5,
+              10,
               "Укажите телефон получателя"
             )
             .max(
               32,
               "Телефон получателя слишком длинный"
-            ),
+            )
+            .refine(validPhone, "Телефон должен содержать 10–15 цифр"),
 
         fullAddress:
           z.string()

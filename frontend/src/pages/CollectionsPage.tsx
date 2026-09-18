@@ -11,6 +11,8 @@ import {
   Link
 } from "react-router-dom";
 
+import BackLink from "../shared/components/BackLink";
+
 import {
   useCollections
 } from "../shared/hooks/useCatalog";
@@ -33,6 +35,7 @@ export default function CollectionsPage() {
 
   return (
     <div className="collections-page">
+      <BackLink to="/" label="Главная" />
       <header className="collections-page__heading">
         <p>Тематические витрины</p>
         <h1>Подборки</h1>

@@ -78,6 +78,10 @@ export const createModeratorProductSchema =
       z.boolean()
         .default(true),
 
+    isNew:
+      z.boolean()
+        .default(false),
+
     teaType:
       nullableText(100),
 

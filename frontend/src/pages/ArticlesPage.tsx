@@ -8,6 +8,8 @@ import {
   Link
 } from "react-router-dom";
 
+import BackLink from "../shared/components/BackLink";
+
 import {
   useArticles
 } from "../shared/hooks/useArticles";
@@ -18,6 +20,7 @@ export default function ArticlesPage() {
 
   return (
     <div className="articles-page">
+      <BackLink to="/" label="Главная" />
       <header className="articles-page__heading">
         <span>
           База знаний

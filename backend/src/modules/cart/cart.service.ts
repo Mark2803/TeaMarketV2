@@ -110,7 +110,11 @@ function formatCart(
 
             image:
               product.product_images[0]
-                ?? null,
+                ? {
+                    url: product.product_images[0].image_url,
+                    alt_text: product.product_images[0].alt_text
+                  }
+                : null,
 
             variants:
               product.product_variants.map(
@@ -660,6 +664,8 @@ export async function mergeGuestCart(
 
       if (
         guestCart
+        && guestCart.status === "active"
+        && guestCart.customer_id === null
         && guestCart.id
           !== customerCart.id
       ) {

@@ -15,12 +15,14 @@ import AuthPage from "../../pages/AuthPage";
 import CartPage from "../../pages/CartPage";
 import CatalogPage from "../../pages/CatalogPage";
 import CategoryPage from "../../pages/CategoryPage";
+import DeliveryAddressesPage from "../../pages/DeliveryAddressesPage";
 import CheckoutPage from "../../pages/CheckoutPage";
 import CollectionPage from "../../pages/CollectionPage";
 import CollectionsPage from "../../pages/CollectionsPage";
 import FavoritesPage from "../../pages/FavoritesPage";
 import HomePage from "../../pages/HomePage";
 import NotFoundPage from "../../pages/NotFoundPage";
+import NewProductsPage from "../../pages/NewProductsPage";
 import OrderDetailsPage from "../../pages/OrderDetailsPage";
 import OrdersPage from "../../pages/OrdersPage";
 import ProductPage from "../../pages/ProductPage";
@@ -46,6 +48,11 @@ export default function AppRouter() {
           <Route
             path="catalog/:categorySlug"
             element={<CategoryPage />}
+          />
+
+          <Route
+            path="new"
+            element={<NewProductsPage />}
           />
 
           <Route
@@ -97,6 +104,8 @@ export default function AppRouter() {
             path="profile/details"
             element={<ProfileDetailsPage />}
           />
+
+          <Route path="profile/delivery-addresses" element={<DeliveryAddressesPage />} />
 
           <Route
             path="profile/orders"

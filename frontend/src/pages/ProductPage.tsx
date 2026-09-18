@@ -9,6 +9,7 @@ import {
   useParams
 } from "react-router-dom";
 
+import BackLink from "../shared/components/BackLink";
 import BrewingGuide from "../features/product/components/BrewingGuide";
 import ProductDescription from "../features/product/components/ProductDescription";
 import ProductGallery from "../features/product/components/ProductGallery";
@@ -180,6 +181,7 @@ function ProductPageContent({
       className="product-page"
       data-product-slug={product.slug}
     >
+      <BackLink to="/catalog" label="Каталог" />
       <div className="product-page__columns">
         <div className="product-page__primary">
           <ProductGallery

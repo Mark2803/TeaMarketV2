@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type {
+import {
   Prisma
 } from "../../generated/prisma/client.js";
 
@@ -112,6 +112,15 @@ export async function createOrder(
 ): Promise<CreateOrderResult> {
   return prisma.$transaction(
     async (transaction) => {
+      // Сериализуем оформление одной корзины до чтения позиций.
+      // Повторный запрос увидит уже закрытую корзину.
+      await transaction.$queryRaw(Prisma.sql`
+        SELECT id FROM carts
+        WHERE status = 'active' AND ${"customerId" in owner
+          ? Prisma.sql`customer_id = ${owner.customerId}::uuid`
+          : Prisma.sql`guest_token = ${owner.guestToken}::uuid AND customer_id IS NULL`}
+        FOR UPDATE
+      `);
       const cart =
         await transaction.carts.findFirst({
           where:
@@ -435,6 +444,10 @@ export async function createOrder(
           );
         }
       }
+
+      // Позиции уже сохранены снимком в order_items. Не возвращаем
+      // купленные товары при следующем открытии гостевой корзины.
+      await transaction.cart_items.deleteMany({ where: { cart_id: cart.id } });
 
       await transaction.carts.update({
         where: {

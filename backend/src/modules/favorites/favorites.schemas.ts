@@ -16,3 +16,6 @@ export type FavoriteProductParams =
   z.infer<
     typeof favoriteProductParamsSchema
   >;
+export const favoriteProductIdsBodySchema = z.object({
+  productIds: z.array(z.string().uuid("Некорректный ID товара")).max(200)
+});

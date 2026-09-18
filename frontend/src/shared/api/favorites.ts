@@ -72,3 +72,28 @@ export function removeFavorite(
     }
   );
 }
+
+export function resolveGuestFavorites(
+  productIds: string[]
+): Promise<FavoritesResponse> {
+  return apiRequest<FavoritesResponse>(
+    "/favorites/resolve",
+    {
+      method: "POST",
+      body: JSON.stringify({ productIds })
+    }
+  );
+}
+
+export function mergeGuestFavorites(
+  productIds: string[]
+): Promise<FavoritesResponse> {
+  return apiRequest<FavoritesResponse>(
+    "/favorites/merge",
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ productIds })
+    }
+  );
+}

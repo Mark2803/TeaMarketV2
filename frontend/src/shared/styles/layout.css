@@ -1557,3 +1557,42 @@
   object-fit: cover;
   border-radius: inherit;
 }
+
+.category-intro__more svg {
+  transition: transform 160ms ease;
+}
+
+.category-intro__more--open svg {
+  transform: rotate(180deg);
+}
+
+/* Единая логическая навигация для вложенных страниц */
+.page-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin: 0 0 14px;
+  color: var(--color-text, #243126);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.page-back-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.page-back-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .page-back-link {
+    margin-bottom: 12px;
+  }
+}

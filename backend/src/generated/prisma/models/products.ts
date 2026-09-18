@@ -46,6 +46,7 @@ export type ProductsMinAggregateOutputType = {
   name: string | null
   short_description: string | null
   is_active: boolean | null
+  is_new: boolean | null
   tea_type: string | null
   country: string | null
   region: string | null
@@ -77,6 +78,7 @@ export type ProductsMaxAggregateOutputType = {
   name: string | null
   short_description: string | null
   is_active: boolean | null
+  is_new: boolean | null
   tea_type: string | null
   country: string | null
   region: string | null
@@ -108,6 +110,7 @@ export type ProductsCountAggregateOutputType = {
   name: number
   short_description: number
   is_active: number
+  is_new: number
   tea_type: number
   country: number
   region: number
@@ -155,6 +158,7 @@ export type ProductsMinAggregateInputType = {
   name?: true
   short_description?: true
   is_active?: true
+  is_new?: true
   tea_type?: true
   country?: true
   region?: true
@@ -186,6 +190,7 @@ export type ProductsMaxAggregateInputType = {
   name?: true
   short_description?: true
   is_active?: true
+  is_new?: true
   tea_type?: true
   country?: true
   region?: true
@@ -217,6 +222,7 @@ export type ProductsCountAggregateInputType = {
   name?: true
   short_description?: true
   is_active?: true
+  is_new?: true
   tea_type?: true
   country?: true
   region?: true
@@ -335,6 +341,7 @@ export type ProductsGroupByOutputType = {
   name: string
   short_description: string | null
   is_active: boolean
+  is_new: boolean
   tea_type: string | null
   country: string | null
   region: string | null
@@ -389,6 +396,7 @@ export type productsWhereInput = {
   name?: Prisma.StringFilter<"products"> | string
   short_description?: Prisma.StringNullableFilter<"products"> | string | null
   is_active?: Prisma.BoolFilter<"products"> | boolean
+  is_new?: Prisma.BoolFilter<"products"> | boolean
   tea_type?: Prisma.StringNullableFilter<"products"> | string | null
   country?: Prisma.StringNullableFilter<"products"> | string | null
   region?: Prisma.StringNullableFilter<"products"> | string | null
@@ -428,6 +436,7 @@ export type productsOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   short_description?: Prisma.SortOrderInput | Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  is_new?: Prisma.SortOrder
   tea_type?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -471,6 +480,7 @@ export type productsWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"products"> | string
   short_description?: Prisma.StringNullableFilter<"products"> | string | null
   is_active?: Prisma.BoolFilter<"products"> | boolean
+  is_new?: Prisma.BoolFilter<"products"> | boolean
   tea_type?: Prisma.StringNullableFilter<"products"> | string | null
   country?: Prisma.StringNullableFilter<"products"> | string | null
   region?: Prisma.StringNullableFilter<"products"> | string | null
@@ -509,6 +519,7 @@ export type productsOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   short_description?: Prisma.SortOrderInput | Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  is_new?: Prisma.SortOrder
   tea_type?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -548,6 +559,7 @@ export type productsScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"products"> | string
   short_description?: Prisma.StringNullableWithAggregatesFilter<"products"> | string | null
   is_active?: Prisma.BoolWithAggregatesFilter<"products"> | boolean
+  is_new?: Prisma.BoolWithAggregatesFilter<"products"> | boolean
   tea_type?: Prisma.StringNullableWithAggregatesFilter<"products"> | string | null
   country?: Prisma.StringNullableWithAggregatesFilter<"products"> | string | null
   region?: Prisma.StringNullableWithAggregatesFilter<"products"> | string | null
@@ -579,6 +591,7 @@ export type productsCreateInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -618,6 +631,7 @@ export type productsUncheckedCreateInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -657,6 +671,7 @@ export type productsUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -696,6 +711,7 @@ export type productsUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -735,6 +751,7 @@ export type productsCreateManyInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -766,6 +783,7 @@ export type productsUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -797,6 +815,7 @@ export type productsUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -838,6 +857,7 @@ export type productsCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   short_description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  is_new?: Prisma.SortOrder
   tea_type?: Prisma.SortOrder
   country?: Prisma.SortOrder
   region?: Prisma.SortOrder
@@ -876,6 +896,7 @@ export type productsMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   short_description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  is_new?: Prisma.SortOrder
   tea_type?: Prisma.SortOrder
   country?: Prisma.SortOrder
   region?: Prisma.SortOrder
@@ -907,6 +928,7 @@ export type productsMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   short_description?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
+  is_new?: Prisma.SortOrder
   tea_type?: Prisma.SortOrder
   country?: Prisma.SortOrder
   region?: Prisma.SortOrder
@@ -1067,6 +1089,7 @@ export type productsCreateWithoutCollection_productsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1105,6 +1128,7 @@ export type productsUncheckedCreateWithoutCollection_productsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1159,6 +1183,7 @@ export type productsUpdateWithoutCollection_productsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1197,6 +1222,7 @@ export type productsUncheckedUpdateWithoutCollection_productsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1235,6 +1261,7 @@ export type productsCreateWithoutFavoritesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1273,6 +1300,7 @@ export type productsUncheckedCreateWithoutFavoritesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1327,6 +1355,7 @@ export type productsUpdateWithoutFavoritesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1365,6 +1394,7 @@ export type productsUncheckedUpdateWithoutFavoritesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1403,6 +1433,7 @@ export type productsCreateWithoutOrder_itemsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1441,6 +1472,7 @@ export type productsUncheckedCreateWithoutOrder_itemsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1495,6 +1527,7 @@ export type productsUpdateWithoutOrder_itemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1533,6 +1566,7 @@ export type productsUncheckedUpdateWithoutOrder_itemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1571,6 +1605,7 @@ export type productsCreateWithoutProduct_categoriesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1609,6 +1644,7 @@ export type productsUncheckedCreateWithoutProduct_categoriesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1663,6 +1699,7 @@ export type productsUpdateWithoutProduct_categoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1701,6 +1738,7 @@ export type productsUncheckedUpdateWithoutProduct_categoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1739,6 +1777,7 @@ export type productsCreateWithoutProduct_imagesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1777,6 +1816,7 @@ export type productsUncheckedCreateWithoutProduct_imagesInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1831,6 +1871,7 @@ export type productsUpdateWithoutProduct_imagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1869,6 +1910,7 @@ export type productsUncheckedUpdateWithoutProduct_imagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1907,6 +1949,7 @@ export type productsCreateWithoutProduct_variantsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1945,6 +1988,7 @@ export type productsUncheckedCreateWithoutProduct_variantsInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -1999,6 +2043,7 @@ export type productsUpdateWithoutProduct_variantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2037,6 +2082,7 @@ export type productsUncheckedUpdateWithoutProduct_variantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2075,6 +2121,7 @@ export type productsCreateWithoutRelated_fromInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -2113,6 +2160,7 @@ export type productsUncheckedCreateWithoutRelated_fromInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -2156,6 +2204,7 @@ export type productsCreateWithoutRelated_toInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -2194,6 +2243,7 @@ export type productsUncheckedCreateWithoutRelated_toInput = {
   name: string
   short_description?: string | null
   is_active?: boolean
+  is_new?: boolean
   tea_type?: string | null
   country?: string | null
   region?: string | null
@@ -2248,6 +2298,7 @@ export type productsUpdateWithoutRelated_fromInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2286,6 +2337,7 @@ export type productsUncheckedUpdateWithoutRelated_fromInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2335,6 +2387,7 @@ export type productsUpdateWithoutRelated_toInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2373,6 +2426,7 @@ export type productsUncheckedUpdateWithoutRelated_toInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   short_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_new?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tea_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2505,6 +2559,7 @@ export type productsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   short_description?: boolean
   is_active?: boolean
+  is_new?: boolean
   tea_type?: boolean
   country?: boolean
   region?: boolean
@@ -2545,6 +2600,7 @@ export type productsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   short_description?: boolean
   is_active?: boolean
+  is_new?: boolean
   tea_type?: boolean
   country?: boolean
   region?: boolean
@@ -2576,6 +2632,7 @@ export type productsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   short_description?: boolean
   is_active?: boolean
+  is_new?: boolean
   tea_type?: boolean
   country?: boolean
   region?: boolean
@@ -2607,6 +2664,7 @@ export type productsSelectScalar = {
   name?: boolean
   short_description?: boolean
   is_active?: boolean
+  is_new?: boolean
   tea_type?: boolean
   country?: boolean
   region?: boolean
@@ -2633,7 +2691,7 @@ export type productsSelectScalar = {
   updated_at?: boolean
 }
 
-export type productsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "short_description" | "is_active" | "tea_type" | "country" | "region" | "manufacturer" | "fermentation_level" | "product_form" | "about_tea" | "taste" | "aroma" | "effect" | "beneficial_properties" | "water_temperature_c" | "tea_amount_g" | "brewing_time_seconds" | "infusion_count" | "brewing_tips" | "slug" | "seo_title" | "seo_description" | "canonical_url" | "is_indexed" | "content_updated_at" | "created_at" | "updated_at", ExtArgs["result"]["products"]>
+export type productsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "short_description" | "is_active" | "is_new" | "tea_type" | "country" | "region" | "manufacturer" | "fermentation_level" | "product_form" | "about_tea" | "taste" | "aroma" | "effect" | "beneficial_properties" | "water_temperature_c" | "tea_amount_g" | "brewing_time_seconds" | "infusion_count" | "brewing_tips" | "slug" | "seo_title" | "seo_description" | "canonical_url" | "is_indexed" | "content_updated_at" | "created_at" | "updated_at", ExtArgs["result"]["products"]>
 export type productsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection_products?: boolean | Prisma.products$collection_productsArgs<ExtArgs>
   favorites?: boolean | Prisma.products$favoritesArgs<ExtArgs>
@@ -2665,6 +2723,7 @@ export type $productsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     short_description: string | null
     is_active: boolean
+    is_new: boolean
     tea_type: string | null
     country: string | null
     region: string | null
@@ -3124,6 +3183,7 @@ export interface productsFieldRefs {
   readonly name: Prisma.FieldRef<"products", 'String'>
   readonly short_description: Prisma.FieldRef<"products", 'String'>
   readonly is_active: Prisma.FieldRef<"products", 'Boolean'>
+  readonly is_new: Prisma.FieldRef<"products", 'Boolean'>
   readonly tea_type: Prisma.FieldRef<"products", 'String'>
   readonly country: Prisma.FieldRef<"products", 'String'>
   readonly region: Prisma.FieldRef<"products", 'String'>

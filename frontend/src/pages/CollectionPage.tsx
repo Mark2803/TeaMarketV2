@@ -8,6 +8,7 @@ import {
   useParams
 } from "react-router-dom";
 
+import BackLink from "../shared/components/BackLink";
 import CatalogPanel from "../features/category/components/CatalogPanel";
 import CategoryIntro from "../features/category/components/CategoryIntro";
 import CategoryProductsSection from "../features/category/components/CategoryProductsSection";
@@ -80,9 +81,11 @@ export default function CollectionPage() {
 
   return (
     <div className="category-page">
+      <BackLink to="/collections" label="Подборки" />
       <CategoryIntro
         categoryName={collection.name}
         description={collection.description ?? ""}
+        imageUrl={collection.image_url}
         isDescriptionOpen={isDescriptionOpen}
         onToggleDescription={() =>
           setIsDescriptionOpen((value) => !value)

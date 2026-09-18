@@ -13,8 +13,21 @@ import {
 export interface DeliveryMethodApi {
   id: string;
   name: string;
-  base_cost: string;
-  delivery_term: string | null;
+  baseCost: string;
+  deliveryTerm: string | null;
+}
+
+
+export interface DeliveryQuoteApi {
+  deliveryMethodId: string;
+  deliveryMethodName: string;
+  cost: string;
+  deliveryTerm: string | null;
+  source: string;
+}
+
+interface DeliveryQuoteResponse {
+  data: DeliveryQuoteApi;
 }
 
 export interface PaymentMethodApi {
@@ -30,7 +43,9 @@ export interface CreatedOrderApi {
   items_total: string;
   delivery_cost: string;
   total_amount: string;
-  created_at: string;
+  ordered_at: string;
+  order_items: Array<{ id: string; product_name: string; weight_g: number; quantity: number; line_total: string }> | { id: string; product_name: string; weight_g: number; quantity: number; line_total: string } | null;
+  order_deliveries: Array<{ id: string; full_address: string; delivery_methods?: { name: string } | null }> | { id: string; full_address: string; delivery_methods?: { name: string } | null } | null;
 }
 
 interface DeliveryMethodsResponse {
@@ -64,6 +79,19 @@ export function getDeliveryMethods():
 Promise<DeliveryMethodsResponse> {
   return apiRequest<DeliveryMethodsResponse>(
     "/delivery-methods"
+  );
+}
+
+export function getDeliveryQuote(
+  deliveryMethodId: string,
+  fullAddress: string
+): Promise<DeliveryQuoteResponse> {
+  return apiRequest<DeliveryQuoteResponse>(
+    "/delivery-methods/quote",
+    {
+      method: "POST",
+      body: JSON.stringify({ deliveryMethodId, fullAddress })
+    }
   );
 }
 

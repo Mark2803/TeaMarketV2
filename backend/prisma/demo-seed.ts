@@ -26,6 +26,7 @@ type CategoryInput = {
   description: string;
   sortOrder: number;
   parentSlug?: string;
+  imageTone?: string;
 };
 
 type VariantInput = {
@@ -644,16 +645,19 @@ const DEMO_ORDER_ONE_SKUS = [products[0].variants[1].sku, products[35].variants[
 const DEMO_ORDER_TWO_SKU = products[20].variants[1].sku;
 const DEMO_FAVORITE_SLUGS = [products[0].slug, products[35].slug, products[70].slug] as const;
 
-function placeholderImage(
-  slug: string,
+function demoSvgImage(
+  label: string,
   tone: string,
-  order: number
+  order?: number
 ): string {
-  const label = encodeURIComponent(
-    `${slug.replace(/^demo-/, "")} ${order}`
-  );
-
-  return `https://placehold.co/1200x1200/${tone}/F6F0DF?text=${label}`;
+  const safeLabel = label
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  const suffix = order ? ` · ${order}` : "";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200"><rect width="1200" height="1200" rx="64" fill="#${tone}"/><circle cx="600" cy="470" r="170" fill="#F6F0DF" fill-opacity="0.16"/><path d="M510 520c95-175 235-180 310-165-17 112-90 225-250 230 58-42 111-91 156-150-67 48-132 77-216 85Z" fill="#F6F0DF" fill-opacity="0.9"/><text x="600" y="760" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="700" fill="#F6F0DF">${safeLabel}${suffix}</text><text x="600" y="835" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#F6F0DF" fill-opacity="0.8">Tea Market · demo</text></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg, "utf8").toString("base64")}`;
 }
 
 
@@ -734,6 +738,7 @@ async function upsertCategories(): Promise<Map<string, string>> {
       update: {
         name: category.name,
         description: category.description,
+        image_url: demoSvgImage(category.name, category.imageTone ?? "355844"),
         sort_order: category.sortOrder,
         is_visible: true,
         seo_title: `${category.name} — Tea Market Demo`,
@@ -746,6 +751,7 @@ async function upsertCategories(): Promise<Map<string, string>> {
         name: category.name,
         slug: category.slug,
         description: category.description,
+        image_url: demoSvgImage(category.name, category.imageTone ?? "355844"),
         sort_order: category.sortOrder,
         is_visible: true,
         seo_title: `${category.name} — Tea Market Demo`,
@@ -771,6 +777,7 @@ async function upsertCategories(): Promise<Map<string, string>> {
         parent_category_id: parentId,
         name: category.name,
         description: category.description,
+        image_url: demoSvgImage(category.name, category.imageTone ?? "355844"),
         sort_order: category.sortOrder,
         is_visible: true,
         seo_title: `${category.name} — Tea Market Demo`,
@@ -784,6 +791,7 @@ async function upsertCategories(): Promise<Map<string, string>> {
         name: category.name,
         slug: category.slug,
         description: category.description,
+        image_url: demoSvgImage(category.name, category.imageTone ?? "355844"),
         sort_order: category.sortOrder,
         is_visible: true,
         seo_title: `${category.name} — Tea Market Demo`,
@@ -870,6 +878,12 @@ async function upsertProducts(
       }
     });
 
+    await prisma.$executeRaw`
+      UPDATE products
+      SET is_new = ${product.createdDaysAgo <= 30}
+      WHERE id = ${record.id}::uuid
+    `;
+
     productIds.set(product.slug, record.id);
 
     await prisma.product_categories.deleteMany({
@@ -953,7 +967,7 @@ async function upsertProducts(
     await prisma.product_images.createMany({
       data: [1, 2, 3].map((order) => ({
         product_id: record.id,
-        image_url: placeholderImage(product.slug, product.imageTone, order),
+        image_url: demoSvgImage(product.name, product.imageTone, order),
         alt_text: `${product.name}, демонстрационное изображение ${order}`,
         sort_order: order - 1
       }))
@@ -972,6 +986,7 @@ async function upsertCollections(
       update: {
         name: collection.name,
         description: collection.description,
+        image_url: demoSvgImage(collection.name, "6B7657"),
         collection_type: "manual",
         automation_rules: Prisma.JsonNull,
         is_active: true,
@@ -989,6 +1004,7 @@ async function upsertCollections(
         name: collection.name,
         slug: collection.slug,
         description: collection.description,
+        image_url: demoSvgImage(collection.name, "6B7657"),
         collection_type: "manual",
         is_active: true,
         show_on_home: collection.showOnHome,
@@ -1032,7 +1048,7 @@ async function upsertHomeBanners(): Promise<void> {
         collection_id, eyebrow, title, subtitle, image_url, image_alt, is_active, sort_order, starts_at, ends_at
       )
       SELECT
-        c.id, ${banner.eyebrow}, ${banner.title}, ${banner.subtitle}, ${banner.imageUrl},
+        c.id, ${banner.eyebrow}, ${banner.title}, ${banner.subtitle}, ${demoSvgImage(banner.title, "355844")},
         ${`${banner.title} — Tea Market`}, true, ${banner.sortOrder}, NULL, NULL
       FROM collections c
       WHERE c.slug = ${banner.collectionSlug}

@@ -15,6 +15,8 @@ import {
   Navigate
 } from "react-router-dom";
 
+import BackLink from "../shared/components/BackLink";
+
 import {
   useAuth
 } from "../features/auth/AuthProvider";
@@ -146,6 +148,7 @@ export default function OrdersPage() {
 
   return (
     <div className="orders-page">
+      <BackLink to="/profile" label="Профиль" />
       <header className="orders-page__header">
         <span>
           Личный кабинет

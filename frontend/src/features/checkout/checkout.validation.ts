@@ -1,20 +1,11 @@
-import type {
-  AuthUser
-} from "../auth/auth.types";
-
-import type {
-  DeliveryLocation
-} from "../delivery/delivery.types";
-
-import type {
-  CheckoutValidationErrors
-} from "./checkout.types";
+import type { DeliveryLocation } from "../delivery/delivery.types";
+import type { CheckoutContact, CheckoutValidationErrors } from "./checkout.types";
 
 const EMAIL_PATTERN =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface CheckoutValidationInput {
-  user: AuthUser | null;
+  user: CheckoutContact | null;
   selectedLocation: DeliveryLocation | null;
   selectedDeliveryMethodId: string;
   selectedPaymentMethodId: string;
@@ -28,14 +19,16 @@ export function validateCheckout(
 
   if (
     !input.user
-    || !input.user.profileCompleted
-    || !input.user.name.trim()
+    || input.user.name.trim().length < 2
+    || input.user.name.trim().length > 255
     || input.user.phone
       .replace(/\D/g, "")
       .length < 10
+    || input.user.phone.replace(/\D/g, "").length > 15
+    || !/^[+\d\s()\-]+$/.test(input.user.phone)
   ) {
     errors.recipient =
-      "Заполните имя и подтверждённый телефон в Профиле.";
+      "Укажите имя (от 2 символов) и телефон (10–15 цифр).";
   } else if (
     input.user.email
     && !EMAIL_PATTERN.test(
@@ -43,16 +36,21 @@ export function validateCheckout(
     )
   ) {
     errors.recipient =
-      "В Профиле указан некорректный электронный адрес.";
+      "Укажите корректный электронный адрес.";
   }
 
   if (
     !input.selectedLocation
     || input.selectedLocation.type
       !== "courier"
+    || !input.selectedLocation.city.trim()
+    || !input.selectedLocation.street.trim()
+    || !input.selectedLocation.house.trim()
+    || input.selectedLocation.recipient.name.trim().length < 2
+    || input.selectedLocation.recipient.phone.replace(/\D/g, "").length < 10
   ) {
     errors.location =
-      "Выберите сохранённый адрес курьерской доставки.";
+      "Укажите город, улицу, дом и данные получателя.";
   }
 
   if (!input.selectedDeliveryMethodId) {

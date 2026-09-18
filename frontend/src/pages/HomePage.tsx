@@ -58,7 +58,9 @@ export default function HomePage() {
     useProducts({
       page: 1,
       limit: 8,
-      sort: "newest"
+      sort: "newest",
+      isNew: true,
+      rotation: "daily"
     });
 
   const categoriesQuery =
@@ -291,7 +293,7 @@ export default function HomePage() {
             Новинки
           </h2>
 
-          <Link to="/catalog">
+          <Link to="/new">
             Смотреть все
             <ArrowRight
               size={15}

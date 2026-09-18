@@ -19,29 +19,9 @@ export default function FavoritesPage() {
     isEmpty,
     isLoading,
     isError,
-    error,
-    isAuthenticated
+    error
   } = useFavorites();
 
-  if (!isAuthenticated) {
-    return (
-      <div className="favorites-page">
-        <header className="favorites-page__header">
-          <div>
-            <span className="favorites-page__eyebrow">
-              Личная подборка
-            </span>
-
-            <h1>
-              Избранное
-            </h1>
-          </div>
-        </header>
-
-        <EmptyFavorites requiresAuth />
-      </div>
-    );
-  }
 
   return (
     <div className="favorites-page">

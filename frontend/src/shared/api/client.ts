@@ -25,7 +25,8 @@ function buildUrl(
 ): string {
   const url =
     new URL(
-      `${API_BASE_URL}${path}`
+      `${API_BASE_URL.replace(/\/$/, "")}${path}`,
+      window.location.origin
     );
 
   if (query) {

@@ -41,6 +41,8 @@ import {
 } from "../features/checkout/checkout.storage";
 
 import type {
+  CheckoutContact,
+  GuestCheckoutAddress,
   CheckoutValidationErrors,
   CheckoutValidationField
 } from "../features/checkout/checkout.types";
@@ -56,12 +58,14 @@ import {
 
 import {
   createOrder,
+  getDeliveryQuote,
   getDeliveryMethods,
   getPaymentMethods
 } from "../shared/api/checkout";
 
 import type {
   CreatedOrderApi,
+  DeliveryQuoteApi,
   DeliveryMethodApi,
   PaymentMethodApi
 } from "../shared/api/checkout";
@@ -102,6 +106,12 @@ function isCourierMethod(
 }
 
 export default function CheckoutPage() {
+  const { session, isInitializing } = useAuth();
+  if (isInitializing) return <div className="checkout-page">Загрузка оформления заказа…</div>;
+  return <CheckoutForm key={session.user?.id ?? "guest"} />;
+}
+
+function CheckoutForm() {
   const {
     session,
     isInitializing
@@ -111,6 +121,7 @@ export default function CheckoutPage() {
     items,
     totalAmount,
     isLoading: isCartLoading,
+    error: cartError,
     refresh: refreshCart
   } = useCart();
 
@@ -123,6 +134,17 @@ export default function CheckoutPage() {
       session.user?.id
     )
   );
+
+  const isGuest = !session.isAuthenticated;
+  const [guestContact, setGuestContact] = useState<CheckoutContact>(
+    initialDraftRef.current?.contact ?? { name: "", phone: "", email: "" }
+  );
+  const [guestAddress, setGuestAddress] = useState<GuestCheckoutAddress>(
+    initialDraftRef.current?.guestAddress ?? { city: "", street: "", house: "", apartment: "" }
+  );
+  const contact = isGuest ? guestContact : session.user;
+  const [manualAddress, setManualAddress] = useState(false);
+  const submittingRef = useRef(false);
 
   const [deliveryMethods, setDeliveryMethods] =
     useState<DeliveryMethodApi[]>([]);
@@ -175,6 +197,11 @@ export default function CheckoutPage() {
   const [orderResult, setOrderResult] =
     useState<CreatedOrderApi | null>(null);
 
+  const [deliveryQuote, setDeliveryQuote] =
+    useState<DeliveryQuoteApi | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
   const courierAddresses = useMemo(
     () =>
       deliveryState.locations.filter(
@@ -184,8 +211,18 @@ export default function CheckoutPage() {
     [deliveryState.locations]
   );
 
-  const selectedLocation =
-    courierAddresses.find(
+  const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0;
+  const selectedLocation = useManualAddress ? {
+    ...guestAddress,
+    id: "guest",
+    type: "courier" as const,
+    label: "Адрес доставки",
+    region: "",
+    postalCode: "",
+    comment: "",
+    isDefault: false,
+    recipient: { name: contact?.name ?? "", phone: contact?.phone ?? "" }
+  } : courierAddresses.find(
       (location) =>
         location.id === selectedLocationId
     ) ?? null;
@@ -202,13 +239,50 @@ export default function CheckoutPage() {
         method.id === selectedPaymentMethodId
     ) ?? null;
 
-  const deliveryCost = Number(
-    selectedDeliveryMethod?.base_cost
-    ?? 0
-  );
+  const deliveryCost = deliveryQuote
+    ? Number(deliveryQuote.cost)
+    : 0;
 
-  const total =
-    totalAmount + deliveryCost;
+  const total = totalAmount + deliveryCost;
+
+  const deliveryQuoteAddress = selectedLocation
+    ? formatAddress(selectedLocation)
+    : "";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!selectedDeliveryMethodId || deliveryQuoteAddress.trim().length < 5) {
+      setDeliveryQuote(null);
+      setQuoteError(null);
+      setQuoteLoading(false);
+      return;
+    }
+
+    setQuoteLoading(true);
+    setQuoteError(null);
+    setDeliveryQuote(null);
+
+    const timer = window.setTimeout(() => {
+      void getDeliveryQuote(selectedDeliveryMethodId, deliveryQuoteAddress)
+        .then((response) => {
+          if (!cancelled) setDeliveryQuote(response.data);
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            setQuoteError(error instanceof Error ? error.message : "Не удалось рассчитать доставку");
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setQuoteLoading(false);
+        });
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [selectedDeliveryMethodId, deliveryQuoteAddress]);
 
   useEffect(() => {
     let cancelled = false;
@@ -308,19 +382,20 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (
-      !session.user?.id
-      || orderResult
+      orderResult
     ) {
       return;
     }
 
     saveCheckoutDraft(
-      session.user.id,
+      session.user?.id,
       {
         selectedLocationId,
         selectedDeliveryMethodId,
         selectedPaymentMethodId,
-        comment: orderComment
+        comment: orderComment,
+        guestAddress,
+        ...(isGuest ? { contact: guestContact } : {})
       }
     );
   }, [
@@ -329,43 +404,14 @@ export default function CheckoutPage() {
     selectedDeliveryMethodId,
     selectedPaymentMethodId,
     orderComment,
-    orderResult
+    orderResult,
+    isGuest,
+    guestContact,
+    guestAddress
   ]);
 
-  if (
-    isInitializing
-    || isCartLoading
-  ) {
-    return (
-      <div className="checkout-page">
-        <section className="checkout-section">
-          Загрузка оформления заказа…
-        </section>
-      </div>
-    );
-  }
-
-  if (!session.isAuthenticated) {
-    return (
-      <Navigate
-        to="/auth"
-        replace
-      />
-    );
-  }
-
-  if (
-    session.user
-    && !session.user.profileCompleted
-  ) {
-    return (
-      <Navigate
-        to="/profile/details"
-        replace
-      />
-    );
-  }
-
+  // После успешного POST /orders результат заказа имеет приоритет
+  // над состоянием корзины: backend уже перевёл старую корзину в converted.
   if (orderResult) {
     return (
       <div className="checkout-page">
@@ -382,8 +428,7 @@ export default function CheckoutPage() {
             <h1>Заказ оформлен</h1>
 
             <p>
-              Заказ создан в PostgreSQL.
-              Остатки обновлены, а корзина закрыта.
+              Сохраните номер заказа, чтобы обратиться в магазин.
             </p>
           </div>
 
@@ -403,6 +448,27 @@ export default function CheckoutPage() {
             </div>
           </dl>
 
+          <div className="checkout-review__card">
+            <h2>Состав заказа</h2>
+            {(Array.isArray(orderResult.order_items)
+              ? orderResult.order_items
+              : orderResult.order_items
+                ? [orderResult.order_items]
+                : []
+            ).map((item) => <p key={item.id}>
+              {item.product_name}, {item.weight_g} г × {item.quantity} — {formatPrice(Number(item.line_total))}
+            </p>)}
+            <p>Статус заказа: {orderResult.status || "новый"}. Оплата: {orderResult.payment_status || "не оплачено"}.</p>
+            {(Array.isArray(orderResult.order_deliveries)
+              ? orderResult.order_deliveries
+              : orderResult.order_deliveries
+                ? [orderResult.order_deliveries]
+                : []
+            ).map((delivery) => <p key={delivery.id}>
+              {delivery.delivery_methods?.name ?? "Доставка"}: {delivery.full_address}
+            </p>)}
+          </div>
+
           <div className="checkout-result__actions">
             <Link
               to="/"
@@ -411,16 +477,48 @@ export default function CheckoutPage() {
               На главную
             </Link>
 
-            <Link
+            {!isGuest && <Link
               to="/profile"
               className="checkout-result__secondary"
             >
               Перейти в профиль
-            </Link>
+            </Link>}
           </div>
         </section>
       </div>
     );
+  }
+
+  if (
+    isInitializing
+    || isCartLoading
+    || (!isGuest && deliveryState.isLoading)
+  ) {
+    return (
+      <div className="checkout-page">
+        <section className="checkout-section">
+          Загрузка оформления заказа…
+        </section>
+      </div>
+    );
+  }
+
+  if (
+    session.user
+    && !session.user.profileCompleted
+  ) {
+    return (
+      <Navigate
+        to="/profile/details"
+        replace
+      />
+    );
+  }
+
+  if (cartError) {
+    return <div className="checkout-page"><p role="alert">{cartError}</p>
+      <button type="button" onClick={() => void refreshCart()}>Повторить загрузку корзины</button>
+      <Link to="/cart">Вернуться в корзину</Link></div>;
   }
 
   if (items.length === 0) {
@@ -449,7 +547,7 @@ export default function CheckoutPage() {
 
   const handleReview = () => {
     const errors = validateCheckout({
-      user: session.user,
+      user: contact,
       selectedLocation,
       selectedDeliveryMethodId,
       selectedPaymentMethodId
@@ -485,7 +583,8 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     if (
-      !session.user
+      submittingRef.current
+      || !contact
       || !selectedLocation
       || !selectedDeliveryMethod
       || !selectedPaymentMethod
@@ -493,6 +592,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    const errors = validateCheckout({ user: contact, selectedLocation,
+      selectedDeliveryMethodId, selectedPaymentMethodId });
+    if (hasCheckoutErrors(errors)) {
+      setValidationErrors(errors);
+      setIsReviewing(false);
+      return;
+    }
+    submittingRef.current = true;
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -500,11 +607,11 @@ export default function CheckoutPage() {
       const response =
         await createOrder({
           customerName:
-            session.user.name,
+            contact.name,
           phone:
-            session.user.phone,
+            contact.phone,
           email:
-            session.user.email
+            contact.email.trim()
             || undefined,
           comment:
             orderComment.trim()
@@ -529,11 +636,12 @@ export default function CheckoutPage() {
       setOrderResult(response.data);
 
       clearCheckoutDraft(
-        session.user.id
+        session.user?.id
       );
 
+      // Обновляем глобальные индикаторы корзины, но не ждём повторной
+      // загрузки уже закрытой (converted) корзины перед показом результата.
       notifyCartChanged();
-      await refreshCart();
 
       window.scrollTo({
         top: 0,
@@ -546,6 +654,7 @@ export default function CheckoutPage() {
           : "Не удалось оформить заказ"
       );
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -576,8 +685,8 @@ export default function CheckoutPage() {
           <div className="checkout-review__grid">
             <article className="checkout-review__card">
               <h3>Получатель</h3>
-              <strong>{session.user?.name}</strong>
-              <span>{session.user?.phone}</span>
+              <strong>{selectedLocation?.recipient.name}</strong>
+              <span>{selectedLocation?.recipient.phone}</span>
             </article>
 
             <article className="checkout-review__card">
@@ -596,7 +705,7 @@ export default function CheckoutPage() {
                 {selectedDeliveryMethod?.name}
               </strong>
               <span>
-                {selectedDeliveryMethod?.delivery_term
+                {selectedDeliveryMethod?.deliveryTerm
                   || "Срок уточняется"}
               </span>
             </article>
@@ -607,7 +716,7 @@ export default function CheckoutPage() {
                 {selectedPaymentMethod?.name}
               </strong>
               <span>
-                Платёж будет создан со статусом ожидания.
+                Ожидает оплаты.
               </span>
             </article>
           </div>
@@ -718,20 +827,40 @@ export default function CheckoutPage() {
               </span>
               <div>
                 <h2>Контактные данные</h2>
-                <p>Получены из профиля</p>
+                <p>{isGuest ? "Покупка без регистрации" : "Получены из профиля"}</p>
               </div>
             </div>
 
+            {isGuest ? (
+              <div className="checkout-form-fields">
+                {([
+                  ["name", "Имя получателя", "text", "name", 255],
+                  ["phone", "Телефон", "tel", "tel", 32],
+                  ["email", "Электронная почта (необязательно)", "email", "email", 320]
+                ] as const).map(([field, label, type, autoComplete, maxLength]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input type={type} autoComplete={autoComplete} maxLength={maxLength}
+                      required={field !== "email"} value={guestContact[field]}
+                      onChange={(event) => {
+                        setGuestContact((current) => ({ ...current, [field]: event.target.value }));
+                        clearValidationError("recipient");
+                      }} />
+                  </label>
+                ))}
+              </div>
+            ) : (
             <div className="checkout-recipient">
-              <strong>{session.user?.name}</strong>
-              <span>{session.user?.phone}</span>
-              {session.user?.email && (
-                <span>{session.user.email}</span>
+              <strong>{contact?.name}</strong>
+              <span>{contact?.phone}</span>
+              {contact?.email && (
+                <span>{contact.email}</span>
               )}
               <Link to="/profile/details">
                 Изменить личные данные
               </Link>
             </div>
+            )}
 
             {validationErrors.recipient && (
               <p className="checkout-field-error">
@@ -755,11 +884,28 @@ export default function CheckoutPage() {
               </span>
               <div>
                 <h2>Адрес доставки</h2>
-                <p>Реальные адреса из профиля</p>
+                <p>{useManualAddress ? "Укажите адрес получения заказа" : "Сохранённые адреса"}</p>
               </div>
             </div>
 
-            {courierAddresses.length > 0 ? (
+            {useManualAddress ? (
+              <div className="checkout-form-fields">
+                {([
+                  ["city", "Город"], ["street", "Улица"],
+                  ["house", "Дом / корпус"], ["apartment", "Квартира (необязательно)"]
+                ] as const).map(([field, label]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input value={guestAddress[field]} maxLength={255}
+                      required={field !== "apartment"}
+                      onChange={(event) => {
+                        setGuestAddress((current) => ({ ...current, [field]: event.target.value }));
+                        clearValidationError("location");
+                      }} />
+                  </label>
+                ))}
+              </div>
+            ) : courierAddresses.length > 0 ? (
               <div className="checkout-locations">
                 {courierAddresses.map(
                   (location) => {
@@ -800,13 +946,12 @@ export default function CheckoutPage() {
                   }
                 )}
               </div>
-            ) : (
-              <div className="checkout-empty-block">
-                <p>Добавьте адрес курьерской доставки.</p>
-                <Link to="/profile/delivery-addresses">
-                  Добавить адрес
-                </Link>
-              </div>
+            ) : null}
+            {!isGuest && courierAddresses.length > 0 && (
+              <button type="button" onClick={() => {
+                setManualAddress((current) => !current);
+                clearValidationError("location");
+              }}>{manualAddress ? "Выбрать сохранённый адрес" : "Указать другой адрес"}</button>
             )}
 
             {validationErrors.location && (
@@ -831,7 +976,7 @@ export default function CheckoutPage() {
               </span>
               <div>
                 <h2>Способ доставки</h2>
-                <p>Загружается из PostgreSQL</p>
+                <p>Выберите подходящий вариант</p>
               </div>
             </div>
 
@@ -871,19 +1016,19 @@ export default function CheckoutPage() {
                           <strong>{method.name}</strong>
                           <small>
                             {enabled
-                              ? method.delivery_term || "Срок уточняется"
+                              ? method.deliveryTerm || "Срок уточняется"
                               : "Будет доступно после подключения API службы доставки"}
                           </small>
                         </span>
 
                         <span className="checkout-delivery-option__details">
                           <strong>
-                            {formatPrice(Number(method.base_cost))}
+                            {formatPrice(Number(method.baseCost))}
                           </strong>
-                          {method.delivery_term && (
+                          {method.deliveryTerm && (
                             <span>
                               <Clock3 size={15} aria-hidden="true" />
-                              {method.delivery_term}
+                              {method.deliveryTerm}
                             </span>
                           )}
                         </span>
@@ -916,7 +1061,7 @@ export default function CheckoutPage() {
               </span>
               <div>
                 <h2>Способ оплаты</h2>
-                <p>Загружается из PostgreSQL</p>
+                <p>Выберите подходящий вариант</p>
               </div>
             </div>
 
@@ -954,7 +1099,7 @@ export default function CheckoutPage() {
                         <span className="checkout-payment-option__content">
                           <strong>{method.name}</strong>
                           <span>
-                            Платёжная операция будет создана в заказе.
+                            Выбранный способ будет указан в заказе.
                           </span>
                         </span>
                       </button>
@@ -1021,9 +1166,15 @@ export default function CheckoutPage() {
             <div>
               <dt>Доставка</dt>
               <dd>
-                {selectedDeliveryMethod
-                  ? formatPrice(deliveryCost)
-                  : "Не выбрана"}
+                {!selectedDeliveryMethod
+                  ? "Не выбрана"
+                  : quoteLoading
+                    ? "Рассчитывается…"
+                    : quoteError
+                      ? "Ошибка расчёта"
+                      : deliveryQuote
+                        ? formatPrice(deliveryCost)
+                        : "Укажите адрес"}
               </dd>
             </div>
 
@@ -1039,6 +1190,9 @@ export default function CheckoutPage() {
             disabled={
               optionsLoading
               || Boolean(optionsError)
+              || quoteLoading
+              || Boolean(quoteError)
+              || !deliveryQuote
             }
             onClick={handleReview}
           >

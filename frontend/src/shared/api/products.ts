@@ -18,6 +18,8 @@ export type GetProductsParams = {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  isNew?: boolean;
+  rotation?: "daily";
 };
 
 export function getProducts(

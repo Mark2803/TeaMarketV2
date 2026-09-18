@@ -350,6 +350,7 @@ model products {
   name                  String                @db.VarChar(255)
   short_description     String?
   is_active             Boolean               @default(true)
+  is_new                Boolean               @default(false)
   tea_type              String?               @db.VarChar(100)
   country               String?               @db.VarChar(100)
   region                String?               @db.VarChar(150)
@@ -384,6 +385,7 @@ model products {
   related_to            product_relations[]   @relation("RelatedProducts")
 
   @@index([is_active], map: "products_active_idx")
+  @@index([is_new, is_active, created_at], map: "products_new_active_created_idx")
   @@index([country])
   @@index([manufacturer])
   @@index([region])

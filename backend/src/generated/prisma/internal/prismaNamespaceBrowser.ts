@@ -366,6 +366,7 @@ export const ProductsScalarFieldEnum = {
   name: 'name',
   short_description: 'short_description',
   is_active: 'is_active',
+  is_new: 'is_new',
   tea_type: 'tea_type',
   country: 'country',
   region: 'region',

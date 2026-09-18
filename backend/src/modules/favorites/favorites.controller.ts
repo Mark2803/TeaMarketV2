@@ -181,3 +181,25 @@ export async function removeFavoriteController(
     }
   });
 }
+import { favoriteProductIdsBodySchema } from "./favorites.schemas.js";
+import { mergeCustomerFavorites, resolveFavoriteProducts } from "./favorites.service.js";
+
+export async function resolveFavoritesController(req: Request, res: Response): Promise<void> {
+  const parsed = favoriteProductIdsBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: { code: "INVALID_PRODUCT_IDS", message: "Некорректный список товаров", details: parsed.error.flatten() } });
+    return;
+  }
+  res.json({ data: await resolveFavoriteProducts(parsed.data.productIds) });
+}
+
+export async function mergeFavoritesController(req: Request, res: Response): Promise<void> {
+  const customerId = getAuthorizedCustomerId(req, res);
+  if (!customerId) return;
+  const parsed = favoriteProductIdsBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: { code: "INVALID_PRODUCT_IDS", message: "Некорректный список товаров", details: parsed.error.flatten() } });
+    return;
+  }
+  res.json({ data: await mergeCustomerFavorites(customerId, parsed.data.productIds) });
+}
