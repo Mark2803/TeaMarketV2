@@ -1,0 +1,119 @@
+.contacts-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.contacts-page__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contacts-page__eyebrow {
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.contacts-page__heading h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-heading);
+}
+
+.contacts-page__heading p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.contacts-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.contacts-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4.75rem;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.contacts-item:last-child {
+  border-bottom: 0;
+}
+
+.contacts-item[href]:hover {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+}
+
+.contacts-item__icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+}
+
+.contacts-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.contacts-item__label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.contacts-item__content strong {
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.contacts-item--placeholder {
+  cursor: default;
+}
+
+.contacts-item--placeholder .contacts-item__icon,
+.contacts-item--placeholder .contacts-item__content strong {
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 48rem) {
+  .contacts-page {
+    max-width: 42rem;
+    margin: 0 auto;
+    gap: var(--space-6);
+  }
+
+  .contacts-card {
+    border-radius: var(--radius-xl);
+  }
+
+  .contacts-item {
+    padding: var(--space-4) var(--space-5);
+  }
+}

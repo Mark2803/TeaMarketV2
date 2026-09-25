@@ -69,6 +69,7 @@ export async function apiRequest<T>(
       ),
       {
         ...requestOptions,
+        credentials: requestOptions.credentials ?? "include",
 
         headers: {
           "Content-Type":

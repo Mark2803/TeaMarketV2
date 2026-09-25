@@ -13,7 +13,18 @@ const app = express();
 app.disable("x-powered-by");
 
 app.use(helmet());
-app.use(cors());
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://tea-master-team.ru",
+      "https://www.tea-master-team.ru"
+    ],
+    credentials: true
+  })
+);
+
 app.use(compression());
 app.use(express.json());
 app.use(pinoHttp());

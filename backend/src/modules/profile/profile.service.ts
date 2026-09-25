@@ -23,14 +23,23 @@ const profileSelect = {
 export async function getProfile(
   customerId: string
 ) {
-  return prisma.customers.findUnique({
-    where: {
-      id: customerId
-    },
+  const [profile, preferences] = await Promise.all([
+    prisma.customers.findUnique({
+      where: { id: customerId },
+      select: profileSelect
+    }),
+    prisma.notification_preferences.findUnique({
+      where: { customer_id: customerId },
+      select: { email_marketing: true }
+    })
+  ]);
 
-    select:
-      profileSelect
-  });
+  if (!profile) return null;
+
+  return {
+    ...profile,
+    emailMarketing: preferences?.email_marketing ?? false
+  };
 }
 
 /**
@@ -40,35 +49,46 @@ export async function updateProfile(
   customerId: string,
   input: UpdateProfileInput
 ) {
-  return prisma.customers.update({
-    where: {
-      id: customerId
-    },
+  return prisma.$transaction(async (transaction) => {
+    const profile = await transaction.customers.update({
+      where: { id: customerId },
+      data: {
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(input.email !== undefined ? { email: input.email || null } : {}),
+        ...(input.phone !== undefined ? { phone: input.phone || null } : {}),
+        ...(input.username !== undefined
+          ? {
+              username: input.username
+                ? (input.username.startsWith("@") ? input.username : `@${input.username}`)
+                : null
+            }
+          : {})
+      },
+      select: profileSelect
+    });
 
-    data: {
-      ...(input.name !== undefined
-        ? {
-            name:
-              input.name
-          }
-        : {}),
+    if (input.emailMarketing !== undefined) {
+      await transaction.notification_preferences.upsert({
+        where: { customer_id: customerId },
+        create: {
+          customer_id: customerId,
+          email_marketing: input.emailMarketing
+        },
+        update: {
+          email_marketing: input.emailMarketing,
+          updated_at: new Date()
+        }
+      });
+    }
 
-      ...(input.email !== undefined
-        ? {
-            email:
-              input.email
-          }
-        : {}),
+    const preferences = await transaction.notification_preferences.findUnique({
+      where: { customer_id: customerId },
+      select: { email_marketing: true }
+    });
 
-      ...(input.username !== undefined
-        ? {
-            username:
-              input.username
-          }
-        : {})
-    },
-
-    select:
-      profileSelect
+    return {
+      ...profile,
+      emailMarketing: preferences?.email_marketing ?? false
+    };
   });
 }

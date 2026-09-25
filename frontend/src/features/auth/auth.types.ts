@@ -1,5 +1,5 @@
 export type AuthStep =
-  | "phone"
+  | "email"
   | "code"
   | "profile-details"
   | "profile";
@@ -15,6 +15,7 @@ export interface AuthUser {
   email: string;
   username: string | null;
   profileCompleted: boolean;
+  emailMarketing: boolean;
 }
 
 export interface AuthSession {
@@ -25,14 +26,17 @@ export interface AuthSession {
 export interface ProfileDetails {
   name: string;
   email: string;
+  phone: string;
+  username: string;
+  emailMarketing: boolean;
 }
 
 export interface AuthContextValue {
   session: AuthSession;
   step: AuthStep;
-  pendingPhone: string;
+  pendingEmail: string;
   isInitializing: boolean;
-  requestCode: (phone: string) => Promise<void>;
+  requestCode: (email: string) => Promise<void>;
   confirmCode: (code: string) => Promise<ConfirmCodeResult>;
   completeProfile: (details: ProfileDetails) => Promise<void>;
   updateProfile: (details: ProfileDetails) => Promise<void>;

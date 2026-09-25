@@ -8,10 +8,11 @@ import {
 
 export interface ApiCustomer {
   id: string;
-  phone: string;
+  phone: string | null;
   name: string | null;
   email: string | null;
   username: string | null;
+  emailMarketing: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -40,32 +41,16 @@ interface LogoutResponse {
   };
 }
 
-export function requestAuthCode(
-  phone: string
-): Promise<RequestCodeResponse> {
-  return apiRequest<RequestCodeResponse>(
-    "/auth/request-code",
-    {
-      method: "POST",
-      body: JSON.stringify({ phone })
-    }
-  );
+export function requestAuthCode(email: string): Promise<RequestCodeResponse> {
+  return apiRequest<RequestCodeResponse>("/auth/request-code", {
+    method: "POST", body: JSON.stringify({ email })
+  });
 }
 
-export function verifyAuthCode(
-  phone: string,
-  code: string
-): Promise<VerifyCodeResponse> {
-  return apiRequest<VerifyCodeResponse>(
-    "/auth/verify-code",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        phone,
-        code
-      })
-    }
-  );
+export function verifyAuthCode(email: string, code: string): Promise<VerifyCodeResponse> {
+  return apiRequest<VerifyCodeResponse>("/auth/verify-code", {
+    method: "POST", body: JSON.stringify({ email, code })
+  });
 }
 
 export function getMyProfile(): Promise<ProfileResponse> {
@@ -81,6 +66,9 @@ export function updateMyProfile(
   data: {
     name: string;
     email: string | null;
+    phone: string | null;
+    username: string | null;
+    emailMarketing: boolean;
   }
 ): Promise<ProfileResponse> {
   return apiRequest<ProfileResponse>(

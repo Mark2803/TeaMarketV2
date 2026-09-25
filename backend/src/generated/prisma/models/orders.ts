@@ -29,12 +29,18 @@ export type AggregateOrders = {
 
 export type OrdersAvgAggregateOutputType = {
   items_total: runtime.Decimal | null
+  gross_items_total: runtime.Decimal | null
+  discount_total: runtime.Decimal | null
+  loyalty_spent: runtime.Decimal | null
   delivery_cost: runtime.Decimal | null
   total_amount: runtime.Decimal | null
 }
 
 export type OrdersSumAggregateOutputType = {
   items_total: runtime.Decimal | null
+  gross_items_total: runtime.Decimal | null
+  discount_total: runtime.Decimal | null
+  loyalty_spent: runtime.Decimal | null
   delivery_cost: runtime.Decimal | null
   total_amount: runtime.Decimal | null
 }
@@ -49,9 +55,17 @@ export type OrdersMinAggregateOutputType = {
   status: string | null
   payment_status: string | null
   items_total: runtime.Decimal | null
+  gross_items_total: runtime.Decimal | null
+  discount_total: runtime.Decimal | null
+  promo_code: string | null
+  loyalty_spent: runtime.Decimal | null
+  referral_code: string | null
   delivery_cost: runtime.Decimal | null
   total_amount: runtime.Decimal | null
   comment: string | null
+  cancellation_reason: string | null
+  is_archived: boolean | null
+  archived_at: Date | null
   ordered_at: Date | null
   updated_at: Date | null
 }
@@ -66,9 +80,17 @@ export type OrdersMaxAggregateOutputType = {
   status: string | null
   payment_status: string | null
   items_total: runtime.Decimal | null
+  gross_items_total: runtime.Decimal | null
+  discount_total: runtime.Decimal | null
+  promo_code: string | null
+  loyalty_spent: runtime.Decimal | null
+  referral_code: string | null
   delivery_cost: runtime.Decimal | null
   total_amount: runtime.Decimal | null
   comment: string | null
+  cancellation_reason: string | null
+  is_archived: boolean | null
+  archived_at: Date | null
   ordered_at: Date | null
   updated_at: Date | null
 }
@@ -83,9 +105,17 @@ export type OrdersCountAggregateOutputType = {
   status: number
   payment_status: number
   items_total: number
+  gross_items_total: number
+  discount_total: number
+  promo_code: number
+  loyalty_spent: number
+  referral_code: number
   delivery_cost: number
   total_amount: number
   comment: number
+  cancellation_reason: number
+  is_archived: number
+  archived_at: number
   ordered_at: number
   updated_at: number
   _all: number
@@ -94,12 +124,18 @@ export type OrdersCountAggregateOutputType = {
 
 export type OrdersAvgAggregateInputType = {
   items_total?: true
+  gross_items_total?: true
+  discount_total?: true
+  loyalty_spent?: true
   delivery_cost?: true
   total_amount?: true
 }
 
 export type OrdersSumAggregateInputType = {
   items_total?: true
+  gross_items_total?: true
+  discount_total?: true
+  loyalty_spent?: true
   delivery_cost?: true
   total_amount?: true
 }
@@ -114,9 +150,17 @@ export type OrdersMinAggregateInputType = {
   status?: true
   payment_status?: true
   items_total?: true
+  gross_items_total?: true
+  discount_total?: true
+  promo_code?: true
+  loyalty_spent?: true
+  referral_code?: true
   delivery_cost?: true
   total_amount?: true
   comment?: true
+  cancellation_reason?: true
+  is_archived?: true
+  archived_at?: true
   ordered_at?: true
   updated_at?: true
 }
@@ -131,9 +175,17 @@ export type OrdersMaxAggregateInputType = {
   status?: true
   payment_status?: true
   items_total?: true
+  gross_items_total?: true
+  discount_total?: true
+  promo_code?: true
+  loyalty_spent?: true
+  referral_code?: true
   delivery_cost?: true
   total_amount?: true
   comment?: true
+  cancellation_reason?: true
+  is_archived?: true
+  archived_at?: true
   ordered_at?: true
   updated_at?: true
 }
@@ -148,9 +200,17 @@ export type OrdersCountAggregateInputType = {
   status?: true
   payment_status?: true
   items_total?: true
+  gross_items_total?: true
+  discount_total?: true
+  promo_code?: true
+  loyalty_spent?: true
+  referral_code?: true
   delivery_cost?: true
   total_amount?: true
   comment?: true
+  cancellation_reason?: true
+  is_archived?: true
+  archived_at?: true
   ordered_at?: true
   updated_at?: true
   _all?: true
@@ -252,9 +312,17 @@ export type OrdersGroupByOutputType = {
   status: string
   payment_status: string
   items_total: runtime.Decimal
+  gross_items_total: runtime.Decimal
+  discount_total: runtime.Decimal
+  promo_code: string | null
+  loyalty_spent: runtime.Decimal
+  referral_code: string | null
   delivery_cost: runtime.Decimal
   total_amount: runtime.Decimal
   comment: string | null
+  cancellation_reason: string | null
+  is_archived: boolean
+  archived_at: Date | null
   ordered_at: Date
   updated_at: Date
   _count: OrdersCountAggregateOutputType | null
@@ -292,15 +360,24 @@ export type ordersWhereInput = {
   status?: Prisma.StringFilter<"orders"> | string
   payment_status?: Prisma.StringFilter<"orders"> | string
   items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.StringNullableFilter<"orders"> | string | null
+  loyalty_spent?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.StringNullableFilter<"orders"> | string | null
   delivery_cost?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.StringNullableFilter<"orders"> | string | null
+  cancellation_reason?: Prisma.StringNullableFilter<"orders"> | string | null
+  is_archived?: Prisma.BoolFilter<"orders"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"orders"> | Date | string | null
   ordered_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   order_deliveries?: Prisma.XOR<Prisma.Order_deliveriesNullableScalarRelationFilter, Prisma.order_deliveriesWhereInput> | null
   order_items?: Prisma.Order_itemsListRelationFilter
   order_payments?: Prisma.Order_paymentsListRelationFilter
   order_status_history?: Prisma.Order_status_historyListRelationFilter
+  order_discounts?: Prisma.Order_discountsListRelationFilter
   customers?: Prisma.XOR<Prisma.CustomersNullableScalarRelationFilter, Prisma.customersWhereInput> | null
 }
 
@@ -314,15 +391,24 @@ export type ordersOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   payment_status?: Prisma.SortOrder
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  promo_code?: Prisma.SortOrderInput | Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
+  referral_code?: Prisma.SortOrderInput | Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellation_reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  is_archived?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   order_deliveries?: Prisma.order_deliveriesOrderByWithRelationInput
   order_items?: Prisma.order_itemsOrderByRelationAggregateInput
   order_payments?: Prisma.order_paymentsOrderByRelationAggregateInput
   order_status_history?: Prisma.order_status_historyOrderByRelationAggregateInput
+  order_discounts?: Prisma.order_discountsOrderByRelationAggregateInput
   customers?: Prisma.customersOrderByWithRelationInput
 }
 
@@ -339,15 +425,24 @@ export type ordersWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"orders"> | string
   payment_status?: Prisma.StringFilter<"orders"> | string
   items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.StringNullableFilter<"orders"> | string | null
+  loyalty_spent?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.StringNullableFilter<"orders"> | string | null
   delivery_cost?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.StringNullableFilter<"orders"> | string | null
+  cancellation_reason?: Prisma.StringNullableFilter<"orders"> | string | null
+  is_archived?: Prisma.BoolFilter<"orders"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"orders"> | Date | string | null
   ordered_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   order_deliveries?: Prisma.XOR<Prisma.Order_deliveriesNullableScalarRelationFilter, Prisma.order_deliveriesWhereInput> | null
   order_items?: Prisma.Order_itemsListRelationFilter
   order_payments?: Prisma.Order_paymentsListRelationFilter
   order_status_history?: Prisma.Order_status_historyListRelationFilter
+  order_discounts?: Prisma.Order_discountsListRelationFilter
   customers?: Prisma.XOR<Prisma.CustomersNullableScalarRelationFilter, Prisma.customersWhereInput> | null
 }, "id" | "order_number">
 
@@ -361,9 +456,17 @@ export type ordersOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   payment_status?: Prisma.SortOrder
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  promo_code?: Prisma.SortOrderInput | Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
+  referral_code?: Prisma.SortOrderInput | Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancellation_reason?: Prisma.SortOrderInput | Prisma.SortOrder
+  is_archived?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   _count?: Prisma.ordersCountOrderByAggregateInput
@@ -386,9 +489,17 @@ export type ordersScalarWhereWithAggregatesInput = {
   status?: Prisma.StringWithAggregatesFilter<"orders"> | string
   payment_status?: Prisma.StringWithAggregatesFilter<"orders"> | string
   items_total?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.StringNullableWithAggregatesFilter<"orders"> | string | null
+  loyalty_spent?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.StringNullableWithAggregatesFilter<"orders"> | string | null
   delivery_cost?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalWithAggregatesFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.StringNullableWithAggregatesFilter<"orders"> | string | null
+  cancellation_reason?: Prisma.StringNullableWithAggregatesFilter<"orders"> | string | null
+  is_archived?: Prisma.BoolWithAggregatesFilter<"orders"> | boolean
+  archived_at?: Prisma.DateTimeNullableWithAggregatesFilter<"orders"> | Date | string | null
   ordered_at?: Prisma.DateTimeWithAggregatesFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"orders"> | Date | string
 }
@@ -402,15 +513,24 @@ export type ordersCreateInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
   customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
 }
 
@@ -424,15 +544,24 @@ export type ordersUncheckedCreateInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersUpdateInput = {
@@ -444,15 +573,24 @@ export type ordersUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
   customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
 }
 
@@ -466,15 +604,24 @@ export type ordersUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateManyInput = {
@@ -487,9 +634,17 @@ export type ordersCreateManyInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
 }
@@ -503,9 +658,17 @@ export type ordersUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -520,9 +683,17 @@ export type ordersUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -552,15 +723,26 @@ export type ordersCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   payment_status?: Prisma.SortOrder
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  promo_code?: Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
+  referral_code?: Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   comment?: Prisma.SortOrder
+  cancellation_reason?: Prisma.SortOrder
+  is_archived?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
 
 export type ordersAvgOrderByAggregateInput = {
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
 }
@@ -575,9 +757,17 @@ export type ordersMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   payment_status?: Prisma.SortOrder
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  promo_code?: Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
+  referral_code?: Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   comment?: Prisma.SortOrder
+  cancellation_reason?: Prisma.SortOrder
+  is_archived?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -592,15 +782,26 @@ export type ordersMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   payment_status?: Prisma.SortOrder
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  promo_code?: Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
+  referral_code?: Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   comment?: Prisma.SortOrder
+  cancellation_reason?: Prisma.SortOrder
+  is_archived?: Prisma.SortOrder
+  archived_at?: Prisma.SortOrder
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
 
 export type ordersSumOrderByAggregateInput = {
   items_total?: Prisma.SortOrder
+  gross_items_total?: Prisma.SortOrder
+  discount_total?: Prisma.SortOrder
+  loyalty_spent?: Prisma.SortOrder
   delivery_cost?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
 }
@@ -703,6 +904,20 @@ export type ordersUpdateOneRequiredWithoutOrder_status_historyNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ordersUpdateToOneWithWhereWithoutOrder_status_historyInput, Prisma.ordersUpdateWithoutOrder_status_historyInput>, Prisma.ordersUncheckedUpdateWithoutOrder_status_historyInput>
 }
 
+export type ordersCreateNestedOneWithoutOrder_discountsInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutOrder_discountsInput, Prisma.ordersUncheckedCreateWithoutOrder_discountsInput>
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutOrder_discountsInput
+  connect?: Prisma.ordersWhereUniqueInput
+}
+
+export type ordersUpdateOneRequiredWithoutOrder_discountsNestedInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutOrder_discountsInput, Prisma.ordersUncheckedCreateWithoutOrder_discountsInput>
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutOrder_discountsInput
+  upsert?: Prisma.ordersUpsertWithoutOrder_discountsInput
+  connect?: Prisma.ordersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ordersUpdateToOneWithWhereWithoutOrder_discountsInput, Prisma.ordersUpdateWithoutOrder_discountsInput>, Prisma.ordersUncheckedUpdateWithoutOrder_discountsInput>
+}
+
 export type ordersCreateWithoutCustomersInput = {
   id?: string
   order_number: string
@@ -712,15 +927,24 @@ export type ordersCreateWithoutCustomersInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersUncheckedCreateWithoutCustomersInput = {
@@ -732,15 +956,24 @@ export type ordersUncheckedCreateWithoutCustomersInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersCreateOrConnectWithoutCustomersInput = {
@@ -782,9 +1015,17 @@ export type ordersScalarWhereInput = {
   status?: Prisma.StringFilter<"orders"> | string
   payment_status?: Prisma.StringFilter<"orders"> | string
   items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.StringNullableFilter<"orders"> | string | null
+  loyalty_spent?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.StringNullableFilter<"orders"> | string | null
   delivery_cost?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFilter<"orders"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.StringNullableFilter<"orders"> | string | null
+  cancellation_reason?: Prisma.StringNullableFilter<"orders"> | string | null
+  is_archived?: Prisma.BoolFilter<"orders"> | boolean
+  archived_at?: Prisma.DateTimeNullableFilter<"orders"> | Date | string | null
   ordered_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orders"> | Date | string
 }
@@ -798,14 +1039,23 @@ export type ordersCreateWithoutOrder_deliveriesInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
   customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
 }
 
@@ -819,14 +1069,23 @@ export type ordersUncheckedCreateWithoutOrder_deliveriesInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersCreateOrConnectWithoutOrder_deliveriesInput = {
@@ -854,14 +1113,23 @@ export type ordersUpdateWithoutOrder_deliveriesInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
   customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
 }
 
@@ -875,14 +1143,23 @@ export type ordersUncheckedUpdateWithoutOrder_deliveriesInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateWithoutOrder_itemsInput = {
@@ -894,14 +1171,23 @@ export type ordersCreateWithoutOrder_itemsInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
   customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
 }
 
@@ -915,14 +1201,23 @@ export type ordersUncheckedCreateWithoutOrder_itemsInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersCreateOrConnectWithoutOrder_itemsInput = {
@@ -950,14 +1245,23 @@ export type ordersUpdateWithoutOrder_itemsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
   customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
 }
 
@@ -971,14 +1275,23 @@ export type ordersUncheckedUpdateWithoutOrder_itemsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateWithoutOrder_paymentsInput = {
@@ -990,14 +1303,23 @@ export type ordersCreateWithoutOrder_paymentsInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
   customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
 }
 
@@ -1011,14 +1333,23 @@ export type ordersUncheckedCreateWithoutOrder_paymentsInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersCreateOrConnectWithoutOrder_paymentsInput = {
@@ -1046,14 +1377,23 @@ export type ordersUpdateWithoutOrder_paymentsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
   customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
 }
 
@@ -1067,14 +1407,23 @@ export type ordersUncheckedUpdateWithoutOrder_paymentsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateWithoutOrder_status_historyInput = {
@@ -1086,14 +1435,23 @@ export type ordersCreateWithoutOrder_status_historyInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
   customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
 }
 
@@ -1107,14 +1465,23 @@ export type ordersUncheckedCreateWithoutOrder_status_historyInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
 }
 
 export type ordersCreateOrConnectWithoutOrder_status_historyInput = {
@@ -1142,14 +1509,23 @@ export type ordersUpdateWithoutOrder_status_historyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
   customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
 }
 
@@ -1163,14 +1539,155 @@ export type ordersUncheckedUpdateWithoutOrder_status_historyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
+}
+
+export type ordersCreateWithoutOrder_discountsInput = {
+  id?: string
+  order_number: string
+  customer_name: string
+  phone: string
+  email?: string | null
+  status?: string
+  payment_status?: string
+  items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
+  delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
+  ordered_at?: Date | string
+  updated_at?: Date | string
+  order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
+  order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
+  order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
+}
+
+export type ordersUncheckedCreateWithoutOrder_discountsInput = {
+  id?: string
+  order_number: string
+  customer_id?: string | null
+  customer_name: string
+  phone: string
+  email?: string | null
+  status?: string
+  payment_status?: string
+  items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
+  delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
+  ordered_at?: Date | string
+  updated_at?: Date | string
+  order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
+  order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
+  order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+}
+
+export type ordersCreateOrConnectWithoutOrder_discountsInput = {
+  where: Prisma.ordersWhereUniqueInput
+  create: Prisma.XOR<Prisma.ordersCreateWithoutOrder_discountsInput, Prisma.ordersUncheckedCreateWithoutOrder_discountsInput>
+}
+
+export type ordersUpsertWithoutOrder_discountsInput = {
+  update: Prisma.XOR<Prisma.ordersUpdateWithoutOrder_discountsInput, Prisma.ordersUncheckedUpdateWithoutOrder_discountsInput>
+  create: Prisma.XOR<Prisma.ordersCreateWithoutOrder_discountsInput, Prisma.ordersUncheckedCreateWithoutOrder_discountsInput>
+  where?: Prisma.ordersWhereInput
+}
+
+export type ordersUpdateToOneWithWhereWithoutOrder_discountsInput = {
+  where?: Prisma.ordersWhereInput
+  data: Prisma.XOR<Prisma.ordersUpdateWithoutOrder_discountsInput, Prisma.ordersUncheckedUpdateWithoutOrder_discountsInput>
+}
+
+export type ordersUpdateWithoutOrder_discountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  order_number?: Prisma.StringFieldUpdateOperationsInput | string
+  customer_name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_status?: Prisma.StringFieldUpdateOperationsInput | string
+  items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
+  order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
+  order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
+}
+
+export type ordersUncheckedUpdateWithoutOrder_discountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  order_number?: Prisma.StringFieldUpdateOperationsInput | string
+  customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customer_name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_status?: Prisma.StringFieldUpdateOperationsInput | string
+  items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
+  order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
+  order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateManyCustomersInput = {
@@ -1182,9 +1699,17 @@ export type ordersCreateManyCustomersInput = {
   status?: string
   payment_status?: string
   items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
   delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
 }
@@ -1198,15 +1723,24 @@ export type ordersUpdateWithoutCustomersInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersUncheckedUpdateWithoutCustomersInput = {
@@ -1218,15 +1752,24 @@ export type ordersUncheckedUpdateWithoutCustomersInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersUncheckedUpdateManyWithoutCustomersInput = {
@@ -1238,9 +1781,17 @@ export type ordersUncheckedUpdateManyWithoutCustomersInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1254,12 +1805,14 @@ export type OrdersCountOutputType = {
   order_items: number
   order_payments: number
   order_status_history: number
+  order_discounts: number
 }
 
 export type OrdersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order_items?: boolean | OrdersCountOutputTypeCountOrder_itemsArgs
   order_payments?: boolean | OrdersCountOutputTypeCountOrder_paymentsArgs
   order_status_history?: boolean | OrdersCountOutputTypeCountOrder_status_historyArgs
+  order_discounts?: boolean | OrdersCountOutputTypeCountOrder_discountsArgs
 }
 
 /**
@@ -1293,6 +1846,13 @@ export type OrdersCountOutputTypeCountOrder_status_historyArgs<ExtArgs extends r
   where?: Prisma.order_status_historyWhereInput
 }
 
+/**
+ * OrdersCountOutputType without action
+ */
+export type OrdersCountOutputTypeCountOrder_discountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.order_discountsWhereInput
+}
+
 
 export type ordersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1304,15 +1864,24 @@ export type ordersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   status?: boolean
   payment_status?: boolean
   items_total?: boolean
+  gross_items_total?: boolean
+  discount_total?: boolean
+  promo_code?: boolean
+  loyalty_spent?: boolean
+  referral_code?: boolean
   delivery_cost?: boolean
   total_amount?: boolean
   comment?: boolean
+  cancellation_reason?: boolean
+  is_archived?: boolean
+  archived_at?: boolean
   ordered_at?: boolean
   updated_at?: boolean
   order_deliveries?: boolean | Prisma.orders$order_deliveriesArgs<ExtArgs>
   order_items?: boolean | Prisma.orders$order_itemsArgs<ExtArgs>
   order_payments?: boolean | Prisma.orders$order_paymentsArgs<ExtArgs>
   order_status_history?: boolean | Prisma.orders$order_status_historyArgs<ExtArgs>
+  order_discounts?: boolean | Prisma.orders$order_discountsArgs<ExtArgs>
   customers?: boolean | Prisma.orders$customersArgs<ExtArgs>
   _count?: boolean | Prisma.OrdersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orders"]>
@@ -1327,9 +1896,17 @@ export type ordersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   status?: boolean
   payment_status?: boolean
   items_total?: boolean
+  gross_items_total?: boolean
+  discount_total?: boolean
+  promo_code?: boolean
+  loyalty_spent?: boolean
+  referral_code?: boolean
   delivery_cost?: boolean
   total_amount?: boolean
   comment?: boolean
+  cancellation_reason?: boolean
+  is_archived?: boolean
+  archived_at?: boolean
   ordered_at?: boolean
   updated_at?: boolean
   customers?: boolean | Prisma.orders$customersArgs<ExtArgs>
@@ -1345,9 +1922,17 @@ export type ordersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   status?: boolean
   payment_status?: boolean
   items_total?: boolean
+  gross_items_total?: boolean
+  discount_total?: boolean
+  promo_code?: boolean
+  loyalty_spent?: boolean
+  referral_code?: boolean
   delivery_cost?: boolean
   total_amount?: boolean
   comment?: boolean
+  cancellation_reason?: boolean
+  is_archived?: boolean
+  archived_at?: boolean
   ordered_at?: boolean
   updated_at?: boolean
   customers?: boolean | Prisma.orders$customersArgs<ExtArgs>
@@ -1363,19 +1948,28 @@ export type ordersSelectScalar = {
   status?: boolean
   payment_status?: boolean
   items_total?: boolean
+  gross_items_total?: boolean
+  discount_total?: boolean
+  promo_code?: boolean
+  loyalty_spent?: boolean
+  referral_code?: boolean
   delivery_cost?: boolean
   total_amount?: boolean
   comment?: boolean
+  cancellation_reason?: boolean
+  is_archived?: boolean
+  archived_at?: boolean
   ordered_at?: boolean
   updated_at?: boolean
 }
 
-export type ordersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order_number" | "customer_id" | "customer_name" | "phone" | "email" | "status" | "payment_status" | "items_total" | "delivery_cost" | "total_amount" | "comment" | "ordered_at" | "updated_at", ExtArgs["result"]["orders"]>
+export type ordersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order_number" | "customer_id" | "customer_name" | "phone" | "email" | "status" | "payment_status" | "items_total" | "gross_items_total" | "discount_total" | "promo_code" | "loyalty_spent" | "referral_code" | "delivery_cost" | "total_amount" | "comment" | "cancellation_reason" | "is_archived" | "archived_at" | "ordered_at" | "updated_at", ExtArgs["result"]["orders"]>
 export type ordersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order_deliveries?: boolean | Prisma.orders$order_deliveriesArgs<ExtArgs>
   order_items?: boolean | Prisma.orders$order_itemsArgs<ExtArgs>
   order_payments?: boolean | Prisma.orders$order_paymentsArgs<ExtArgs>
   order_status_history?: boolean | Prisma.orders$order_status_historyArgs<ExtArgs>
+  order_discounts?: boolean | Prisma.orders$order_discountsArgs<ExtArgs>
   customers?: boolean | Prisma.orders$customersArgs<ExtArgs>
   _count?: boolean | Prisma.OrdersCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1393,6 +1987,7 @@ export type $ordersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     order_items: Prisma.$order_itemsPayload<ExtArgs>[]
     order_payments: Prisma.$order_paymentsPayload<ExtArgs>[]
     order_status_history: Prisma.$order_status_historyPayload<ExtArgs>[]
+    order_discounts: Prisma.$order_discountsPayload<ExtArgs>[]
     customers: Prisma.$customersPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1405,9 +2000,17 @@ export type $ordersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     status: string
     payment_status: string
     items_total: runtime.Decimal
+    gross_items_total: runtime.Decimal
+    discount_total: runtime.Decimal
+    promo_code: string | null
+    loyalty_spent: runtime.Decimal
+    referral_code: string | null
     delivery_cost: runtime.Decimal
     total_amount: runtime.Decimal
     comment: string | null
+    cancellation_reason: string | null
+    is_archived: boolean
+    archived_at: Date | null
     ordered_at: Date
     updated_at: Date
   }, ExtArgs["result"]["orders"]>
@@ -1808,6 +2411,7 @@ export interface Prisma__ordersClient<T, Null = never, ExtArgs extends runtime.T
   order_items<T extends Prisma.orders$order_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   order_payments<T extends Prisma.orders$order_paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_paymentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   order_status_history<T extends Prisma.orders$order_status_historyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_status_historyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_status_historyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  order_discounts<T extends Prisma.orders$order_discountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_discountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_discountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   customers<T extends Prisma.orders$customersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$customersArgs<ExtArgs>>): Prisma.Prisma__customersClient<runtime.Types.Result.GetResult<Prisma.$customersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1847,9 +2451,17 @@ export interface ordersFieldRefs {
   readonly status: Prisma.FieldRef<"orders", 'String'>
   readonly payment_status: Prisma.FieldRef<"orders", 'String'>
   readonly items_total: Prisma.FieldRef<"orders", 'Decimal'>
+  readonly gross_items_total: Prisma.FieldRef<"orders", 'Decimal'>
+  readonly discount_total: Prisma.FieldRef<"orders", 'Decimal'>
+  readonly promo_code: Prisma.FieldRef<"orders", 'String'>
+  readonly loyalty_spent: Prisma.FieldRef<"orders", 'Decimal'>
+  readonly referral_code: Prisma.FieldRef<"orders", 'String'>
   readonly delivery_cost: Prisma.FieldRef<"orders", 'Decimal'>
   readonly total_amount: Prisma.FieldRef<"orders", 'Decimal'>
   readonly comment: Prisma.FieldRef<"orders", 'String'>
+  readonly cancellation_reason: Prisma.FieldRef<"orders", 'String'>
+  readonly is_archived: Prisma.FieldRef<"orders", 'Boolean'>
+  readonly archived_at: Prisma.FieldRef<"orders", 'DateTime'>
   readonly ordered_at: Prisma.FieldRef<"orders", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"orders", 'DateTime'>
 }
@@ -2341,6 +2953,30 @@ export type orders$order_status_historyArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.Order_status_historyScalarFieldEnum | Prisma.Order_status_historyScalarFieldEnum[]
+}
+
+/**
+ * orders.order_discounts
+ */
+export type orders$order_discountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the order_discounts
+   */
+  select?: Prisma.order_discountsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the order_discounts
+   */
+  omit?: Prisma.order_discountsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.order_discountsInclude<ExtArgs> | null
+  where?: Prisma.order_discountsWhereInput
+  orderBy?: Prisma.order_discountsOrderByWithRelationInput | Prisma.order_discountsOrderByWithRelationInput[]
+  cursor?: Prisma.order_discountsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Order_discountsScalarFieldEnum | Prisma.Order_discountsScalarFieldEnum[]
 }
 
 /**

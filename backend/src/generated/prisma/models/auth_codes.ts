@@ -40,6 +40,8 @@ export type Auth_codesSumAggregateOutputType = {
 export type Auth_codesMinAggregateOutputType = {
   id: string | null
   phone: string | null
+  email: string | null
+  channel: string | null
   code_hash: string | null
   expires_at: Date | null
   attempts: number | null
@@ -51,6 +53,8 @@ export type Auth_codesMinAggregateOutputType = {
 export type Auth_codesMaxAggregateOutputType = {
   id: string | null
   phone: string | null
+  email: string | null
+  channel: string | null
   code_hash: string | null
   expires_at: Date | null
   attempts: number | null
@@ -62,6 +66,8 @@ export type Auth_codesMaxAggregateOutputType = {
 export type Auth_codesCountAggregateOutputType = {
   id: number
   phone: number
+  email: number
+  channel: number
   code_hash: number
   expires_at: number
   attempts: number
@@ -85,6 +91,8 @@ export type Auth_codesSumAggregateInputType = {
 export type Auth_codesMinAggregateInputType = {
   id?: true
   phone?: true
+  email?: true
+  channel?: true
   code_hash?: true
   expires_at?: true
   attempts?: true
@@ -96,6 +104,8 @@ export type Auth_codesMinAggregateInputType = {
 export type Auth_codesMaxAggregateInputType = {
   id?: true
   phone?: true
+  email?: true
+  channel?: true
   code_hash?: true
   expires_at?: true
   attempts?: true
@@ -107,6 +117,8 @@ export type Auth_codesMaxAggregateInputType = {
 export type Auth_codesCountAggregateInputType = {
   id?: true
   phone?: true
+  email?: true
+  channel?: true
   code_hash?: true
   expires_at?: true
   attempts?: true
@@ -204,7 +216,9 @@ export type auth_codesGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type Auth_codesGroupByOutputType = {
   id: string
-  phone: string
+  phone: string | null
+  email: string | null
+  channel: string
   code_hash: string
   expires_at: Date
   attempts: number
@@ -238,7 +252,9 @@ export type auth_codesWhereInput = {
   OR?: Prisma.auth_codesWhereInput[]
   NOT?: Prisma.auth_codesWhereInput | Prisma.auth_codesWhereInput[]
   id?: Prisma.UuidFilter<"auth_codes"> | string
-  phone?: Prisma.StringFilter<"auth_codes"> | string
+  phone?: Prisma.StringNullableFilter<"auth_codes"> | string | null
+  email?: Prisma.StringNullableFilter<"auth_codes"> | string | null
+  channel?: Prisma.StringFilter<"auth_codes"> | string
   code_hash?: Prisma.StringFilter<"auth_codes"> | string
   expires_at?: Prisma.DateTimeFilter<"auth_codes"> | Date | string
   attempts?: Prisma.IntFilter<"auth_codes"> | number
@@ -249,7 +265,9 @@ export type auth_codesWhereInput = {
 
 export type auth_codesOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  phone?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  channel?: Prisma.SortOrder
   code_hash?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -263,7 +281,9 @@ export type auth_codesWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.auth_codesWhereInput | Prisma.auth_codesWhereInput[]
   OR?: Prisma.auth_codesWhereInput[]
   NOT?: Prisma.auth_codesWhereInput | Prisma.auth_codesWhereInput[]
-  phone?: Prisma.StringFilter<"auth_codes"> | string
+  phone?: Prisma.StringNullableFilter<"auth_codes"> | string | null
+  email?: Prisma.StringNullableFilter<"auth_codes"> | string | null
+  channel?: Prisma.StringFilter<"auth_codes"> | string
   code_hash?: Prisma.StringFilter<"auth_codes"> | string
   expires_at?: Prisma.DateTimeFilter<"auth_codes"> | Date | string
   attempts?: Prisma.IntFilter<"auth_codes"> | number
@@ -274,7 +294,9 @@ export type auth_codesWhereUniqueInput = Prisma.AtLeast<{
 
 export type auth_codesOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  phone?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  channel?: Prisma.SortOrder
   code_hash?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -293,7 +315,9 @@ export type auth_codesScalarWhereWithAggregatesInput = {
   OR?: Prisma.auth_codesScalarWhereWithAggregatesInput[]
   NOT?: Prisma.auth_codesScalarWhereWithAggregatesInput | Prisma.auth_codesScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"auth_codes"> | string
-  phone?: Prisma.StringWithAggregatesFilter<"auth_codes"> | string
+  phone?: Prisma.StringNullableWithAggregatesFilter<"auth_codes"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"auth_codes"> | string | null
+  channel?: Prisma.StringWithAggregatesFilter<"auth_codes"> | string
   code_hash?: Prisma.StringWithAggregatesFilter<"auth_codes"> | string
   expires_at?: Prisma.DateTimeWithAggregatesFilter<"auth_codes"> | Date | string
   attempts?: Prisma.IntWithAggregatesFilter<"auth_codes"> | number
@@ -304,7 +328,9 @@ export type auth_codesScalarWhereWithAggregatesInput = {
 
 export type auth_codesCreateInput = {
   id?: string
-  phone: string
+  phone?: string | null
+  email?: string | null
+  channel?: string
   code_hash: string
   expires_at: Date | string
   attempts?: number
@@ -315,7 +341,9 @@ export type auth_codesCreateInput = {
 
 export type auth_codesUncheckedCreateInput = {
   id?: string
-  phone: string
+  phone?: string | null
+  email?: string | null
+  channel?: string
   code_hash: string
   expires_at: Date | string
   attempts?: number
@@ -326,7 +354,9 @@ export type auth_codesUncheckedCreateInput = {
 
 export type auth_codesUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
   code_hash?: Prisma.StringFieldUpdateOperationsInput | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -337,7 +367,9 @@ export type auth_codesUpdateInput = {
 
 export type auth_codesUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
   code_hash?: Prisma.StringFieldUpdateOperationsInput | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -348,7 +380,9 @@ export type auth_codesUncheckedUpdateInput = {
 
 export type auth_codesCreateManyInput = {
   id?: string
-  phone: string
+  phone?: string | null
+  email?: string | null
+  channel?: string
   code_hash: string
   expires_at: Date | string
   attempts?: number
@@ -359,7 +393,9 @@ export type auth_codesCreateManyInput = {
 
 export type auth_codesUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
   code_hash?: Prisma.StringFieldUpdateOperationsInput | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -370,7 +406,9 @@ export type auth_codesUpdateManyMutationInput = {
 
 export type auth_codesUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
   code_hash?: Prisma.StringFieldUpdateOperationsInput | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -382,6 +420,8 @@ export type auth_codesUncheckedUpdateManyInput = {
 export type auth_codesCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
   code_hash?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -398,6 +438,8 @@ export type auth_codesAvgOrderByAggregateInput = {
 export type auth_codesMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
   code_hash?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -409,6 +451,8 @@ export type auth_codesMaxOrderByAggregateInput = {
 export type auth_codesMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   phone?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  channel?: Prisma.SortOrder
   code_hash?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
@@ -427,6 +471,8 @@ export type auth_codesSumOrderByAggregateInput = {
 export type auth_codesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   phone?: boolean
+  email?: boolean
+  channel?: boolean
   code_hash?: boolean
   expires_at?: boolean
   attempts?: boolean
@@ -438,6 +484,8 @@ export type auth_codesSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type auth_codesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   phone?: boolean
+  email?: boolean
+  channel?: boolean
   code_hash?: boolean
   expires_at?: boolean
   attempts?: boolean
@@ -449,6 +497,8 @@ export type auth_codesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type auth_codesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   phone?: boolean
+  email?: boolean
+  channel?: boolean
   code_hash?: boolean
   expires_at?: boolean
   attempts?: boolean
@@ -460,6 +510,8 @@ export type auth_codesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type auth_codesSelectScalar = {
   id?: boolean
   phone?: boolean
+  email?: boolean
+  channel?: boolean
   code_hash?: boolean
   expires_at?: boolean
   attempts?: boolean
@@ -468,14 +520,16 @@ export type auth_codesSelectScalar = {
   created_at?: boolean
 }
 
-export type auth_codesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "code_hash" | "expires_at" | "attempts" | "max_attempts" | "used_at" | "created_at", ExtArgs["result"]["auth_codes"]>
+export type auth_codesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "channel" | "code_hash" | "expires_at" | "attempts" | "max_attempts" | "used_at" | "created_at", ExtArgs["result"]["auth_codes"]>
 
 export type $auth_codesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "auth_codes"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    phone: string
+    phone: string | null
+    email: string | null
+    channel: string
     code_hash: string
     expires_at: Date
     attempts: number
@@ -907,6 +961,8 @@ export interface Prisma__auth_codesClient<T, Null = never, ExtArgs extends runti
 export interface auth_codesFieldRefs {
   readonly id: Prisma.FieldRef<"auth_codes", 'String'>
   readonly phone: Prisma.FieldRef<"auth_codes", 'String'>
+  readonly email: Prisma.FieldRef<"auth_codes", 'String'>
+  readonly channel: Prisma.FieldRef<"auth_codes", 'String'>
   readonly code_hash: Prisma.FieldRef<"auth_codes", 'String'>
   readonly expires_at: Prisma.FieldRef<"auth_codes", 'DateTime'>
   readonly attempts: Prisma.FieldRef<"auth_codes", 'Int'>

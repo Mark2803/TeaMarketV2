@@ -37,7 +37,33 @@ export const moderatorOrderParamsSchema =
 export const updateOrderStatusSchema =
   z.object({
     status:
-      orderStatusSchema
+      orderStatusSchema,
+
+    cancellationReason:
+      z.string()
+        .trim()
+        .min(2, "Укажите причину отмены")
+        .max(1000, "Причина отмены слишком длинная")
+        .nullable()
+        .optional()
+  })
+  .superRefine((value, ctx) => {
+    if (
+      value.status === "cancelled"
+      && !value.cancellationReason
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cancellationReason"],
+        message: "Для отмены заказа укажите причину"
+      });
+    }
+  });
+
+export const updateOrderArchiveSchema =
+  z.object({
+    archived:
+      z.boolean()
   });
 
 export type OrderStatus =

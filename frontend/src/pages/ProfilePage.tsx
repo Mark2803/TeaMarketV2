@@ -139,11 +139,9 @@ export default function ProfilePage() {
         <div className="profile-user-card__info">
           <strong>{displayName}</strong>
 
-          <span>
-            {formatPhone(
-              session.user.phone
-            )}
-          </span>
+          {session.user.phone && (
+            <span>{formatPhone(session.user.phone)}</span>
+          )}
 
           {session.user.email && (
             <span>
@@ -159,7 +157,7 @@ export default function ProfilePage() {
             aria-hidden="true"
           />
 
-          Номер подтверждён
+          {session.user.email ? "Email подтверждён" : "Номер подтверждён"}
         </span>
       </section>
 
@@ -213,7 +211,7 @@ export default function ProfilePage() {
               <strong>Личные данные</strong>
 
               <small>
-                Имя, телефон и электронная почта
+                Имя, email, телефон и Telegram
               </small>
             </span>
 

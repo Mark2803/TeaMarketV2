@@ -15,7 +15,7 @@ declare global {
     interface Request {
       customer?: {
         id: string;
-        phone: string;
+        phone: string | null;
         name: string | null;
         email: string | null;
         username: string | null;

@@ -15,15 +15,27 @@ export default function AppHeader() {
         aria-label="На главную"
       >
         <span className="app-header__logo-placeholder">
-          TM
+          <img
+            src="https://tea-master-team.ru/bimi/logo.svg"
+            alt=""
+            className="app-header__logo-image"
+            aria-hidden="true"
+          />
         </span>
 
         <span className="app-header__brand-text">
-          Tea Market
+          Чайный Мастер
         </span>
       </Link>
 
       <div className="app-header__actions">
+        <Link
+          to="/contacts"
+          className="app-header__contacts"
+        >
+          Контакты
+        </Link>
+
         <Link
           to="/search"
           className="app-header__action"

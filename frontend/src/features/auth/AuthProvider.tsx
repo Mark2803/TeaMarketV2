@@ -58,17 +58,6 @@ const EMPTY_SESSION: AuthSession = {
 const AuthContext =
   createContext<AuthContextValue | null>(null);
 
-function normalizePhone(
-  phone: string
-): string {
-  const digits =
-    phone.replace(/\D/g, "");
-
-  return digits
-    ? `+${digits}`
-    : "";
-}
-
 function mapCustomer(
   customer: ApiCustomer
 ): AuthUser {
@@ -77,14 +66,16 @@ function mapCustomer(
 
   return {
     id: customer.id,
-    phone: customer.phone,
+    phone: customer.phone ?? "",
     name,
     email:
       customer.email?.trim() ?? "",
     username:
       customer.username,
     profileCompleted:
-      name.length >= 2
+      name.length >= 2,
+    emailMarketing:
+      customer.emailMarketing ?? false
   };
 }
 
@@ -106,9 +97,9 @@ export default function AuthProvider({
     useState<AuthSession>(EMPTY_SESSION);
 
   const [step, setStep] =
-    useState<AuthStep>("phone");
+    useState<AuthStep>("email");
 
-  const [pendingPhone, setPendingPhone] =
+  const [pendingEmail, setPendingEmail] =
     useState("");
 
   const [isInitializing, setIsInitializing] =
@@ -155,7 +146,7 @@ export default function AuthProvider({
 
         if (active) {
           setSession(EMPTY_SESSION);
-          setStep("phone");
+          setStep("email");
         }
       } finally {
         if (active) {
@@ -172,34 +163,20 @@ export default function AuthProvider({
   }, []);
 
   const requestCode = useCallback(
-    async (phone: string) => {
-      const normalizedPhone =
-        normalizePhone(phone);
-
-      if (!normalizedPhone) {
-        throw new Error(
-          "Введите номер телефона."
-        );
-      }
-
-      await requestAuthCode(
-        normalizedPhone
-      );
-
-      setPendingPhone(
-        normalizedPhone
-      );
-
+    async (email: string) => {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail) throw new Error("Введите email.");
+      await requestAuthCode(normalizedEmail);
+      setPendingEmail(normalizedEmail);
       setStep("code");
-    },
-    []
+    }, []
   );
 
   const confirmCode = useCallback(
     async (
       code: string
     ): Promise<ConfirmCodeResult> => {
-      if (!pendingPhone) {
+      if (!pendingEmail) {
         throw new Error(
           "Сначала запросите код подтверждения."
         );
@@ -207,7 +184,7 @@ export default function AuthProvider({
 
       const response =
         await verifyAuthCode(
-          pendingPhone,
+          pendingEmail,
           code
         );
 
@@ -238,7 +215,7 @@ export default function AuthProvider({
 
       return nextStep;
     },
-    [pendingPhone]
+    [pendingEmail]
   );
 
   const saveProfile = useCallback(
@@ -250,7 +227,15 @@ export default function AuthProvider({
           name: details.name.trim(),
           email:
             details.email.trim()
-            || null
+            || null,
+          phone:
+            details.phone.trim()
+            || null,
+          username:
+            details.username.trim()
+            || null,
+          emailMarketing:
+            details.emailMarketing
         });
 
       const user =
@@ -283,8 +268,8 @@ export default function AuthProvider({
         rotateGuestCartToken();
         notifyCartChanged();
         setSession(EMPTY_SESSION);
-        setPendingPhone("");
-        setStep("phone");
+        setPendingEmail("");
+        setStep("email");
       }
     },
     []
@@ -292,13 +277,13 @@ export default function AuthProvider({
 
   const resetAuthFlow = useCallback(
     () => {
-      setPendingPhone("");
+      setPendingEmail("");
 
       if (
         !session.isAuthenticated
         || !session.user
       ) {
-        setStep("phone");
+        setStep("email");
         return;
       }
 
@@ -315,7 +300,7 @@ export default function AuthProvider({
     () => ({
       session,
       step,
-      pendingPhone,
+      pendingEmail,
       isInitializing,
       requestCode,
       confirmCode,
@@ -327,7 +312,7 @@ export default function AuthProvider({
     [
       session,
       step,
-      pendingPhone,
+      pendingEmail,
       isInitializing,
       requestCode,
       confirmCode,

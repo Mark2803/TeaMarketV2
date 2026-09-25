@@ -39,6 +39,7 @@ import {
 import type {
   ProductView
 } from "../features/product/product.types";
+import { trackAnalyticsEvent } from "../features/analytics/analytics";
 
 type ProductPageContentProps = {
   product: ProductView;
@@ -81,11 +82,15 @@ function ProductPageContent({
   } = useCart();
 
   useEffect(() => {
+    trackAnalyticsEvent("product_view", { productId: product.id, path: window.location.pathname });
+  }, [product.id]);
+
+  useEffect(() => {
     document.title =
       product.seoTitle;
 
     return () => {
-      document.title = "Tea Market";
+      document.title = "Чайный Мастер";
     };
   }, [product.seoTitle]);
 
@@ -145,6 +150,7 @@ function ProductPageContent({
         selectedVariant.id,
         quantity
       );
+      trackAnalyticsEvent("add_to_cart", { productId: product.id, variantId: selectedVariant.id, quantity });
 
       setMessage(
         "Товар добавлен в корзину"

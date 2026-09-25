@@ -1,3 +1,4 @@
+import { trackAnalyticsEvent } from "../features/analytics/analytics";
 import {
   Check,
   ChevronLeft,
@@ -60,14 +61,16 @@ import {
   createOrder,
   getDeliveryQuote,
   getDeliveryMethods,
-  getPaymentMethods
+  getPaymentMethods,
+  getPricingQuote
 } from "../shared/api/checkout";
 
 import type {
   CreatedOrderApi,
   DeliveryQuoteApi,
   DeliveryMethodApi,
-  PaymentMethodApi
+  PaymentMethodApi,
+  PricingQuoteApi
 } from "../shared/api/checkout";
 
 function formatPrice(
@@ -106,6 +109,8 @@ function isCourierMethod(
 }
 
 export default function CheckoutPage() {
+  useEffect(() => { trackAnalyticsEvent("checkout_started", { path: window.location.pathname }); }, []);
+
   const { session, isInitializing } = useAuth();
   if (isInitializing) return <div className="checkout-page">Загрузка оформления заказа…</div>;
   return <CheckoutForm key={session.user?.id ?? "guest"} />;
@@ -201,6 +206,9 @@ function CheckoutForm() {
     useState<DeliveryQuoteApi | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [pricingQuote, setPricingQuote] = useState<PricingQuoteApi | null>(null);
 
   const courierAddresses = useMemo(
     () =>
@@ -243,7 +251,10 @@ function CheckoutForm() {
     ? Number(deliveryQuote.cost)
     : 0;
 
-  const total = totalAmount + deliveryCost;
+  const effectiveItemsTotal = pricingQuote?.itemsTotal ?? totalAmount;
+  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? deliveryCost;
+  const discountTotal = pricingQuote?.discountTotal ?? 0;
+  const total = pricingQuote?.totalAmount ?? (totalAmount + deliveryCost);
 
   const deliveryQuoteAddress = selectedLocation
     ? formatAddress(selectedLocation)
@@ -581,6 +592,17 @@ function CheckoutForm() {
     });
   };
 
+  useEffect(() => {
+    if (!selectedDeliveryMethodId) { setPricingQuote(null); return; }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
+        .then(r=>{if(!cancelled)setPricingQuote(r.data)})
+        .catch(()=>{if(!cancelled)setPricingQuote(null)});
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount]);
+
   const handleSubmit = async () => {
     if (
       submittingRef.current
@@ -630,7 +652,9 @@ function CheckoutForm() {
               || undefined
           },
           paymentMethodId:
-            selectedPaymentMethod.id
+            selectedPaymentMethod.id,
+          promoCode: promoCode.trim() || undefined,
+          referralCode: referralCode.trim() || undefined
         });
 
       setOrderResult(response.data);
@@ -749,13 +773,15 @@ function CheckoutForm() {
           <dl className="checkout-review__totals">
             <div>
               <dt>Товары</dt>
-              <dd>{formatPrice(totalAmount)}</dd>
+              <dd>{formatPrice(effectiveItemsTotal)}</dd>
             </div>
 
             <div>
               <dt>Доставка</dt>
-              <dd>{formatPrice(deliveryCost)}</dd>
+              <dd>{formatPrice(effectiveDeliveryCost)}</dd>
             </div>
+
+            {discountTotal > 0 && <div><dt>Скидка</dt><dd>−{formatPrice(discountTotal)}</dd></div>}
 
             <div className="checkout-review__total">
               <dt>Итого</dt>
@@ -1117,6 +1143,15 @@ function CheckoutForm() {
           </section>
 
           <section className="checkout-section">
+            <div className="checkout-section__heading"><div><h2>Скидки</h2><p>Необязательно</p></div></div>
+            <div className="checkout-loyalty">
+              <label className="checkout-loyalty__block"><span>Промокод</span><input value={promoCode} onChange={e=>setPromoCode(e.target.value.toUpperCase())} placeholder="TEA10" /></label>
+              <label className="checkout-loyalty__block"><span>Реферальный код</span><input value={referralCode} onChange={e=>setReferralCode(e.target.value.toUpperCase())} placeholder="Код друга" /></label>
+            </div>
+            {pricingQuote?.discounts.length ? <p className="checkout-loyalty__message">{pricingQuote.discounts.map(x=>`${x.name}: −${formatPrice(x.amount)}`).join(" · ")}</p> : null}
+          </section>
+
+          <section className="checkout-section">
             <div className="checkout-section__heading">
               <span className="checkout-section__step">5</span>
               <span className="checkout-section__icon">
@@ -1160,7 +1195,7 @@ function CheckoutForm() {
           <dl className="checkout-summary__totals">
             <div>
               <dt>Товары</dt>
-              <dd>{formatPrice(totalAmount)}</dd>
+              <dd>{formatPrice(effectiveItemsTotal)}</dd>
             </div>
 
             <div>
@@ -1173,10 +1208,12 @@ function CheckoutForm() {
                     : quoteError
                       ? "Ошибка расчёта"
                       : deliveryQuote
-                        ? formatPrice(deliveryCost)
+                        ? formatPrice(effectiveDeliveryCost)
                         : "Укажите адрес"}
               </dd>
             </div>
+
+            {discountTotal > 0 && <div><dt>Скидка</dt><dd>−{formatPrice(discountTotal)}</dd></div>}
 
             <div className="checkout-summary__total">
               <dt>Итого</dt>

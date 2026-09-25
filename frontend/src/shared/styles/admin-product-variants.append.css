@@ -1,0 +1,147 @@
+
+/* ===== Admin product variants editor ===== */
+.admin-variants-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-variants-heading h2 {
+  margin-bottom: .35rem;
+}
+
+.admin-variants-heading p {
+  margin: 0;
+}
+
+.admin-variant-editor {
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, .018);
+}
+
+.admin-variant-editor-actions {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.admin-variant-available {
+  margin: 0;
+  align-self: end;
+}
+
+.admin-variants-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-variants-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-variants-table th,
+.admin-variants-table td {
+  padding: .8rem .7rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admin-variants-table th {
+  font-size: .78rem;
+  font-weight: 700;
+  opacity: .65;
+}
+
+.admin-variant-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+
+.admin-icon-danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.45rem;
+  height: 2.45rem;
+  border: 1px solid rgba(170, 40, 40, .25);
+  border-radius: .7rem;
+  background: transparent;
+  color: #a62828;
+  cursor: pointer;
+}
+
+.admin-icon-danger-button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .admin-variants-heading {
+    flex-direction: column;
+  }
+
+  .admin-variants-heading .admin-primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-variants-table-wrap {
+    overflow: visible;
+  }
+
+  .admin-variants-table,
+  .admin-variants-table tbody,
+  .admin-variants-table tr,
+  .admin-variants-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-variants-table thead {
+    display: none;
+  }
+
+  .admin-variants-table tr {
+    padding: .8rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .admin-variants-table td {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .35rem 0;
+    border: 0;
+    white-space: normal;
+  }
+
+  .admin-variants-table td::before {
+    content: attr(data-label);
+    font-size: .78rem;
+    font-weight: 700;
+    opacity: .6;
+  }
+
+  .admin-variants-table .admin-variant-actions {
+    justify-content: flex-end;
+    padding-top: .75rem;
+  }
+
+  .admin-variants-table .admin-variant-actions::before {
+    display: none;
+  }
+
+  .admin-variants-table .admin-variant-actions .admin-secondary-button {
+    flex: 1;
+    justify-content: center;
+  }
+}

@@ -137,10 +137,12 @@ model customer_addresses {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model customers {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  phone              String               @unique(map: "customers_phone_uq") @db.VarChar(32)
+  phone              String?              @unique(map: "customers_phone_uq") @db.VarChar(32)
   name               String?              @db.VarChar(255)
   email              String?              @unique(map: "customers_email_uq", where: raw("(email IS NOT NULL)")) @db.VarChar(320)
   username           String?              @db.VarChar(255)
+  telegram_chat_id   String?              @unique(map: "customers_telegram_chat_id_uq") @db.VarChar(64)
+  telegram_connected_at DateTime?          @db.Timestamptz(6)
   birth_date         DateTime?            @db.Date
   created_at         DateTime             @default(now()) @db.Timestamptz(6)
   updated_at         DateTime             @default(now()) @db.Timestamptz(6)
@@ -210,6 +212,8 @@ model order_items {
   sku          String    @db.VarChar(100)
   weight_g     Decimal   @db.Decimal(10, 3)
   unit_price   Decimal   @db.Decimal(12, 2)
+  list_price   Decimal   @default(0) @db.Decimal(12, 2)
+  discount_amount Decimal @default(0) @db.Decimal(12, 2)
   quantity     Int       @default(1)
   line_total   Decimal   @db.Decimal(12, 2)
   orders       orders    @relation(fields: [order_id], references: [id], onUpdate: NoAction, map: "order_items_order_fk")
@@ -264,20 +268,30 @@ model orders {
   status               String                 @default("new") @db.VarChar(32)
   payment_status       String                 @default("unpaid") @db.VarChar(32)
   items_total          Decimal                @default(0) @db.Decimal(12, 2)
+  gross_items_total    Decimal                @default(0) @db.Decimal(12, 2)
+  discount_total       Decimal                @default(0) @db.Decimal(12, 2)
+  promo_code           String?                @db.VarChar(100)
+  loyalty_spent        Decimal                @default(0) @db.Decimal(12, 2)
+  referral_code        String?                @db.VarChar(100)
   delivery_cost        Decimal                @default(0) @db.Decimal(12, 2)
   total_amount         Decimal                @default(0) @db.Decimal(12, 2)
   comment              String?
+  cancellation_reason  String?
+  is_archived          Boolean                @default(false)
+  archived_at          DateTime?              @db.Timestamptz(6)
   ordered_at           DateTime               @default(now()) @db.Timestamptz(6)
   updated_at           DateTime               @default(now()) @db.Timestamptz(6)
   order_deliveries     order_deliveries?
   order_items          order_items[]
   order_payments       order_payments[]
   order_status_history order_status_history[]
+  order_discounts      order_discounts[]
   customers            customers?             @relation(fields: [customer_id], references: [id], onUpdate: NoAction, map: "orders_customer_fk")
 
   @@index([customer_id])
   @@index([ordered_at])
   @@index([status])
+  @@index([is_archived, ordered_at])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -416,7 +430,9 @@ model product_relations {
 /// В базе хранится только SHA-256 хеш кода.
 model auth_codes {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  phone        String    @db.VarChar(32)
+  phone        String?   @db.VarChar(32)
+  email        String?   @db.VarChar(320)
+  channel      String    @default("phone") @db.VarChar(16)
   code_hash    String    @db.VarChar(64)
   expires_at   DateTime  @db.Timestamptz(6)
   attempts     Int       @default(0)
@@ -426,6 +442,8 @@ model auth_codes {
 
   @@index([phone, created_at(sort: Desc)], map: "auth_codes_phone_created_idx")
   @@index([phone, expires_at], map: "auth_codes_active_idx", where: raw("(used_at IS NULL)"))
+  @@index([email, created_at(sort: Desc)], map: "auth_codes_email_created_idx")
+  @@index([email, expires_at], map: "auth_codes_email_active_idx", where: raw("(used_at IS NULL)"))
 }
 
 /// Сессии авторизованных покупателей.
@@ -487,4 +505,280 @@ model home_banners {
   @@index([is_active, sort_order], map: "home_banners_active_sort_idx")
   @@index([collection_id], map: "home_banners_collection_idx")
   @@index([starts_at, ends_at], map: "home_banners_dates_idx")
+}
+
+
+model promotions {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String   @db.VarChar(255)
+  description      String?
+  discount_type    String   @db.VarChar(32)
+  scope            String   @default("order") @db.VarChar(32)
+  target_ids       Json?
+  value            Decimal  @default(0) @db.Decimal(12, 2)
+  buy_quantity     Int?
+  get_quantity     Int?
+  min_order_amount Decimal  @default(0) @db.Decimal(12, 2)
+  priority         Int      @default(0)
+  audience_type    String   @default("all") @db.VarChar(32)
+  customer_ids     Json?
+  activation_type  String   @default("automatic") @db.VarChar(32)
+  promo_code_id    String?  @db.Uuid
+  is_stackable     Boolean  @default(false)
+  usage_limit      Int?
+  per_customer_limit Int    @default(1)
+  is_active        Boolean  @default(true)
+  starts_at        DateTime? @db.Timestamptz(6)
+  ends_at          DateTime? @db.Timestamptz(6)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active, starts_at, ends_at])
+  @@index([priority])
+}
+
+model promo_codes {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code               String   @unique @db.VarChar(100)
+  name               String   @db.VarChar(255)
+  discount_type      String   @db.VarChar(32)
+  value              Decimal  @default(0) @db.Decimal(12, 2)
+  min_order_amount   Decimal  @default(0) @db.Decimal(12, 2)
+  usage_limit        Int?
+  used_count         Int      @default(0)
+  per_customer_limit Int      @default(1)
+  is_active          Boolean  @default(true)
+  starts_at          DateTime? @db.Timestamptz(6)
+  ends_at            DateTime? @db.Timestamptz(6)
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active, starts_at, ends_at])
+}
+
+model loyalty_settings {
+  id                Int      @id @default(1)
+  is_active         Boolean  @default(false)
+  earn_percent      Decimal  @default(3) @db.Decimal(5, 2)
+  max_spend_percent Decimal  @default(30) @db.Decimal(5, 2)
+  min_order_amount  Decimal  @default(0) @db.Decimal(12, 2)
+  bonus_lifetime_days Int?
+  min_spend_points  Decimal  @default(0) @db.Decimal(12, 2)
+  allow_with_promotions Boolean @default(true)
+  allow_with_promo_codes Boolean @default(true)
+  updated_at        DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model loyalty_accounts {
+  customer_id String   @id @db.Uuid
+  balance     Decimal  @default(0) @db.Decimal(12, 2)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model loyalty_transactions {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_id String   @db.Uuid
+  order_id    String?  @db.Uuid
+  type        String   @db.VarChar(32)
+  amount      Decimal  @db.Decimal(12, 2)
+  comment     String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([customer_id, created_at])
+  @@index([order_id])
+}
+
+model referral_settings {
+  id                       Int      @id @default(1)
+  is_active                Boolean  @default(false)
+  inviter_bonus            Decimal  @default(200) @db.Decimal(12, 2)
+  invitee_discount_percent Decimal  @default(10) @db.Decimal(5, 2)
+  min_order_amount         Decimal  @default(1000) @db.Decimal(12, 2)
+  updated_at               DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model referral_codes {
+  customer_id String   @id @db.Uuid
+  code        String   @unique @db.VarChar(100)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model referrals {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                String   @db.VarChar(100)
+  inviter_customer_id String   @db.Uuid
+  invited_customer_id String?  @db.Uuid
+  invited_phone       String?  @db.VarChar(32)
+  order_id            String?  @unique @db.Uuid
+  status              String   @default("pending") @db.VarChar(32)
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  rewarded_at         DateTime? @db.Timestamptz(6)
+
+  @@index([inviter_customer_id])
+  @@index([invited_customer_id])
+  @@index([code])
+}
+
+
+model referral_partners {
+  id                       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                     String   @db.VarChar(255)
+  contact                  String?
+  code                     String   @unique @db.VarChar(100)
+  invitee_discount_percent Decimal  @default(0) @db.Decimal(5, 2)
+  commission_percent       Decimal  @default(0) @db.Decimal(5, 2)
+  min_order_amount         Decimal  @default(0) @db.Decimal(12, 2)
+  is_active                Boolean  @default(true)
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active])
+}
+
+model referral_partner_orders {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id  String   @db.Uuid
+  order_id    String   @unique @db.Uuid
+  order_total Decimal  @db.Decimal(12, 2)
+  commission  Decimal  @db.Decimal(12, 2)
+  status      String   @default("accrued") @db.VarChar(32)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([partner_id, created_at])
+}
+
+model order_discounts {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id    String   @db.Uuid
+  source_type String   @db.VarChar(32)
+  source_id   String?  @db.Uuid
+  code        String?  @db.VarChar(100)
+  name        String   @db.VarChar(255)
+  amount      Decimal  @db.Decimal(12, 2)
+  metadata    Json?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  orders      orders   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@index([source_type, source_id])
+}
+
+
+/// Настройки Email-канала уведомлений. SMTP-секреты хранятся только в .env backend.
+model notification_channel_settings {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel     String   @unique @db.VarChar(32)
+  is_enabled  Boolean  @default(true)
+  sender_name String?  @db.VarChar(255)
+  sender_from String?  @db.VarChar(320)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// Редактируемые Email-шаблоны автоматических уведомлений.
+model notification_templates {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_key  String   @unique @db.VarChar(100)
+  name       String   @db.VarChar(255)
+  subject    String   @db.VarChar(500)
+  body       String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// Email-рассылка администратора.
+model notification_campaigns {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String    @db.VarChar(255)
+  audience_type String    @default("all") @db.VarChar(32)
+  customer_ids  Json?
+  subject       String    @db.VarChar(500)
+  body          String
+  channels      Json      @default("[\"email\"]")
+  status        String    @default("draft") @db.VarChar(32)
+  sent_at       DateTime? @db.Timestamptz(6)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([status, created_at])
+}
+
+/// Журнал фактических Email-отправок.
+model notification_deliveries {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_id   String?   @db.Uuid
+  campaign_id   String?   @db.Uuid
+  event_key     String?   @db.VarChar(100)
+  recipient     String    @db.VarChar(500)
+  subject       String    @db.VarChar(500)
+  body          String
+  status        String    @default("pending") @db.VarChar(32)
+  error_message String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  sent_at       DateTime? @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)])
+  @@index([customer_id, created_at(sort: Desc)])
+  @@index([status])
+}
+
+/// Согласие покупателя на маркетинговые Email. Сервисные письма отделены от маркетинговых.
+model notification_preferences {
+  customer_id     String   @id @db.Uuid
+  email_marketing Boolean  @default(false)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// Анонимная сессия посетителя для собственной аналитики магазина.
+model analytics_sessions {
+  id               String   @id @db.Uuid
+  visitor_id       String   @db.Uuid
+  customer_id      String?  @db.Uuid
+  started_at       DateTime @default(now()) @db.Timestamptz(6)
+  last_activity_at DateTime @default(now()) @db.Timestamptz(6)
+  landing_path     String
+  referrer         String?
+  source           String   @default("direct") @db.VarChar(100)
+  medium           String?  @db.VarChar(100)
+  campaign         String?  @db.VarChar(255)
+  content          String?  @db.VarChar(255)
+  term             String?  @db.VarChar(255)
+  device_type      String?  @db.VarChar(32)
+  events           analytics_events[]
+  attributions     analytics_order_attributions[]
+
+  @@index([started_at])
+  @@index([visitor_id, started_at])
+  @@index([source, started_at])
+  @@index([customer_id, started_at])
+}
+
+/// Только необходимые поведенческие события: страницы, товары, корзина, checkout.
+model analytics_events {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id String   @db.Uuid
+  visitor_id String   @db.Uuid
+  customer_id String? @db.Uuid
+  event_type String   @db.VarChar(32)
+  product_id String?  @db.Uuid
+  variant_id String?  @db.Uuid
+  quantity   Int?
+  path       String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  session    analytics_sessions @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@index([created_at])
+  @@index([event_type, created_at])
+  @@index([product_id, event_type, created_at])
+  @@index([session_id, created_at])
+}
+
+/// Связывает заказ с той сессией, из которой он был оформлен.
+model analytics_order_attributions {
+  order_id   String   @id @db.Uuid
+  session_id String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  session    analytics_sessions @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@index([session_id])
 }

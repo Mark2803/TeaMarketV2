@@ -1,0 +1,75 @@
+/*
+ * Desktop-only home page horizontal rails.
+ * Mobile/tablet rules are intentionally untouched.
+ * Dynamic content added from admin extends each rail horizontally instead of
+ * creating extra rows or changing the page geometry.
+ */
+@media (min-width: 64rem) {
+  .home-collections,
+  .home-categories,
+  .home-products,
+  .home-articles {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-bottom: var(--space-3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .home-collections {
+    grid-auto-columns: clamp(15rem, 23vw, 22rem);
+  }
+
+  .home-categories {
+    grid-auto-columns: clamp(9rem, 13vw, 12rem);
+  }
+
+  .home-products {
+    grid-auto-columns: clamp(12rem, 17vw, 15rem);
+  }
+
+  .home-articles {
+    grid-auto-columns: clamp(19rem, 27vw, 25rem);
+  }
+
+  .home-collections::-webkit-scrollbar,
+  .home-categories::-webkit-scrollbar,
+  .home-products::-webkit-scrollbar,
+  .home-articles::-webkit-scrollbar {
+    display: block;
+    height: 6px;
+  }
+
+  .home-collections::-webkit-scrollbar-track,
+  .home-categories::-webkit-scrollbar-track,
+  .home-products::-webkit-scrollbar-track,
+  .home-articles::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .home-collections::-webkit-scrollbar-thumb,
+  .home-categories::-webkit-scrollbar-thumb,
+  .home-products::-webkit-scrollbar-thumb,
+  .home-articles::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--color-border);
+  }
+
+  .home-collection-card,
+  .home-category,
+  .home-product-card,
+  .home-article-card {
+    scroll-snap-align: start;
+  }
+}

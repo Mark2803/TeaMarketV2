@@ -5,6 +5,8 @@ import {
 } from "../../generated/prisma/client.js";
 
 import { prisma } from "../../database/prisma.js";
+import { calculatePricing } from "../pricing/pricing.service.js";
+import { sendTemplateEmail } from "../notifications/notification.service.js";
 
 import type {
   CreateOrderInput
@@ -110,7 +112,7 @@ export async function createOrder(
   owner: OrderOwner,
   input: CreateOrderInput
 ): Promise<CreateOrderResult> {
-  return prisma.$transaction(
+  const result: CreateOrderResult = await prisma.$transaction(
     async (transaction) => {
       // Сериализуем оформление одной корзины до чтения позиций.
       // Повторный запрос увидит уже закрытую корзину.
@@ -252,7 +254,12 @@ export async function createOrder(
           include: {
             product_variants: {
               include: {
-                products: true
+                products: {
+                  include: {
+                    product_categories: true,
+                    collection_products: true
+                  }
+                }
               }
             }
           },
@@ -262,23 +269,24 @@ export async function createOrder(
           }
         });
 
-      const itemsTotal =
-        freshItems.reduce(
-          (sum, item) =>
-            sum
-            + Number(
-              item.product_variants.price
-            ) * item.quantity,
-          0
-        );
-
-      const deliveryCost =
-        Number(
-          deliveryMethod.base_cost
-        );
-
-      const totalAmount =
-        itemsTotal + deliveryCost;
+      const pricing = await calculatePricing(
+        freshItems.map((item) => ({
+          productId: item.product_variants.product_id,
+          variantId: item.product_variants.id,
+          quantity: item.quantity,
+          unitPrice: Number(item.product_variants.price),
+          categoryIds: item.product_variants.products.product_categories.map((x) => x.category_id),
+          collectionIds: item.product_variants.products.collection_products.map((x) => x.collection_id)
+        })),
+        Number(deliveryMethod.base_cost),
+        input.promoCode,
+        input.referralCode,
+        input.loyaltyToSpend,
+        "customerId" in owner ? owner.customerId : null
+      );
+      const itemsTotal = pricing.itemsTotal;
+      const deliveryCost = pricing.deliveryCost;
+      const totalAmount = pricing.totalAmount;
 
       const customerId =
         "customerId" in owner
@@ -315,6 +323,21 @@ export async function createOrder(
             items_total:
               itemsTotal.toFixed(2),
 
+            gross_items_total:
+              pricing.grossItemsTotal.toFixed(2),
+
+            discount_total:
+              pricing.discountTotal.toFixed(2),
+
+            promo_code:
+              input.promoCode?.trim().toUpperCase() || null,
+
+            loyalty_spent:
+              pricing.loyaltySpent.toFixed(2),
+
+            referral_code:
+              input.referralCode?.trim().toUpperCase() || null,
+
             delivery_cost:
               deliveryCost.toFixed(2),
 
@@ -348,6 +371,12 @@ export async function createOrder(
 
                       unit_price:
                         variant.price,
+
+                      list_price:
+                        variant.price,
+
+                      discount_amount:
+                        "0.00",
 
                       quantity:
                         item.quantity,
@@ -411,6 +440,32 @@ export async function createOrder(
             }
           }
         });
+
+      if (pricing.discounts.length) {
+        await transaction.order_discounts.createMany({
+          data: pricing.discounts.map((discount) => ({
+            order_id: order.id,
+            source_type: discount.sourceType,
+            source_id: discount.sourceId,
+            code: discount.code,
+            name: discount.name,
+            amount: discount.amount.toFixed(2),
+            ...(discount.metadata
+              ? { metadata: discount.metadata as Prisma.InputJsonValue }
+              : {})
+          }))
+        });
+      }
+
+      const promoDiscount = pricing.discounts.find((x) => x.sourceType === "promo_code");
+      if (promoDiscount?.sourceId) {
+        await transaction.promo_codes.update({where:{id:promoDiscount.sourceId},data:{used_count:{increment:1}}});
+      }
+
+      if (pricing.loyaltySpent > 0 && customerId) {
+        await transaction.loyalty_accounts.upsert({where:{customer_id:customerId},create:{customer_id:customerId,balance:0},update:{balance:{decrement:pricing.loyaltySpent}}});
+        await transaction.loyalty_transactions.create({data:{customer_id:customerId,order_id:order.id,type:"spend",amount:(-pricing.loyaltySpent).toFixed(2),comment:"Списание при оформлении заказа"}});
+      }
 
       /*
        * Уменьшение остатка выполняется условным updateMany,
@@ -476,4 +531,22 @@ export async function createOrder(
       };
     }
   );
+
+  if (result.success && result.order.email) {
+    try {
+      await sendTemplateEmail(
+        "order_created",
+        result.order.email,
+        {
+          order_number: result.order.order_number,
+          total: Number(result.order.total_amount).toFixed(2)
+        },
+        result.order.customer_id
+      );
+    } catch (error) {
+      console.error("[NOTIFICATIONS] Не удалось отправить письмо о новом заказе", error);
+    }
+  }
+
+  return result;
 }

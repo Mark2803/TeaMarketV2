@@ -9,6 +9,7 @@ import {
 import {
   getGuestCartToken
 } from "../../features/cart/cart.token";
+import { getAnalyticsSessionId } from "../../features/analytics/analytics";
 
 export interface DeliveryMethodApi {
   id: string;
@@ -73,6 +74,9 @@ export interface CreateOrderPayload {
     comment?: string;
   };
   paymentMethodId: string;
+  promoCode?: string;
+  referralCode?: string;
+  loyaltyToSpend?: number;
 }
 
 export function getDeliveryMethods():
@@ -112,6 +116,7 @@ export function createOrder(
       headers: {
         "x-guest-token":
           getGuestCartToken(),
+        "x-analytics-session-id": getAnalyticsSessionId(),
         ...getAuthHeaders()
       },
       body:
@@ -119,3 +124,6 @@ export function createOrder(
     }
   );
 }
+
+export interface PricingQuoteApi { grossItemsTotal:number; itemsTotal:number; deliveryCost:number; discountTotal:number; totalAmount:number; loyaltySpent:number; discounts:Array<{sourceType:string;sourceId:string|null;code:string|null;name:string;amount:number}> }
+export function getPricingQuote(payload:{deliveryMethodId:string;promoCode?:string;referralCode?:string;loyaltyToSpend?:number}){return apiRequest<{data:PricingQuoteApi}>("/pricing/quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify(payload)})}

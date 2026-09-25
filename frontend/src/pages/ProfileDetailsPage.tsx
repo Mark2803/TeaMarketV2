@@ -6,6 +6,8 @@ import {
 import {
   ArrowLeft,
   Mail,
+  Phone,
+  Send,
   UserRound
 } from "lucide-react";
 
@@ -39,6 +41,9 @@ export default function ProfileDetailsPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
+  const [emailMarketing, setEmailMarketing] = useState(true);
   const [error, setError] =
     useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] =
@@ -61,6 +66,13 @@ export default function ProfileDetailsPage() {
 
     setName(session.user.name);
     setEmail(session.user.email);
+    setPhone(session.user.phone);
+    setUsername(session.user.username ?? "");
+    setEmailMarketing(
+      session.user.profileCompleted
+        ? session.user.emailMarketing
+        : true
+    );
   }, [
     isInitializing,
     navigate,
@@ -79,7 +91,7 @@ export default function ProfileDetailsPage() {
       email.trim();
 
     if (normalizedName.length < 2) {
-      setError("Введите имя.");
+      setError("Введите ФИО.");
       return;
     }
 
@@ -96,7 +108,10 @@ export default function ProfileDetailsPage() {
     try {
       await updateProfile({
         name: normalizedName,
-        email: normalizedEmail
+        email: normalizedEmail,
+        phone: phone.trim(),
+        username: username.trim(),
+        emailMarketing
       });
 
       navigate("/profile", {
@@ -168,11 +183,11 @@ export default function ProfileDetailsPage() {
           <h1>
             {session.user.profileCompleted
               ? "Личные данные"
-              : "Заполните профиль"}
+              : "Создание профиля"}
           </h1>
 
           <p>
-            Имя используется при оформлении заказа. Электронная почта необязательна.
+            ФИО используется при оформлении заказа. Телефон и Telegram заполнять необязательно.
           </p>
         </div>
 
@@ -184,7 +199,7 @@ export default function ProfileDetailsPage() {
             className="auth-field"
             htmlFor="profile-name"
           >
-            <span>Имя</span>
+            <span>ФИО</span>
 
             <div className="auth-field__control">
               <UserRound
@@ -203,7 +218,7 @@ export default function ProfileDetailsPage() {
                   setName(event.target.value);
                   setError(null);
                 }}
-                placeholder="Ваше имя"
+                placeholder="Фамилия Имя Отчество"
                 autoFocus
               />
             </div>
@@ -227,15 +242,84 @@ export default function ProfileDetailsPage() {
                 type="email"
                 autoComplete="email"
                 value={email}
-                disabled={isSubmitting}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                  setError(null);
-                }}
-                placeholder="Необязательно"
+                disabled
+                readOnly
+                placeholder="Электронная почта"
               />
             </div>
           </label>
+
+          <label
+            className="auth-field"
+            htmlFor="profile-phone"
+          >
+            <span>Номер телефона <small>(необязательно)</small></span>
+
+            <div className="auth-field__control">
+              <Phone
+                size={18}
+                strokeWidth={1.7}
+                aria-hidden="true"
+              />
+
+              <input
+                id="profile-phone"
+                type="tel"
+                autoComplete="tel"
+                value={phone}
+                disabled={isSubmitting}
+                onChange={(event) => {
+                  setPhone(event.target.value);
+                  setError(null);
+                }}
+                placeholder="+7 999 123-45-67"
+              />
+            </div>
+          </label>
+
+          <label
+            className="auth-field"
+            htmlFor="profile-telegram"
+          >
+            <span>Telegram username <small>(необязательно)</small></span>
+
+            <div className="auth-field__control">
+              <Send
+                size={18}
+                strokeWidth={1.7}
+                aria-hidden="true"
+              />
+
+              <input
+                id="profile-telegram"
+                type="text"
+                autoComplete="off"
+                value={username}
+                disabled={isSubmitting}
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                  setError(null);
+                }}
+                placeholder="@username"
+              />
+            </div>
+          </label>
+
+          <label className="auth-consent">
+            <input
+              type="checkbox"
+              checked={emailMarketing}
+              disabled={isSubmitting}
+              onChange={(event) => setEmailMarketing(event.target.checked)}
+            />
+            <span>
+              Получать новости, акции и специальные предложения по электронной почте
+            </span>
+          </label>
+
+          <p className="auth-consent__hint">
+            Необязательно. Согласие можно изменить в профиле в любое время. Сервисные письма о входе и заказах будут приходить независимо от этой настройки.
+          </p>
 
           {error && (
             <div

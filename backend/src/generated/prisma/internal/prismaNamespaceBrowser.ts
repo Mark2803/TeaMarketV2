@@ -74,7 +74,26 @@ export const ModelName = {
   auth_codes: 'auth_codes',
   auth_sessions: 'auth_sessions',
   articles: 'articles',
-  home_banners: 'home_banners'
+  home_banners: 'home_banners',
+  promotions: 'promotions',
+  promo_codes: 'promo_codes',
+  loyalty_settings: 'loyalty_settings',
+  loyalty_accounts: 'loyalty_accounts',
+  loyalty_transactions: 'loyalty_transactions',
+  referral_settings: 'referral_settings',
+  referral_codes: 'referral_codes',
+  referrals: 'referrals',
+  referral_partners: 'referral_partners',
+  referral_partner_orders: 'referral_partner_orders',
+  order_discounts: 'order_discounts',
+  notification_channel_settings: 'notification_channel_settings',
+  notification_templates: 'notification_templates',
+  notification_campaigns: 'notification_campaigns',
+  notification_deliveries: 'notification_deliveries',
+  notification_preferences: 'notification_preferences',
+  analytics_sessions: 'analytics_sessions',
+  analytics_events: 'analytics_events',
+  analytics_order_attributions: 'analytics_order_attributions'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -198,6 +217,8 @@ export const CustomersScalarFieldEnum = {
   name: 'name',
   email: 'email',
   username: 'username',
+  telegram_chat_id: 'telegram_chat_id',
+  telegram_connected_at: 'telegram_connected_at',
   birth_date: 'birth_date',
   created_at: 'created_at',
   updated_at: 'updated_at'
@@ -258,6 +279,8 @@ export const Order_itemsScalarFieldEnum = {
   sku: 'sku',
   weight_g: 'weight_g',
   unit_price: 'unit_price',
+  list_price: 'list_price',
+  discount_amount: 'discount_amount',
   quantity: 'quantity',
   line_total: 'line_total'
 } as const
@@ -300,9 +323,17 @@ export const OrdersScalarFieldEnum = {
   status: 'status',
   payment_status: 'payment_status',
   items_total: 'items_total',
+  gross_items_total: 'gross_items_total',
+  discount_total: 'discount_total',
+  promo_code: 'promo_code',
+  loyalty_spent: 'loyalty_spent',
+  referral_code: 'referral_code',
   delivery_cost: 'delivery_cost',
   total_amount: 'total_amount',
   comment: 'comment',
+  cancellation_reason: 'cancellation_reason',
+  is_archived: 'is_archived',
+  archived_at: 'archived_at',
   ordered_at: 'ordered_at',
   updated_at: 'updated_at'
 } as const
@@ -411,6 +442,8 @@ export type Product_relationsScalarFieldEnum = (typeof Product_relationsScalarFi
 export const Auth_codesScalarFieldEnum = {
   id: 'id',
   phone: 'phone',
+  email: 'email',
+  channel: 'channel',
   code_hash: 'code_hash',
   expires_at: 'expires_at',
   attempts: 'attempts',
@@ -476,6 +509,286 @@ export const Home_bannersScalarFieldEnum = {
 export type Home_bannersScalarFieldEnum = (typeof Home_bannersScalarFieldEnum)[keyof typeof Home_bannersScalarFieldEnum]
 
 
+export const PromotionsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  discount_type: 'discount_type',
+  scope: 'scope',
+  target_ids: 'target_ids',
+  value: 'value',
+  buy_quantity: 'buy_quantity',
+  get_quantity: 'get_quantity',
+  min_order_amount: 'min_order_amount',
+  priority: 'priority',
+  audience_type: 'audience_type',
+  customer_ids: 'customer_ids',
+  activation_type: 'activation_type',
+  promo_code_id: 'promo_code_id',
+  is_stackable: 'is_stackable',
+  usage_limit: 'usage_limit',
+  per_customer_limit: 'per_customer_limit',
+  is_active: 'is_active',
+  starts_at: 'starts_at',
+  ends_at: 'ends_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type PromotionsScalarFieldEnum = (typeof PromotionsScalarFieldEnum)[keyof typeof PromotionsScalarFieldEnum]
+
+
+export const Promo_codesScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  discount_type: 'discount_type',
+  value: 'value',
+  min_order_amount: 'min_order_amount',
+  usage_limit: 'usage_limit',
+  used_count: 'used_count',
+  per_customer_limit: 'per_customer_limit',
+  is_active: 'is_active',
+  starts_at: 'starts_at',
+  ends_at: 'ends_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Promo_codesScalarFieldEnum = (typeof Promo_codesScalarFieldEnum)[keyof typeof Promo_codesScalarFieldEnum]
+
+
+export const Loyalty_settingsScalarFieldEnum = {
+  id: 'id',
+  is_active: 'is_active',
+  earn_percent: 'earn_percent',
+  max_spend_percent: 'max_spend_percent',
+  min_order_amount: 'min_order_amount',
+  bonus_lifetime_days: 'bonus_lifetime_days',
+  min_spend_points: 'min_spend_points',
+  allow_with_promotions: 'allow_with_promotions',
+  allow_with_promo_codes: 'allow_with_promo_codes',
+  updated_at: 'updated_at'
+} as const
+
+export type Loyalty_settingsScalarFieldEnum = (typeof Loyalty_settingsScalarFieldEnum)[keyof typeof Loyalty_settingsScalarFieldEnum]
+
+
+export const Loyalty_accountsScalarFieldEnum = {
+  customer_id: 'customer_id',
+  balance: 'balance',
+  updated_at: 'updated_at'
+} as const
+
+export type Loyalty_accountsScalarFieldEnum = (typeof Loyalty_accountsScalarFieldEnum)[keyof typeof Loyalty_accountsScalarFieldEnum]
+
+
+export const Loyalty_transactionsScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  order_id: 'order_id',
+  type: 'type',
+  amount: 'amount',
+  comment: 'comment',
+  created_at: 'created_at'
+} as const
+
+export type Loyalty_transactionsScalarFieldEnum = (typeof Loyalty_transactionsScalarFieldEnum)[keyof typeof Loyalty_transactionsScalarFieldEnum]
+
+
+export const Referral_settingsScalarFieldEnum = {
+  id: 'id',
+  is_active: 'is_active',
+  inviter_bonus: 'inviter_bonus',
+  invitee_discount_percent: 'invitee_discount_percent',
+  min_order_amount: 'min_order_amount',
+  updated_at: 'updated_at'
+} as const
+
+export type Referral_settingsScalarFieldEnum = (typeof Referral_settingsScalarFieldEnum)[keyof typeof Referral_settingsScalarFieldEnum]
+
+
+export const Referral_codesScalarFieldEnum = {
+  customer_id: 'customer_id',
+  code: 'code',
+  created_at: 'created_at'
+} as const
+
+export type Referral_codesScalarFieldEnum = (typeof Referral_codesScalarFieldEnum)[keyof typeof Referral_codesScalarFieldEnum]
+
+
+export const ReferralsScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  inviter_customer_id: 'inviter_customer_id',
+  invited_customer_id: 'invited_customer_id',
+  invited_phone: 'invited_phone',
+  order_id: 'order_id',
+  status: 'status',
+  created_at: 'created_at',
+  rewarded_at: 'rewarded_at'
+} as const
+
+export type ReferralsScalarFieldEnum = (typeof ReferralsScalarFieldEnum)[keyof typeof ReferralsScalarFieldEnum]
+
+
+export const Referral_partnersScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  contact: 'contact',
+  code: 'code',
+  invitee_discount_percent: 'invitee_discount_percent',
+  commission_percent: 'commission_percent',
+  min_order_amount: 'min_order_amount',
+  is_active: 'is_active',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Referral_partnersScalarFieldEnum = (typeof Referral_partnersScalarFieldEnum)[keyof typeof Referral_partnersScalarFieldEnum]
+
+
+export const Referral_partner_ordersScalarFieldEnum = {
+  id: 'id',
+  partner_id: 'partner_id',
+  order_id: 'order_id',
+  order_total: 'order_total',
+  commission: 'commission',
+  status: 'status',
+  created_at: 'created_at'
+} as const
+
+export type Referral_partner_ordersScalarFieldEnum = (typeof Referral_partner_ordersScalarFieldEnum)[keyof typeof Referral_partner_ordersScalarFieldEnum]
+
+
+export const Order_discountsScalarFieldEnum = {
+  id: 'id',
+  order_id: 'order_id',
+  source_type: 'source_type',
+  source_id: 'source_id',
+  code: 'code',
+  name: 'name',
+  amount: 'amount',
+  metadata: 'metadata',
+  created_at: 'created_at'
+} as const
+
+export type Order_discountsScalarFieldEnum = (typeof Order_discountsScalarFieldEnum)[keyof typeof Order_discountsScalarFieldEnum]
+
+
+export const Notification_channel_settingsScalarFieldEnum = {
+  id: 'id',
+  channel: 'channel',
+  is_enabled: 'is_enabled',
+  sender_name: 'sender_name',
+  sender_from: 'sender_from',
+  updated_at: 'updated_at'
+} as const
+
+export type Notification_channel_settingsScalarFieldEnum = (typeof Notification_channel_settingsScalarFieldEnum)[keyof typeof Notification_channel_settingsScalarFieldEnum]
+
+
+export const Notification_templatesScalarFieldEnum = {
+  id: 'id',
+  event_key: 'event_key',
+  name: 'name',
+  subject: 'subject',
+  body: 'body',
+  is_active: 'is_active',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Notification_templatesScalarFieldEnum = (typeof Notification_templatesScalarFieldEnum)[keyof typeof Notification_templatesScalarFieldEnum]
+
+
+export const Notification_campaignsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  audience_type: 'audience_type',
+  customer_ids: 'customer_ids',
+  subject: 'subject',
+  body: 'body',
+  channels: 'channels',
+  status: 'status',
+  sent_at: 'sent_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Notification_campaignsScalarFieldEnum = (typeof Notification_campaignsScalarFieldEnum)[keyof typeof Notification_campaignsScalarFieldEnum]
+
+
+export const Notification_deliveriesScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  campaign_id: 'campaign_id',
+  event_key: 'event_key',
+  recipient: 'recipient',
+  subject: 'subject',
+  body: 'body',
+  status: 'status',
+  error_message: 'error_message',
+  created_at: 'created_at',
+  sent_at: 'sent_at'
+} as const
+
+export type Notification_deliveriesScalarFieldEnum = (typeof Notification_deliveriesScalarFieldEnum)[keyof typeof Notification_deliveriesScalarFieldEnum]
+
+
+export const Notification_preferencesScalarFieldEnum = {
+  customer_id: 'customer_id',
+  email_marketing: 'email_marketing',
+  updated_at: 'updated_at'
+} as const
+
+export type Notification_preferencesScalarFieldEnum = (typeof Notification_preferencesScalarFieldEnum)[keyof typeof Notification_preferencesScalarFieldEnum]
+
+
+export const Analytics_sessionsScalarFieldEnum = {
+  id: 'id',
+  visitor_id: 'visitor_id',
+  customer_id: 'customer_id',
+  started_at: 'started_at',
+  last_activity_at: 'last_activity_at',
+  landing_path: 'landing_path',
+  referrer: 'referrer',
+  source: 'source',
+  medium: 'medium',
+  campaign: 'campaign',
+  content: 'content',
+  term: 'term',
+  device_type: 'device_type'
+} as const
+
+export type Analytics_sessionsScalarFieldEnum = (typeof Analytics_sessionsScalarFieldEnum)[keyof typeof Analytics_sessionsScalarFieldEnum]
+
+
+export const Analytics_eventsScalarFieldEnum = {
+  id: 'id',
+  session_id: 'session_id',
+  visitor_id: 'visitor_id',
+  customer_id: 'customer_id',
+  event_type: 'event_type',
+  product_id: 'product_id',
+  variant_id: 'variant_id',
+  quantity: 'quantity',
+  path: 'path',
+  created_at: 'created_at'
+} as const
+
+export type Analytics_eventsScalarFieldEnum = (typeof Analytics_eventsScalarFieldEnum)[keyof typeof Analytics_eventsScalarFieldEnum]
+
+
+export const Analytics_order_attributionsScalarFieldEnum = {
+  order_id: 'order_id',
+  session_id: 'session_id',
+  created_at: 'created_at'
+} as const
+
+export type Analytics_order_attributionsScalarFieldEnum = (typeof Analytics_order_attributionsScalarFieldEnum)[keyof typeof Analytics_order_attributionsScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -490,6 +803,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

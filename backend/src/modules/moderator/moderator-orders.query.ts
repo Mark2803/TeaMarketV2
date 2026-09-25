@@ -28,6 +28,14 @@ export const moderatorOrdersQuerySchema =
       orderStatusSchema
         .optional(),
 
+    archive:
+      z.enum([
+        "active",
+        "archived",
+        "all"
+      ])
+        .default("active"),
+
     search:
       z.string()
         .trim()

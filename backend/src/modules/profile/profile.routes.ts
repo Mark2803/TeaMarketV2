@@ -6,7 +6,8 @@ import {
 
 import {
   getProfileController,
-  updateProfileController
+  updateProfileController,
+  getReferralProfileController
 } from "./profile.controller.js";
 
 const router = Router();
@@ -28,5 +29,7 @@ router.patch(
   "/me",
   updateProfileController
 );
+
+router.get("/referral", getReferralProfileController);
 
 export default router;

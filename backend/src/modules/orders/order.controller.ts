@@ -12,6 +12,8 @@ import {
   createOrder
 } from "./order.service.js";
 
+import { prisma } from "../../database/prisma.js";
+
 function getOrderOwner(
   req: Request,
   res: Response
@@ -195,6 +197,23 @@ export async function createOrderController(
         result
       );
       return;
+    }
+
+    const analyticsSessionHeader = req.headers["x-analytics-session-id"];
+    const analyticsSessionId = Array.isArray(analyticsSessionHeader) ? analyticsSessionHeader[0] : analyticsSessionHeader;
+    if (analyticsSessionId && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(analyticsSessionId)) {
+      try {
+        const session = await prisma.analytics_sessions.findUnique({ where: { id: analyticsSessionId }, select: { id: true } });
+        if (session) {
+          await prisma.analytics_order_attributions.upsert({
+            where: { order_id: result.order.id },
+            create: { order_id: result.order.id, session_id: analyticsSessionId },
+            update: { session_id: analyticsSessionId }
+          });
+        }
+      } catch {
+        // Сбой аналитики не должен мешать созданию заказа.
+      }
     }
 
     res.status(201).json({

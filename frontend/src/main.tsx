@@ -5,6 +5,7 @@ import App from "./app/App";
 
 import "./shared/styles/global.css";
 import "./shared/styles/layout.css";
+import "./shared/styles/storefront-desktop-fix.css";
 import "./shared/styles/product.css";
 import "./shared/styles/auth.css";
 import "./shared/styles/profile.css";
@@ -14,6 +15,8 @@ import "./shared/styles/delivery.css";
 import "./shared/styles/checkout.css";
 import "./shared/styles/category-subcategories.css";
 import "./shared/styles/articles.css";
+import "./shared/styles/admin.css";
+import "./shared/styles/home-desktop-horizontal-sections.css";
 
 ReactDOM.createRoot(
   document.getElementById("root")!

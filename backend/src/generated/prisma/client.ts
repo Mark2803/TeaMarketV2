@@ -182,3 +182,98 @@ export type articles = Prisma.articlesModel
  * Управляемые Hero-плашки Главной, каждая ведёт в тематическую подборку.
  */
 export type home_banners = Prisma.home_bannersModel
+/**
+ * Model promotions
+ * 
+ */
+export type promotions = Prisma.promotionsModel
+/**
+ * Model promo_codes
+ * 
+ */
+export type promo_codes = Prisma.promo_codesModel
+/**
+ * Model loyalty_settings
+ * 
+ */
+export type loyalty_settings = Prisma.loyalty_settingsModel
+/**
+ * Model loyalty_accounts
+ * 
+ */
+export type loyalty_accounts = Prisma.loyalty_accountsModel
+/**
+ * Model loyalty_transactions
+ * 
+ */
+export type loyalty_transactions = Prisma.loyalty_transactionsModel
+/**
+ * Model referral_settings
+ * 
+ */
+export type referral_settings = Prisma.referral_settingsModel
+/**
+ * Model referral_codes
+ * 
+ */
+export type referral_codes = Prisma.referral_codesModel
+/**
+ * Model referrals
+ * 
+ */
+export type referrals = Prisma.referralsModel
+/**
+ * Model referral_partners
+ * 
+ */
+export type referral_partners = Prisma.referral_partnersModel
+/**
+ * Model referral_partner_orders
+ * 
+ */
+export type referral_partner_orders = Prisma.referral_partner_ordersModel
+/**
+ * Model order_discounts
+ * 
+ */
+export type order_discounts = Prisma.order_discountsModel
+/**
+ * Model notification_channel_settings
+ * Настройки Email-канала уведомлений. SMTP-секреты хранятся только в .env backend.
+ */
+export type notification_channel_settings = Prisma.notification_channel_settingsModel
+/**
+ * Model notification_templates
+ * Редактируемые Email-шаблоны автоматических уведомлений.
+ */
+export type notification_templates = Prisma.notification_templatesModel
+/**
+ * Model notification_campaigns
+ * Email-рассылка администратора.
+ */
+export type notification_campaigns = Prisma.notification_campaignsModel
+/**
+ * Model notification_deliveries
+ * Журнал фактических Email-отправок.
+ */
+export type notification_deliveries = Prisma.notification_deliveriesModel
+/**
+ * Model notification_preferences
+ * Согласие покупателя на маркетинговые Email. Сервисные письма отделены от маркетинговых.
+ */
+export type notification_preferences = Prisma.notification_preferencesModel
+/**
+ * Model analytics_sessions
+ * Анонимная сессия посетителя для собственной аналитики магазина.
+ */
+export type analytics_sessions = Prisma.analytics_sessionsModel
+/**
+ * Model analytics_events
+ * Только необходимые поведенческие события: страницы, товары, корзина, checkout.
+ */
+export type analytics_events = Prisma.analytics_eventsModel
+/**
+ * Model analytics_order_attributions
+ * Связывает заказ с той сессией, из которой он был оформлен.
+ */
+export type analytics_order_attributions = Prisma.analytics_order_attributionsModel

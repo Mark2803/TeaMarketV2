@@ -119,6 +119,12 @@ export const createOrderSchema =
             .optional()
       }),
 
+    promoCode: z.string().trim().max(100).optional(),
+
+    referralCode: z.string().trim().max(100).optional(),
+
+    loyaltyToSpend: z.coerce.number().min(0).default(0),
+
     paymentMethodId:
       z.string()
         .uuid(

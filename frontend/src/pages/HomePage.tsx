@@ -117,7 +117,6 @@ export default function HomePage() {
 
   const homeCategories =
     categoriesQuery.data?.data
-      .slice(0, 8)
     ?? [];
 
   const homeCollections =
@@ -125,8 +124,7 @@ export default function HomePage() {
       .filter(
         (collection) =>
           collection.show_on_home
-      )
-      .slice(0, 8);
+      );
 
   const hasCatalogError =
     Boolean(productsQuery.error)
@@ -141,7 +139,7 @@ export default function HomePage() {
         <HomeHeroCarousel banners={homeBannersQuery.data?.data ?? []} />
       ) : (
         <header className="home-db-heading">
-          <p>Каталог Tea Market</p>
+          <p>Каталог Чайный Мастер</p>
           <h1>Китайский чай из реальной базы данных</h1>
           <span>Hero-плашки пока не добавлены в базу данных.</span>
         </header>

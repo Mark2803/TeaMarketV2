@@ -9,6 +9,7 @@ import {
 
 import AuthProvider from "../../features/auth/AuthProvider";
 import DeliveryProvider from "../../features/delivery/DeliveryProvider";
+import { AdminAuthProvider } from "../../features/admin/AdminAuthProvider";
 
 const queryClient =
   new QueryClient({
@@ -34,9 +35,11 @@ export default function AppProviders({
       client={queryClient}
     >
       <AuthProvider>
-        <DeliveryProvider>
-          {children}
-        </DeliveryProvider>
+        <AdminAuthProvider>
+          <DeliveryProvider>
+            {children}
+          </DeliveryProvider>
+        </AdminAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

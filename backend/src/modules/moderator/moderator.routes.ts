@@ -5,11 +5,18 @@ import {
 } from "./moderator-auth.middleware.js";
 
 import {
+  getModeratorSessionController,
+  loginModeratorController,
+  logoutModeratorController
+} from "./moderator-session.controller.js";
+
+import {
   getModeratorOrderController
 } from "./moderator-order-details.controller.js";
 
 import {
-  updateModeratorOrderStatusController
+  updateModeratorOrderStatusController,
+  updateModeratorOrderArchiveController
 } from "./moderator-order.controller.js";
 
 import {
@@ -51,6 +58,10 @@ import {
 import {
   getModeratorProductsController
 } from "./moderator-products.controller.js";
+
+import {
+  getModeratorStockController
+} from "./moderator-stock.controller.js";
 
 import {
   getModeratorProductByIdController
@@ -144,11 +155,76 @@ import {
   replaceModeratorProductImageController
 } from "./products/moderator-product-image-replace.controller.js";
 
+
+import {
+  listHomeBannersAdmin, createHomeBannerAdmin, updateHomeBannerAdmin, deleteHomeBannerAdmin,
+  listArticlesAdmin, createArticleAdmin, updateArticleAdmin, deleteArticleAdmin
+} from "./content/moderator-home-content.controller.js";
+
+import {
+  getModeratorCustomersController,
+  getModeratorCustomerController,
+  updateModeratorCustomerController,
+  deleteModeratorCustomerController
+} from "./customers/moderator-customers.controller.js";
+
+
+import {listPromotions,createPromotion,updatePromotion,deletePromotion,listPromoCodes,createPromoCode,updatePromoCode,deletePromoCode,getBenefitSettings,updateLoyaltySettings,updateReferralSettings,listReferralPartners,createReferralPartner,updateReferralPartner,deleteReferralPartner} from "./promotions/moderator-promotions.controller.js";
+
+
+import {
+  getNotificationOverview,
+  updateNotificationTemplate,
+  createNotificationCampaign,
+  deleteNotificationCampaign,
+  sendNotificationCampaign,
+  updateNotificationChannel,
+  checkNotificationChannel
+} from "./notifications/moderator-notifications.controller.js";
+
+import { getModeratorAnalyticsController } from "./analytics/moderator-analytics.controller.js";
+
 const router = Router();
+
+router.post("/login", loginModeratorController);
+router.post("/logout", logoutModeratorController);
+router.get("/session", getModeratorSessionController);
 
 router.use(
   moderatorAuthMiddleware
 );
+
+
+router.get("/analytics", getModeratorAnalyticsController);
+
+router.get("/notifications", getNotificationOverview);
+router.patch("/notifications/templates/:id", updateNotificationTemplate);
+router.post("/notifications/campaigns", createNotificationCampaign);
+router.post("/notifications/campaigns/:id/send", sendNotificationCampaign);
+router.delete("/notifications/campaigns/:id", deleteNotificationCampaign);
+router.put("/notifications/channels/:channel", updateNotificationChannel);
+router.post("/notifications/channels/:channel/check", checkNotificationChannel);
+
+router.get("/promotions", listPromotions);
+router.post("/promotions", createPromotion);
+router.patch("/promotions/:id", updatePromotion);
+router.delete("/promotions/:id", deletePromotion);
+router.get("/promo-codes", listPromoCodes);
+router.post("/promo-codes", createPromoCode);
+router.patch("/promo-codes/:id", updatePromoCode);
+router.delete("/promo-codes/:id", deletePromoCode);
+router.get("/benefit-settings", getBenefitSettings);
+router.put("/benefit-settings/loyalty", updateLoyaltySettings);
+router.put("/benefit-settings/referral", updateReferralSettings);
+router.get("/referral-partners", listReferralPartners);
+router.post("/referral-partners", createReferralPartner);
+router.patch("/referral-partners/:id", updateReferralPartner);
+router.delete("/referral-partners/:id", deleteReferralPartner);
+
+router.get("/customers", getModeratorCustomersController);
+router.get("/customers/:customerId", getModeratorCustomerController);
+router.patch("/customers/:customerId", updateModeratorCustomerController);
+router.delete("/customers/:customerId", deleteModeratorCustomerController);
 
 router.get(
   "/orders",
@@ -166,6 +242,11 @@ router.patch(
 );
 
 router.patch(
+  "/orders/:orderNumber/archive",
+  updateModeratorOrderArchiveController
+);
+
+router.patch(
   "/orders/:orderNumber/delivery",
   updateModeratorDeliveryController
 );
@@ -174,6 +255,16 @@ router.patch(
   "/orders/:orderNumber/payment",
   updateModeratorPaymentController
 );
+
+
+router.get("/content/home-banners", listHomeBannersAdmin);
+router.post("/content/home-banners", createHomeBannerAdmin);
+router.patch("/content/home-banners/:bannerId", updateHomeBannerAdmin);
+router.delete("/content/home-banners/:bannerId", deleteHomeBannerAdmin);
+router.get("/content/articles", listArticlesAdmin);
+router.post("/content/articles", createArticleAdmin);
+router.patch("/content/articles/:articleId", updateArticleAdmin);
+router.delete("/content/articles/:articleId", deleteArticleAdmin);
 
 router.post(
   "/products",
@@ -203,6 +294,11 @@ router.delete(
 router.delete(
   "/products/:productId",
   deleteModeratorProductController
+);
+
+router.get(
+  "/stock",
+  getModeratorStockController
 );
 
 router.get(

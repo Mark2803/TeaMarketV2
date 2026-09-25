@@ -1,0 +1,1 @@
+import {Router} from "express";import {authMiddleware} from "../auth/auth.middleware.js";import {pricingQuoteController} from "./pricing.controller.js";const router=Router();router.post("/quote",authMiddleware,pricingQuoteController);export default router;

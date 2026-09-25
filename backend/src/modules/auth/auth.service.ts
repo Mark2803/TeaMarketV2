@@ -40,10 +40,11 @@ export type VerifyAuthCodeResult =
       expiresAt: Date;
       customer: {
         id: string;
-        phone: string;
+        phone: string | null;
         name: string | null;
         email: string | null;
         username: string | null;
+        emailMarketing: boolean;
       };
     }
   | {
@@ -122,74 +123,35 @@ function createSessionToken() {
 export async function requestAuthCode(
   input: RequestAuthCodeInput
 ): Promise<RequestAuthCodeResult> {
-  const code =
-    createAuthCode();
+  const code = createAuthCode();
+  const codeHash = createSha256Hash(code);
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + AUTH_CODE_LIFETIME_MINUTES * 60 * 1000);
+  const identityWhere = input.channel === "email" ? { email: input.email } : { phone: input.phone };
 
-  const codeHash =
-    createSha256Hash(code);
+  await prisma.$transaction(async (transaction) => {
+    await transaction.auth_codes.updateMany({ where: { ...identityWhere, used_at: null }, data: { used_at: now } });
+    await transaction.auth_codes.create({
+      data: {
+        phone: input.channel === "phone" ? input.phone : null,
+        email: input.channel === "email" ? input.email : null,
+        channel: input.channel, code_hash: codeHash, expires_at: expiresAt, max_attempts: AUTH_CODE_MAX_ATTEMPTS
+      }
+    });
+  });
 
-  const now =
-    new Date();
+  try {
+    if (input.channel === "email") await authCodeProvider.sendEmailCode(input.email, code);
+    else await authCodeProvider.sendPhoneCode(input.phone, code);
+  } catch (error) {
+    await prisma.auth_codes.updateMany({
+      where: { ...identityWhere, code_hash: codeHash, used_at: null },
+      data: { used_at: new Date() }
+    });
+    throw error;
+  }
 
-  const expiresAt =
-    new Date(
-      now.getTime()
-      + AUTH_CODE_LIFETIME_MINUTES
-      * 60
-      * 1000
-    );
-
-  await prisma.$transaction(
-    async (transaction) => {
-      await transaction
-        .auth_codes
-        .updateMany({
-          where: {
-            phone:
-              input.phone,
-
-            used_at:
-              null
-          },
-
-          data: {
-            used_at:
-              now
-          }
-        });
-
-      await transaction
-        .auth_codes
-        .create({
-          data: {
-            phone:
-              input.phone,
-
-            code_hash:
-              codeHash,
-
-            expires_at:
-              expiresAt,
-
-            max_attempts:
-              AUTH_CODE_MAX_ATTEMPTS
-          }
-        });
-    }
-  );
-
-  await authCodeProvider.sendCode(
-    input.phone,
-    code
-  );
-
-  return {
-    success: true,
-
-    expiresInSeconds:
-      AUTH_CODE_LIFETIME_MINUTES
-      * 60
-  };
+  return { success: true, expiresInSeconds: AUTH_CODE_LIFETIME_MINUTES * 60 };
 }
 
 /**
@@ -206,11 +168,8 @@ export async function verifyAuthCode(
   const authCode =
     await prisma.auth_codes.findFirst({
       where: {
-        phone:
-          input.phone,
-
-        used_at:
-          null
+        ...(input.channel === "email" ? { email: input.email } : { phone: input.phone }),
+        used_at: null
       },
 
       orderBy: {
@@ -352,29 +311,14 @@ export async function verifyAuthCode(
             }
           });
 
-        const currentCustomer =
-          await transaction
-            .customers
-            .upsert({
-              where: {
-                phone:
-                  input.phone
-              },
-
-              update: {},
-
-              create: {
-                phone:
-                  input.phone
-              },
-
-              select: {
-                id: true,
-                phone: true,
-                name: true,
-                email: true,
-                username: true
-              }
+        const currentCustomer = input.channel === "email"
+          ? await transaction.customers.upsert({
+              where: { email: input.email }, update: {}, create: { email: input.email },
+              select: { id: true, phone: true, name: true, email: true, username: true }
+            })
+          : await transaction.customers.upsert({
+              where: { phone: input.phone }, update: {}, create: { phone: input.phone },
+              select: { id: true, phone: true, name: true, email: true, username: true }
             });
 
         await transaction
@@ -395,7 +339,15 @@ export async function verifyAuthCode(
             }
           });
 
-        return currentCustomer;
+        const preferences = await transaction.notification_preferences.findUnique({
+          where: { customer_id: currentCustomer.id },
+          select: { email_marketing: true }
+        });
+
+        return {
+          ...currentCustomer,
+          emailMarketing: preferences?.email_marketing ?? false
+        };
       }
     );
 

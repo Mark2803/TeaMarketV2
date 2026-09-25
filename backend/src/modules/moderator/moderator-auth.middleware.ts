@@ -1,59 +1,21 @@
-import type {
-  NextFunction,
-  Request,
-  Response
-} from "express";
+import type { NextFunction, Request, Response } from "express";
+import { readAdminSession } from "./moderator-session.js";
 
-/**
- * Защищает маршруты единого модератора
- * ключом из переменной MODERATOR_API_KEY.
- */
+/** Защищает административные маршруты серверной сессией. */
 export function moderatorAuthMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ): void {
-  const configuredKey =
-    process.env.MODERATOR_API_KEY;
-
-  if (!configuredKey) {
-    res.status(503).json({
-      error: {
-        code:
-          "MODERATOR_AUTH_NOT_CONFIGURED",
-
-        message:
-          "Доступ модератора не настроен"
-      }
-    });
-
+  if (readAdminSession(req)) {
+    next();
     return;
   }
 
-  const headerValue =
-    req.headers["x-moderator-key"];
-
-  const providedKey =
-    Array.isArray(headerValue)
-      ? headerValue[0]
-      : headerValue;
-
-  if (
-    !providedKey ||
-    providedKey !== configuredKey
-  ) {
-    res.status(401).json({
-      error: {
-        code:
-          "MODERATOR_UNAUTHORIZED",
-
-        message:
-          "Неверный ключ доступа модератора"
-      }
-    });
-
-    return;
-  }
-
-  next();
+  res.status(401).json({
+    error: {
+      code: "MODERATOR_UNAUTHORIZED",
+      message: "Требуется вход администратора"
+    }
+  });
 }

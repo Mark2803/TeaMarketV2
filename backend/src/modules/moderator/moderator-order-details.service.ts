@@ -51,6 +51,8 @@ export async function getModeratorOrderByNumber(
         }
       },
 
+      order_discounts: { orderBy: { created_at: "asc" } },
+
       order_status_history: {
         orderBy: {
           changed_at:

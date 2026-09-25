@@ -137,3 +137,14 @@ export async function updateProfileController(
     data: profile
   });
 }
+export async function getReferralProfileController(req: Request,res: Response): Promise<void> {
+  const customerId = getAuthorizedCustomerId(req,res); if(!customerId)return;
+  const { prisma } = await import("../../database/prisma.js");
+  const codeValue = `TM${customerId.replaceAll("-","").slice(0,10).toUpperCase()}`;
+  const [code,account,settings] = await Promise.all([
+    prisma.referral_codes.upsert({where:{customer_id:customerId},create:{customer_id:customerId,code:codeValue},update:{}}),
+    prisma.loyalty_accounts.upsert({where:{customer_id:customerId},create:{customer_id:customerId,balance:0},update:{}}),
+    prisma.referral_settings.upsert({where:{id:1},create:{id:1},update:{}})
+  ]);
+  res.json({data:{code:code.code,bonusBalance:account.balance,referral:settings}});
+}

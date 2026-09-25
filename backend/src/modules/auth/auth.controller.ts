@@ -30,7 +30,7 @@ export async function requestAuthCodeController(
           "INVALID_AUTH_DATA",
 
         message:
-          "Некорректный номер телефона",
+          "Укажите корректный email или номер телефона",
 
         details:
           bodyResult.error.flatten()

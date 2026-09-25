@@ -1,0 +1,94 @@
+/*
+ * Desktop storefront layout fix.
+ * Mobile/tablet app behavior remains unchanged.
+ * On desktop the storefront behaves like a normal web page:
+ * browser page scroll, wider content area, no 100dvh internal viewport.
+ */
+@media (min-width: 64rem) {
+  :root {
+    --content-max-width: 90rem;
+  }
+
+  .client-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    width: min(calc(100% - (var(--space-4) * 2)), var(--content-max-width));
+    flex: 0 0 auto;
+  }
+
+  .client-layout__content,
+  .client-layout__content--catalog,
+  .client-layout__content--product {
+    width: min(calc(100% - (var(--space-4) * 2)), var(--content-max-width));
+    min-height: auto;
+    margin: 0 auto;
+    padding: var(--space-4) 0 var(--space-6);
+    overflow: visible;
+  }
+
+  .bottom-navigation {
+    position: static;
+    width: min(40rem, calc(100% - (var(--space-4) * 2)));
+    margin: var(--space-3) auto var(--space-4);
+    flex: 0 0 auto;
+  }
+}
+
+/* Desktop home proportions: use the available storefront width. */
+@media (min-width: 64rem) {
+  .app-header__logo-placeholder {
+    width: 3rem;
+    height: 3rem;
+    flex-basis: 3rem;
+  }
+
+  .home-collections {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    overflow: visible;
+  }
+
+  .home-collection-card {
+    min-height: 11.5rem;
+    padding: 1.15rem;
+  }
+
+  .home-collection-card span {
+    font-size: 1.08rem;
+  }
+
+  .home-categories {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1rem;
+    overflow: visible;
+  }
+
+  .home-category {
+    min-height: 8.5rem;
+    justify-content: center;
+    padding: .9rem .65rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    font-size: var(--font-size-sm);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .home-category__icon {
+    width: 4.75rem;
+    height: 4.75rem;
+  }
+}

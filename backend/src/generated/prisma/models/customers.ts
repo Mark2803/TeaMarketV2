@@ -31,6 +31,8 @@ export type CustomersMinAggregateOutputType = {
   name: string | null
   email: string | null
   username: string | null
+  telegram_chat_id: string | null
+  telegram_connected_at: Date | null
   birth_date: Date | null
   created_at: Date | null
   updated_at: Date | null
@@ -42,6 +44,8 @@ export type CustomersMaxAggregateOutputType = {
   name: string | null
   email: string | null
   username: string | null
+  telegram_chat_id: string | null
+  telegram_connected_at: Date | null
   birth_date: Date | null
   created_at: Date | null
   updated_at: Date | null
@@ -53,6 +57,8 @@ export type CustomersCountAggregateOutputType = {
   name: number
   email: number
   username: number
+  telegram_chat_id: number
+  telegram_connected_at: number
   birth_date: number
   created_at: number
   updated_at: number
@@ -66,6 +72,8 @@ export type CustomersMinAggregateInputType = {
   name?: true
   email?: true
   username?: true
+  telegram_chat_id?: true
+  telegram_connected_at?: true
   birth_date?: true
   created_at?: true
   updated_at?: true
@@ -77,6 +85,8 @@ export type CustomersMaxAggregateInputType = {
   name?: true
   email?: true
   username?: true
+  telegram_chat_id?: true
+  telegram_connected_at?: true
   birth_date?: true
   created_at?: true
   updated_at?: true
@@ -88,6 +98,8 @@ export type CustomersCountAggregateInputType = {
   name?: true
   email?: true
   username?: true
+  telegram_chat_id?: true
+  telegram_connected_at?: true
   birth_date?: true
   created_at?: true
   updated_at?: true
@@ -168,10 +180,12 @@ export type customersGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type CustomersGroupByOutputType = {
   id: string
-  phone: string
+  phone: string | null
   name: string | null
   email: string | null
   username: string | null
+  telegram_chat_id: string | null
+  telegram_connected_at: Date | null
   birth_date: Date | null
   created_at: Date
   updated_at: Date
@@ -200,10 +214,12 @@ export type customersWhereInput = {
   OR?: Prisma.customersWhereInput[]
   NOT?: Prisma.customersWhereInput | Prisma.customersWhereInput[]
   id?: Prisma.UuidFilter<"customers"> | string
-  phone?: Prisma.StringFilter<"customers"> | string
+  phone?: Prisma.StringNullableFilter<"customers"> | string | null
   name?: Prisma.StringNullableFilter<"customers"> | string | null
   email?: Prisma.StringNullableFilter<"customers"> | string | null
   username?: Prisma.StringNullableFilter<"customers"> | string | null
+  telegram_chat_id?: Prisma.StringNullableFilter<"customers"> | string | null
+  telegram_connected_at?: Prisma.DateTimeNullableFilter<"customers"> | Date | string | null
   birth_date?: Prisma.DateTimeNullableFilter<"customers"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"customers"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"customers"> | Date | string
@@ -216,10 +232,12 @@ export type customersWhereInput = {
 
 export type customersOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  phone?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegram_chat_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegram_connected_at?: Prisma.SortOrderInput | Prisma.SortOrder
   birth_date?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -234,11 +252,13 @@ export type customersWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   phone?: string
   email?: string
+  telegram_chat_id?: string
   AND?: Prisma.customersWhereInput | Prisma.customersWhereInput[]
   OR?: Prisma.customersWhereInput[]
   NOT?: Prisma.customersWhereInput | Prisma.customersWhereInput[]
   name?: Prisma.StringNullableFilter<"customers"> | string | null
   username?: Prisma.StringNullableFilter<"customers"> | string | null
+  telegram_connected_at?: Prisma.DateTimeNullableFilter<"customers"> | Date | string | null
   birth_date?: Prisma.DateTimeNullableFilter<"customers"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"customers"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"customers"> | Date | string
@@ -247,14 +267,16 @@ export type customersWhereUniqueInput = Prisma.AtLeast<{
   favorites?: Prisma.FavoritesListRelationFilter
   orders?: Prisma.OrdersListRelationFilter
   auth_sessions?: Prisma.Auth_sessionsListRelationFilter
-}, "id" | "phone" | "email">
+}, "id" | "phone" | "email" | "telegram_chat_id">
 
 export type customersOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  phone?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   username?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegram_chat_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  telegram_connected_at?: Prisma.SortOrderInput | Prisma.SortOrder
   birth_date?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -268,10 +290,12 @@ export type customersScalarWhereWithAggregatesInput = {
   OR?: Prisma.customersScalarWhereWithAggregatesInput[]
   NOT?: Prisma.customersScalarWhereWithAggregatesInput | Prisma.customersScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"customers"> | string
-  phone?: Prisma.StringWithAggregatesFilter<"customers"> | string
+  phone?: Prisma.StringNullableWithAggregatesFilter<"customers"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"customers"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"customers"> | string | null
   username?: Prisma.StringNullableWithAggregatesFilter<"customers"> | string | null
+  telegram_chat_id?: Prisma.StringNullableWithAggregatesFilter<"customers"> | string | null
+  telegram_connected_at?: Prisma.DateTimeNullableWithAggregatesFilter<"customers"> | Date | string | null
   birth_date?: Prisma.DateTimeNullableWithAggregatesFilter<"customers"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"customers"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"customers"> | Date | string
@@ -279,10 +303,12 @@ export type customersScalarWhereWithAggregatesInput = {
 
 export type customersCreateInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -295,10 +321,12 @@ export type customersCreateInput = {
 
 export type customersUncheckedCreateInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -311,10 +339,12 @@ export type customersUncheckedCreateInput = {
 
 export type customersUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -327,10 +357,12 @@ export type customersUpdateInput = {
 
 export type customersUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -343,10 +375,12 @@ export type customersUncheckedUpdateInput = {
 
 export type customersCreateManyInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -354,10 +388,12 @@ export type customersCreateManyInput = {
 
 export type customersUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -365,10 +401,12 @@ export type customersUpdateManyMutationInput = {
 
 export type customersUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,6 +428,8 @@ export type customersCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
   username?: Prisma.SortOrder
+  telegram_chat_id?: Prisma.SortOrder
+  telegram_connected_at?: Prisma.SortOrder
   birth_date?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -401,6 +441,8 @@ export type customersMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
   username?: Prisma.SortOrder
+  telegram_chat_id?: Prisma.SortOrder
+  telegram_connected_at?: Prisma.SortOrder
   birth_date?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -412,6 +454,8 @@ export type customersMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
   username?: Prisma.SortOrder
+  telegram_chat_id?: Prisma.SortOrder
+  telegram_connected_at?: Prisma.SortOrder
   birth_date?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -493,10 +537,12 @@ export type customersUpdateOneRequiredWithoutAuth_sessionsNestedInput = {
 
 export type customersCreateWithoutCartsInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -508,10 +554,12 @@ export type customersCreateWithoutCartsInput = {
 
 export type customersUncheckedCreateWithoutCartsInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -539,10 +587,12 @@ export type customersUpdateToOneWithWhereWithoutCartsInput = {
 
 export type customersUpdateWithoutCartsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -554,10 +604,12 @@ export type customersUpdateWithoutCartsInput = {
 
 export type customersUncheckedUpdateWithoutCartsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -569,10 +621,12 @@ export type customersUncheckedUpdateWithoutCartsInput = {
 
 export type customersCreateWithoutCustomer_addressesInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -584,10 +638,12 @@ export type customersCreateWithoutCustomer_addressesInput = {
 
 export type customersUncheckedCreateWithoutCustomer_addressesInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -615,10 +671,12 @@ export type customersUpdateToOneWithWhereWithoutCustomer_addressesInput = {
 
 export type customersUpdateWithoutCustomer_addressesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -630,10 +688,12 @@ export type customersUpdateWithoutCustomer_addressesInput = {
 
 export type customersUncheckedUpdateWithoutCustomer_addressesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -645,10 +705,12 @@ export type customersUncheckedUpdateWithoutCustomer_addressesInput = {
 
 export type customersCreateWithoutFavoritesInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -660,10 +722,12 @@ export type customersCreateWithoutFavoritesInput = {
 
 export type customersUncheckedCreateWithoutFavoritesInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -691,10 +755,12 @@ export type customersUpdateToOneWithWhereWithoutFavoritesInput = {
 
 export type customersUpdateWithoutFavoritesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -706,10 +772,12 @@ export type customersUpdateWithoutFavoritesInput = {
 
 export type customersUncheckedUpdateWithoutFavoritesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -721,10 +789,12 @@ export type customersUncheckedUpdateWithoutFavoritesInput = {
 
 export type customersCreateWithoutOrdersInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -736,10 +806,12 @@ export type customersCreateWithoutOrdersInput = {
 
 export type customersUncheckedCreateWithoutOrdersInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -767,10 +839,12 @@ export type customersUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type customersUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -782,10 +856,12 @@ export type customersUpdateWithoutOrdersInput = {
 
 export type customersUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -797,10 +873,12 @@ export type customersUncheckedUpdateWithoutOrdersInput = {
 
 export type customersCreateWithoutAuth_sessionsInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -812,10 +890,12 @@ export type customersCreateWithoutAuth_sessionsInput = {
 
 export type customersUncheckedCreateWithoutAuth_sessionsInput = {
   id?: string
-  phone: string
+  phone?: string | null
   name?: string | null
   email?: string | null
   username?: string | null
+  telegram_chat_id?: string | null
+  telegram_connected_at?: Date | string | null
   birth_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -843,10 +923,12 @@ export type customersUpdateToOneWithWhereWithoutAuth_sessionsInput = {
 
 export type customersUpdateWithoutAuth_sessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -858,10 +940,12 @@ export type customersUpdateWithoutAuth_sessionsInput = {
 
 export type customersUncheckedUpdateWithoutAuth_sessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_chat_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telegram_connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   birth_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -944,6 +1028,8 @@ export type customersSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   name?: boolean
   email?: boolean
   username?: boolean
+  telegram_chat_id?: boolean
+  telegram_connected_at?: boolean
   birth_date?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -961,6 +1047,8 @@ export type customersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   email?: boolean
   username?: boolean
+  telegram_chat_id?: boolean
+  telegram_connected_at?: boolean
   birth_date?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -972,6 +1060,8 @@ export type customersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   email?: boolean
   username?: boolean
+  telegram_chat_id?: boolean
+  telegram_connected_at?: boolean
   birth_date?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -983,12 +1073,14 @@ export type customersSelectScalar = {
   name?: boolean
   email?: boolean
   username?: boolean
+  telegram_chat_id?: boolean
+  telegram_connected_at?: boolean
   birth_date?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type customersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "name" | "email" | "username" | "birth_date" | "created_at" | "updated_at", ExtArgs["result"]["customers"]>
+export type customersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "name" | "email" | "username" | "telegram_chat_id" | "telegram_connected_at" | "birth_date" | "created_at" | "updated_at", ExtArgs["result"]["customers"]>
 export type customersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   carts?: boolean | Prisma.customers$cartsArgs<ExtArgs>
   customer_addresses?: boolean | Prisma.customers$customer_addressesArgs<ExtArgs>
@@ -1011,10 +1103,12 @@ export type $customersPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    phone: string
+    phone: string | null
     name: string | null
     email: string | null
     username: string | null
+    telegram_chat_id: string | null
+    telegram_connected_at: Date | null
     birth_date: Date | null
     created_at: Date
     updated_at: Date
@@ -1451,6 +1545,8 @@ export interface customersFieldRefs {
   readonly name: Prisma.FieldRef<"customers", 'String'>
   readonly email: Prisma.FieldRef<"customers", 'String'>
   readonly username: Prisma.FieldRef<"customers", 'String'>
+  readonly telegram_chat_id: Prisma.FieldRef<"customers", 'String'>
+  readonly telegram_connected_at: Prisma.FieldRef<"customers", 'DateTime'>
   readonly birth_date: Prisma.FieldRef<"customers", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"customers", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"customers", 'DateTime'>
@@ -1677,7 +1773,7 @@ export type customersCreateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * The data needed to create a customers.
    */
-  data: Prisma.XOR<Prisma.customersCreateInput, Prisma.customersUncheckedCreateInput>
+  data?: Prisma.XOR<Prisma.customersCreateInput, Prisma.customersUncheckedCreateInput>
 }
 
 /**

@@ -52,3 +52,38 @@
 .product-toolbar {
   display: none;
 }
+
+
+/* Desktop storefront: normal document flow, browser scroll. */
+@media (min-width: 64rem) {
+  .client-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .app-header {
+    width: min(calc(100% - 4rem), 96rem);
+    margin-inline: auto;
+    flex: 0 0 auto;
+  }
+
+  .client-layout__content {
+    width: min(calc(100% - 4rem), 96rem);
+    min-height: 0;
+    margin-inline: auto;
+    padding: 1rem 0 2rem;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  .bottom-navigation {
+    position: static;
+    width: min(40rem, calc(100% - 4rem));
+    margin: 1rem auto 1.5rem;
+    flex: 0 0 auto;
+  }
+}

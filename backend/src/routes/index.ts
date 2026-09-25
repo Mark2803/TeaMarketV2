@@ -8,6 +8,8 @@ import collectionsRouter from "../modules/collections/collections.routes.js";
 import articlesRouter from "../modules/articles/articles.routes.js";
 import homeBannersRouter from "../modules/home-banners/home-banners.routes.js";
 import searchRouter from "../modules/search/search.routes.js";
+import pricingRouter from "../modules/pricing/pricing.routes.js";
+import analyticsRouter from "../modules/analytics/analytics.routes.js";
 
 import cartRouter from "../modules/cart/cart.routes.js";
 import ordersRouter from "../modules/orders/order.routes.js";
@@ -32,6 +34,8 @@ router.use("/collections", collectionsRouter);
 router.use("/articles", articlesRouter);
 router.use("/home-banners", homeBannersRouter);
 router.use("/search", searchRouter);
+router.use("/pricing", pricingRouter);
+router.use("/analytics", analyticsRouter);
 
 router.use("/delivery-methods", deliveryMethodsRouter);
 router.use("/payment-methods", paymentMethodsRouter);

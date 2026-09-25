@@ -26,6 +26,12 @@ export async function getModeratorOrders(
       query.status;
   }
 
+  if (query.archive === "active") {
+    where.is_archived = false;
+  } else if (query.archive === "archived") {
+    where.is_archived = true;
+  }
+
   if (query.search) {
     where.OR = [
       {
@@ -90,6 +96,9 @@ export async function getModeratorOrders(
           email: true,
           status: true,
           payment_status: true,
+          cancellation_reason: true,
+          is_archived: true,
+          archived_at: true,
           items_total: true,
           delivery_cost: true,
           total_amount: true,
