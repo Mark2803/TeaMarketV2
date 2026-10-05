@@ -1710,3 +1710,19 @@
     margin-right: 0;
   }
 }
+/* Mobile grid intrinsic-width fix */
+@media (max-width: 63.999rem) {
+  .client-layout {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .app-header,
+  .client-layout__content,
+  .bottom-navigation {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
