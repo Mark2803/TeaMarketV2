@@ -25,63 +25,86 @@ ReactDOM.createRoot(
     <App />
   </React.StrictMode>
 );
-
 /* TEMP: real-device horizontal overflow diagnostics */
 if (new URLSearchParams(window.location.search).has("debug-width")) {
   window.addEventListener("load", () => {
     setTimeout(() => {
-      const vw = document.documentElement.clientWidth;
+      const describe = (selector: string) => {
+        const el = document.querySelector<HTMLElement>(selector);
 
-      const bad = Array.from(document.querySelectorAll<HTMLElement>("*"))
-        .map((el) => {
-          const r = el.getBoundingClientRect();
-          return {
-            el,
-            left: Math.round(r.left),
-            right: Math.round(r.right),
-            width: Math.round(r.width),
-            overflow: Math.round(Math.max(0, r.right - vw)),
-          };
-        })
-        .filter((x) => x.right > vw + 1 || x.left < -1 || x.width > vw + 1)
-        .sort((a, b) => b.overflow - a.overflow)
-        .slice(0, 12);
+        if (!el) return `${selector}: NOT FOUND`;
+
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+
+        return [
+          selector,
+          `left=${r.left.toFixed(1)} right=${r.right.toFixed(1)} width=${r.width.toFixed(1)}`,
+          `clientWidth=${el.clientWidth} scrollWidth=${el.scrollWidth}`,
+          `padding=${cs.paddingLeft} / ${cs.paddingRight}`,
+          `margin=${cs.marginLeft} / ${cs.marginRight}`,
+        ].join("\n");
+      };
+
+      const vv = window.visualViewport;
 
       const lines = [
-        `viewport: ${vw}px`,
-        `html scrollWidth: ${document.documentElement.scrollWidth}px`,
-        `body scrollWidth: ${document.body.scrollWidth}px`,
+        `innerWidth=${window.innerWidth}`,
+        `documentWidth=${document.documentElement.clientWidth}`,
+        `visualWidth=${vv?.width ?? "n/a"}`,
+        `visualOffset=${vv?.offsetLeft ?? "n/a"}`,
+        `DPR=${window.devicePixelRatio}`,
         "",
-        ...bad.map((x, i) => {
-          const id = x.el.id ? `#${x.el.id}` : "";
-          const cls =
-            typeof x.el.className === "string" && x.el.className.trim()
-              ? "." + x.el.className.trim().split(/\s+/).join(".")
-              : "";
-
-          return `${i + 1}. ${x.el.tagName.toLowerCase()}${id}${cls}
-left=${x.left} right=${x.right} width=${x.width} overflow=${x.overflow}`;
-        }),
+        describe("html"),
+        "",
+        describe("body"),
+        "",
+        describe("#root"),
+        "",
+        describe(".client-layout"),
+        "",
+        describe(".app-header"),
+        "",
+        describe(".app-header__brand"),
+        "",
+        describe(".app-header__actions"),
+        "",
+        describe(".client-layout__content"),
+        "",
+        describe(".bottom-navigation"),
       ];
+
+      document.documentElement.style.overflow = "auto";
+      document.body.style.overflow = "auto";
+
+      const layout = document.querySelector<HTMLElement>(".client-layout");
+      if (layout) {
+        layout.style.height = "auto";
+        layout.style.minHeight = "100vh";
+        layout.style.overflow = "visible";
+      }
+
+      const content = document.querySelector<HTMLElement>(".client-layout__content");
+      if (content) {
+        content.style.overflow = "visible";
+      }
 
       const panel = document.createElement("pre");
       panel.textContent = lines.join("\n");
 
       Object.assign(panel.style, {
-        position: "fixed",
+        position: "absolute",
         zIndex: "2147483647",
         left: "4px",
         right: "4px",
         top: "4px",
-        maxHeight: "75vh",
-        overflow: "auto",
         margin: "0",
         padding: "10px",
-        background: "rgba(0,0,0,.92)",
+        background: "rgba(0,0,0,.94)",
         color: "#fff",
         font: "11px/1.35 monospace",
         whiteSpace: "pre-wrap",
-        wordBreak: "break-all",
+        wordBreak: "break-word",
         borderRadius: "6px",
       });
 
