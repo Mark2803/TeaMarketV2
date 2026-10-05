@@ -1726,3 +1726,29 @@
     max-width: 100%;
   }
 }
+/* Compact mobile header */
+@media (max-width: 30rem) {
+  .app-header {
+    gap: 0.5rem;
+  }
+
+  .app-header__brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0.4rem;
+  }
+
+  .app-header__actions {
+    flex: 0 0 auto;
+    gap: 0.35rem;
+  }
+
+  .app-header__contacts {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+
+  .app-header__brand-text {
+    font-size: 0.95rem;
+  }
+}
