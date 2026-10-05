@@ -38,6 +38,8 @@ const ProfilePage = lazy(() => import("../../pages/ProfilePage"));
 const SearchPage = lazy(() => import("../../pages/SearchPage"));
 
 const AdminLoginPage = lazy(() => import("../../pages/admin/AdminLoginPage"));
+const AdminForgotPasswordPage = lazy(() => import("../../pages/admin/AdminForgotPasswordPage"));
+const AdminResetPasswordPage = lazy(() => import("../../pages/admin/AdminResetPasswordPage"));
 const AdminDashboardPage = lazy(() => import("../../pages/admin/AdminDashboardPage"));
 const AdminPlaceholderPage = lazy(() => import("../../pages/admin/AdminPlaceholderPage"));
 const AdminProductsPage = lazy(() => import("../../pages/admin/AdminProductsPage"));
@@ -94,6 +96,8 @@ export default function AppRouter() {
         </Route>
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} />
+        <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />

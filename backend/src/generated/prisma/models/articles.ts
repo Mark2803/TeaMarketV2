@@ -51,6 +51,8 @@ export type ArticlesMinAggregateOutputType = {
   published_at: Date | null
   seo_title: string | null
   seo_description: string | null
+  linked_product_id: string | null
+  cta_text: string | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -70,6 +72,8 @@ export type ArticlesMaxAggregateOutputType = {
   published_at: Date | null
   seo_title: string | null
   seo_description: string | null
+  linked_product_id: string | null
+  cta_text: string | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -89,6 +93,8 @@ export type ArticlesCountAggregateOutputType = {
   published_at: number
   seo_title: number
   seo_description: number
+  linked_product_id: number
+  cta_text: number
   created_at: number
   updated_at: number
   _all: number
@@ -120,6 +126,8 @@ export type ArticlesMinAggregateInputType = {
   published_at?: true
   seo_title?: true
   seo_description?: true
+  linked_product_id?: true
+  cta_text?: true
   created_at?: true
   updated_at?: true
 }
@@ -139,6 +147,8 @@ export type ArticlesMaxAggregateInputType = {
   published_at?: true
   seo_title?: true
   seo_description?: true
+  linked_product_id?: true
+  cta_text?: true
   created_at?: true
   updated_at?: true
 }
@@ -158,6 +168,8 @@ export type ArticlesCountAggregateInputType = {
   published_at?: true
   seo_title?: true
   seo_description?: true
+  linked_product_id?: true
+  cta_text?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -264,6 +276,8 @@ export type ArticlesGroupByOutputType = {
   published_at: Date | null
   seo_title: string | null
   seo_description: string | null
+  linked_product_id: string | null
+  cta_text: string | null
   created_at: Date
   updated_at: Date
   _count: ArticlesCountAggregateOutputType | null
@@ -306,8 +320,12 @@ export type articlesWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"articles"> | Date | string | null
   seo_title?: Prisma.StringNullableFilter<"articles"> | string | null
   seo_description?: Prisma.StringNullableFilter<"articles"> | string | null
+  linked_product_id?: Prisma.UuidNullableFilter<"articles"> | string | null
+  cta_text?: Prisma.StringNullableFilter<"articles"> | string | null
   created_at?: Prisma.DateTimeFilter<"articles"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"articles"> | Date | string
+  products?: Prisma.XOR<Prisma.ProductsNullableScalarRelationFilter, Prisma.productsWhereInput> | null
+  article_publications?: Prisma.Article_publicationsListRelationFilter
 }
 
 export type articlesOrderByWithRelationInput = {
@@ -325,8 +343,12 @@ export type articlesOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   seo_title?: Prisma.SortOrderInput | Prisma.SortOrder
   seo_description?: Prisma.SortOrderInput | Prisma.SortOrder
+  linked_product_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  cta_text?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  products?: Prisma.productsOrderByWithRelationInput
+  article_publications?: Prisma.article_publicationsOrderByRelationAggregateInput
 }
 
 export type articlesWhereUniqueInput = Prisma.AtLeast<{
@@ -347,8 +369,12 @@ export type articlesWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"articles"> | Date | string | null
   seo_title?: Prisma.StringNullableFilter<"articles"> | string | null
   seo_description?: Prisma.StringNullableFilter<"articles"> | string | null
+  linked_product_id?: Prisma.UuidNullableFilter<"articles"> | string | null
+  cta_text?: Prisma.StringNullableFilter<"articles"> | string | null
   created_at?: Prisma.DateTimeFilter<"articles"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"articles"> | Date | string
+  products?: Prisma.XOR<Prisma.ProductsNullableScalarRelationFilter, Prisma.productsWhereInput> | null
+  article_publications?: Prisma.Article_publicationsListRelationFilter
 }, "id" | "slug">
 
 export type articlesOrderByWithAggregationInput = {
@@ -366,6 +392,8 @@ export type articlesOrderByWithAggregationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   seo_title?: Prisma.SortOrderInput | Prisma.SortOrder
   seo_description?: Prisma.SortOrderInput | Prisma.SortOrder
+  linked_product_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  cta_text?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   _count?: Prisma.articlesCountOrderByAggregateInput
@@ -393,6 +421,8 @@ export type articlesScalarWhereWithAggregatesInput = {
   published_at?: Prisma.DateTimeNullableWithAggregatesFilter<"articles"> | Date | string | null
   seo_title?: Prisma.StringNullableWithAggregatesFilter<"articles"> | string | null
   seo_description?: Prisma.StringNullableWithAggregatesFilter<"articles"> | string | null
+  linked_product_id?: Prisma.UuidNullableWithAggregatesFilter<"articles"> | string | null
+  cta_text?: Prisma.StringNullableWithAggregatesFilter<"articles"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"articles"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"articles"> | Date | string
 }
@@ -412,8 +442,11 @@ export type articlesCreateInput = {
   published_at?: Date | string | null
   seo_title?: string | null
   seo_description?: string | null
+  cta_text?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  products?: Prisma.productsCreateNestedOneWithoutArticlesInput
+  article_publications?: Prisma.article_publicationsCreateNestedManyWithoutArticlesInput
 }
 
 export type articlesUncheckedCreateInput = {
@@ -431,8 +464,11 @@ export type articlesUncheckedCreateInput = {
   published_at?: Date | string | null
   seo_title?: string | null
   seo_description?: string | null
+  linked_product_id?: string | null
+  cta_text?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  article_publications?: Prisma.article_publicationsUncheckedCreateNestedManyWithoutArticlesInput
 }
 
 export type articlesUpdateInput = {
@@ -450,8 +486,11 @@ export type articlesUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  products?: Prisma.productsUpdateOneWithoutArticlesNestedInput
+  article_publications?: Prisma.article_publicationsUpdateManyWithoutArticlesNestedInput
 }
 
 export type articlesUncheckedUpdateInput = {
@@ -469,8 +508,11 @@ export type articlesUncheckedUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_product_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  article_publications?: Prisma.article_publicationsUncheckedUpdateManyWithoutArticlesNestedInput
 }
 
 export type articlesCreateManyInput = {
@@ -488,6 +530,8 @@ export type articlesCreateManyInput = {
   published_at?: Date | string | null
   seo_title?: string | null
   seo_description?: string | null
+  linked_product_id?: string | null
+  cta_text?: string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -507,6 +551,7 @@ export type articlesUpdateManyMutationInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -526,8 +571,20 @@ export type articlesUncheckedUpdateManyInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_product_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ArticlesListRelationFilter = {
+  every?: Prisma.articlesWhereInput
+  some?: Prisma.articlesWhereInput
+  none?: Prisma.articlesWhereInput
+}
+
+export type articlesOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type articlesCountOrderByAggregateInput = {
@@ -545,6 +602,8 @@ export type articlesCountOrderByAggregateInput = {
   published_at?: Prisma.SortOrder
   seo_title?: Prisma.SortOrder
   seo_description?: Prisma.SortOrder
+  linked_product_id?: Prisma.SortOrder
+  cta_text?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -569,6 +628,8 @@ export type articlesMaxOrderByAggregateInput = {
   published_at?: Prisma.SortOrder
   seo_title?: Prisma.SortOrder
   seo_description?: Prisma.SortOrder
+  linked_product_id?: Prisma.SortOrder
+  cta_text?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -588,6 +649,8 @@ export type articlesMinOrderByAggregateInput = {
   published_at?: Prisma.SortOrder
   seo_title?: Prisma.SortOrder
   seo_description?: Prisma.SortOrder
+  linked_product_id?: Prisma.SortOrder
+  cta_text?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -597,6 +660,370 @@ export type articlesSumOrderByAggregateInput = {
   sort_order?: Prisma.SortOrder
 }
 
+export type ArticlesScalarRelationFilter = {
+  is?: Prisma.articlesWhereInput
+  isNot?: Prisma.articlesWhereInput
+}
+
+export type articlesCreateNestedManyWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput> | Prisma.articlesCreateWithoutProductsInput[] | Prisma.articlesUncheckedCreateWithoutProductsInput[]
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutProductsInput | Prisma.articlesCreateOrConnectWithoutProductsInput[]
+  createMany?: Prisma.articlesCreateManyProductsInputEnvelope
+  connect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+}
+
+export type articlesUncheckedCreateNestedManyWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput> | Prisma.articlesCreateWithoutProductsInput[] | Prisma.articlesUncheckedCreateWithoutProductsInput[]
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutProductsInput | Prisma.articlesCreateOrConnectWithoutProductsInput[]
+  createMany?: Prisma.articlesCreateManyProductsInputEnvelope
+  connect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+}
+
+export type articlesUpdateManyWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput> | Prisma.articlesCreateWithoutProductsInput[] | Prisma.articlesUncheckedCreateWithoutProductsInput[]
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutProductsInput | Prisma.articlesCreateOrConnectWithoutProductsInput[]
+  upsert?: Prisma.articlesUpsertWithWhereUniqueWithoutProductsInput | Prisma.articlesUpsertWithWhereUniqueWithoutProductsInput[]
+  createMany?: Prisma.articlesCreateManyProductsInputEnvelope
+  set?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  disconnect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  delete?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  connect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  update?: Prisma.articlesUpdateWithWhereUniqueWithoutProductsInput | Prisma.articlesUpdateWithWhereUniqueWithoutProductsInput[]
+  updateMany?: Prisma.articlesUpdateManyWithWhereWithoutProductsInput | Prisma.articlesUpdateManyWithWhereWithoutProductsInput[]
+  deleteMany?: Prisma.articlesScalarWhereInput | Prisma.articlesScalarWhereInput[]
+}
+
+export type articlesUncheckedUpdateManyWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput> | Prisma.articlesCreateWithoutProductsInput[] | Prisma.articlesUncheckedCreateWithoutProductsInput[]
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutProductsInput | Prisma.articlesCreateOrConnectWithoutProductsInput[]
+  upsert?: Prisma.articlesUpsertWithWhereUniqueWithoutProductsInput | Prisma.articlesUpsertWithWhereUniqueWithoutProductsInput[]
+  createMany?: Prisma.articlesCreateManyProductsInputEnvelope
+  set?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  disconnect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  delete?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  connect?: Prisma.articlesWhereUniqueInput | Prisma.articlesWhereUniqueInput[]
+  update?: Prisma.articlesUpdateWithWhereUniqueWithoutProductsInput | Prisma.articlesUpdateWithWhereUniqueWithoutProductsInput[]
+  updateMany?: Prisma.articlesUpdateManyWithWhereWithoutProductsInput | Prisma.articlesUpdateManyWithWhereWithoutProductsInput[]
+  deleteMany?: Prisma.articlesScalarWhereInput | Prisma.articlesScalarWhereInput[]
+}
+
+export type articlesCreateNestedOneWithoutArticle_publicationsInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutArticle_publicationsInput, Prisma.articlesUncheckedCreateWithoutArticle_publicationsInput>
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutArticle_publicationsInput
+  connect?: Prisma.articlesWhereUniqueInput
+}
+
+export type articlesUpdateOneRequiredWithoutArticle_publicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.articlesCreateWithoutArticle_publicationsInput, Prisma.articlesUncheckedCreateWithoutArticle_publicationsInput>
+  connectOrCreate?: Prisma.articlesCreateOrConnectWithoutArticle_publicationsInput
+  upsert?: Prisma.articlesUpsertWithoutArticle_publicationsInput
+  connect?: Prisma.articlesWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.articlesUpdateToOneWithWhereWithoutArticle_publicationsInput, Prisma.articlesUpdateWithoutArticle_publicationsInput>, Prisma.articlesUncheckedUpdateWithoutArticle_publicationsInput>
+}
+
+export type articlesCreateWithoutProductsInput = {
+  id?: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  cover_url?: string | null
+  cover_alt?: string | null
+  reading_time_minutes?: number
+  status?: string
+  is_featured?: boolean
+  sort_order?: number
+  published_at?: Date | string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  cta_text?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  article_publications?: Prisma.article_publicationsCreateNestedManyWithoutArticlesInput
+}
+
+export type articlesUncheckedCreateWithoutProductsInput = {
+  id?: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  cover_url?: string | null
+  cover_alt?: string | null
+  reading_time_minutes?: number
+  status?: string
+  is_featured?: boolean
+  sort_order?: number
+  published_at?: Date | string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  cta_text?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  article_publications?: Prisma.article_publicationsUncheckedCreateNestedManyWithoutArticlesInput
+}
+
+export type articlesCreateOrConnectWithoutProductsInput = {
+  where: Prisma.articlesWhereUniqueInput
+  create: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput>
+}
+
+export type articlesCreateManyProductsInputEnvelope = {
+  data: Prisma.articlesCreateManyProductsInput | Prisma.articlesCreateManyProductsInput[]
+  skipDuplicates?: boolean
+}
+
+export type articlesUpsertWithWhereUniqueWithoutProductsInput = {
+  where: Prisma.articlesWhereUniqueInput
+  update: Prisma.XOR<Prisma.articlesUpdateWithoutProductsInput, Prisma.articlesUncheckedUpdateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.articlesCreateWithoutProductsInput, Prisma.articlesUncheckedCreateWithoutProductsInput>
+}
+
+export type articlesUpdateWithWhereUniqueWithoutProductsInput = {
+  where: Prisma.articlesWhereUniqueInput
+  data: Prisma.XOR<Prisma.articlesUpdateWithoutProductsInput, Prisma.articlesUncheckedUpdateWithoutProductsInput>
+}
+
+export type articlesUpdateManyWithWhereWithoutProductsInput = {
+  where: Prisma.articlesScalarWhereInput
+  data: Prisma.XOR<Prisma.articlesUpdateManyMutationInput, Prisma.articlesUncheckedUpdateManyWithoutProductsInput>
+}
+
+export type articlesScalarWhereInput = {
+  AND?: Prisma.articlesScalarWhereInput | Prisma.articlesScalarWhereInput[]
+  OR?: Prisma.articlesScalarWhereInput[]
+  NOT?: Prisma.articlesScalarWhereInput | Prisma.articlesScalarWhereInput[]
+  id?: Prisma.UuidFilter<"articles"> | string
+  slug?: Prisma.StringFilter<"articles"> | string
+  title?: Prisma.StringFilter<"articles"> | string
+  excerpt?: Prisma.StringFilter<"articles"> | string
+  content?: Prisma.StringFilter<"articles"> | string
+  cover_url?: Prisma.StringNullableFilter<"articles"> | string | null
+  cover_alt?: Prisma.StringNullableFilter<"articles"> | string | null
+  reading_time_minutes?: Prisma.IntFilter<"articles"> | number
+  status?: Prisma.StringFilter<"articles"> | string
+  is_featured?: Prisma.BoolFilter<"articles"> | boolean
+  sort_order?: Prisma.IntFilter<"articles"> | number
+  published_at?: Prisma.DateTimeNullableFilter<"articles"> | Date | string | null
+  seo_title?: Prisma.StringNullableFilter<"articles"> | string | null
+  seo_description?: Prisma.StringNullableFilter<"articles"> | string | null
+  linked_product_id?: Prisma.UuidNullableFilter<"articles"> | string | null
+  cta_text?: Prisma.StringNullableFilter<"articles"> | string | null
+  created_at?: Prisma.DateTimeFilter<"articles"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"articles"> | Date | string
+}
+
+export type articlesCreateWithoutArticle_publicationsInput = {
+  id?: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  cover_url?: string | null
+  cover_alt?: string | null
+  reading_time_minutes?: number
+  status?: string
+  is_featured?: boolean
+  sort_order?: number
+  published_at?: Date | string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  cta_text?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  products?: Prisma.productsCreateNestedOneWithoutArticlesInput
+}
+
+export type articlesUncheckedCreateWithoutArticle_publicationsInput = {
+  id?: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  cover_url?: string | null
+  cover_alt?: string | null
+  reading_time_minutes?: number
+  status?: string
+  is_featured?: boolean
+  sort_order?: number
+  published_at?: Date | string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  linked_product_id?: string | null
+  cta_text?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type articlesCreateOrConnectWithoutArticle_publicationsInput = {
+  where: Prisma.articlesWhereUniqueInput
+  create: Prisma.XOR<Prisma.articlesCreateWithoutArticle_publicationsInput, Prisma.articlesUncheckedCreateWithoutArticle_publicationsInput>
+}
+
+export type articlesUpsertWithoutArticle_publicationsInput = {
+  update: Prisma.XOR<Prisma.articlesUpdateWithoutArticle_publicationsInput, Prisma.articlesUncheckedUpdateWithoutArticle_publicationsInput>
+  create: Prisma.XOR<Prisma.articlesCreateWithoutArticle_publicationsInput, Prisma.articlesUncheckedCreateWithoutArticle_publicationsInput>
+  where?: Prisma.articlesWhereInput
+}
+
+export type articlesUpdateToOneWithWhereWithoutArticle_publicationsInput = {
+  where?: Prisma.articlesWhereInput
+  data: Prisma.XOR<Prisma.articlesUpdateWithoutArticle_publicationsInput, Prisma.articlesUncheckedUpdateWithoutArticle_publicationsInput>
+}
+
+export type articlesUpdateWithoutArticle_publicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  excerpt?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  cover_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reading_time_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  products?: Prisma.productsUpdateOneWithoutArticlesNestedInput
+}
+
+export type articlesUncheckedUpdateWithoutArticle_publicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  excerpt?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  cover_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reading_time_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_product_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type articlesCreateManyProductsInput = {
+  id?: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  cover_url?: string | null
+  cover_alt?: string | null
+  reading_time_minutes?: number
+  status?: string
+  is_featured?: boolean
+  sort_order?: number
+  published_at?: Date | string | null
+  seo_title?: string | null
+  seo_description?: string | null
+  cta_text?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type articlesUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  excerpt?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  cover_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reading_time_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  article_publications?: Prisma.article_publicationsUpdateManyWithoutArticlesNestedInput
+}
+
+export type articlesUncheckedUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  excerpt?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  cover_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reading_time_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  article_publications?: Prisma.article_publicationsUncheckedUpdateManyWithoutArticlesNestedInput
+}
+
+export type articlesUncheckedUpdateManyWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  excerpt?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  cover_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_alt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reading_time_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_featured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  seo_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seo_description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type ArticlesCountOutputType
+ */
+
+export type ArticlesCountOutputType = {
+  article_publications: number
+}
+
+export type ArticlesCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  article_publications?: boolean | ArticlesCountOutputTypeCountArticle_publicationsArgs
+}
+
+/**
+ * ArticlesCountOutputType without action
+ */
+export type ArticlesCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ArticlesCountOutputType
+   */
+  select?: Prisma.ArticlesCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ArticlesCountOutputType without action
+ */
+export type ArticlesCountOutputTypeCountArticle_publicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.article_publicationsWhereInput
+}
 
 
 export type articlesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -614,8 +1041,13 @@ export type articlesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   published_at?: boolean
   seo_title?: boolean
   seo_description?: boolean
+  linked_product_id?: boolean
+  cta_text?: boolean
   created_at?: boolean
   updated_at?: boolean
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
+  article_publications?: boolean | Prisma.articles$article_publicationsArgs<ExtArgs>
+  _count?: boolean | Prisma.ArticlesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["articles"]>
 
 export type articlesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -633,8 +1065,11 @@ export type articlesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   published_at?: boolean
   seo_title?: boolean
   seo_description?: boolean
+  linked_product_id?: boolean
+  cta_text?: boolean
   created_at?: boolean
   updated_at?: boolean
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
 }, ExtArgs["result"]["articles"]>
 
 export type articlesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -652,8 +1087,11 @@ export type articlesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   published_at?: boolean
   seo_title?: boolean
   seo_description?: boolean
+  linked_product_id?: boolean
+  cta_text?: boolean
   created_at?: boolean
   updated_at?: boolean
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
 }, ExtArgs["result"]["articles"]>
 
 export type articlesSelectScalar = {
@@ -671,15 +1109,31 @@ export type articlesSelectScalar = {
   published_at?: boolean
   seo_title?: boolean
   seo_description?: boolean
+  linked_product_id?: boolean
+  cta_text?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type articlesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "excerpt" | "content" | "cover_url" | "cover_alt" | "reading_time_minutes" | "status" | "is_featured" | "sort_order" | "published_at" | "seo_title" | "seo_description" | "created_at" | "updated_at", ExtArgs["result"]["articles"]>
+export type articlesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "excerpt" | "content" | "cover_url" | "cover_alt" | "reading_time_minutes" | "status" | "is_featured" | "sort_order" | "published_at" | "seo_title" | "seo_description" | "linked_product_id" | "cta_text" | "created_at" | "updated_at", ExtArgs["result"]["articles"]>
+export type articlesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
+  article_publications?: boolean | Prisma.articles$article_publicationsArgs<ExtArgs>
+  _count?: boolean | Prisma.ArticlesCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type articlesIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
+}
+export type articlesIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  products?: boolean | Prisma.articles$productsArgs<ExtArgs>
+}
 
 export type $articlesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "articles"
-  objects: {}
+  objects: {
+    products: Prisma.$productsPayload<ExtArgs> | null
+    article_publications: Prisma.$article_publicationsPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     slug: string
@@ -695,6 +1149,8 @@ export type $articlesPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     published_at: Date | null
     seo_title: string | null
     seo_description: string | null
+    linked_product_id: string | null
+    cta_text: string | null
     created_at: Date
     updated_at: Date
   }, ExtArgs["result"]["articles"]>
@@ -1091,6 +1547,8 @@ readonly fields: articlesFieldRefs;
  */
 export interface Prisma__articlesClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  products<T extends Prisma.articles$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.articles$productsArgs<ExtArgs>>): Prisma.Prisma__productsClient<runtime.Types.Result.GetResult<Prisma.$productsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  article_publications<T extends Prisma.articles$article_publicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.articles$article_publicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$article_publicationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1134,6 +1592,8 @@ export interface articlesFieldRefs {
   readonly published_at: Prisma.FieldRef<"articles", 'DateTime'>
   readonly seo_title: Prisma.FieldRef<"articles", 'String'>
   readonly seo_description: Prisma.FieldRef<"articles", 'String'>
+  readonly linked_product_id: Prisma.FieldRef<"articles", 'String'>
+  readonly cta_text: Prisma.FieldRef<"articles", 'String'>
   readonly created_at: Prisma.FieldRef<"articles", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"articles", 'DateTime'>
 }
@@ -1153,6 +1613,10 @@ export type articlesFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
+  /**
    * Filter, which articles to fetch.
    */
   where: Prisma.articlesWhereUniqueInput
@@ -1171,6 +1635,10 @@ export type articlesFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
+  /**
    * Filter, which articles to fetch.
    */
   where: Prisma.articlesWhereUniqueInput
@@ -1188,6 +1656,10 @@ export type articlesFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the articles
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
   /**
    * Filter, which articles to fetch.
    */
@@ -1237,6 +1709,10 @@ export type articlesFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
+  /**
    * Filter, which articles to fetch.
    */
   where?: Prisma.articlesWhereInput
@@ -1284,6 +1760,10 @@ export type articlesFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the articles
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
   /**
    * Filter, which articles to fetch.
    */
@@ -1333,6 +1813,10 @@ export type articlesCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
+  /**
    * The data needed to create a articles.
    */
   data: Prisma.XOR<Prisma.articlesCreateInput, Prisma.articlesUncheckedCreateInput>
@@ -1366,6 +1850,10 @@ export type articlesCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.articlesCreateManyInput | Prisma.articlesCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1380,6 +1868,10 @@ export type articlesUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the articles
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
   /**
    * The data needed to update a articles.
    */
@@ -1432,6 +1924,10 @@ export type articlesUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many articles to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1446,6 +1942,10 @@ export type articlesUpsertArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the articles
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
   /**
    * The filter to search for the articles to update in case it exists.
    */
@@ -1473,6 +1973,10 @@ export type articlesDeleteArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
+  /**
    * Filter which articles to delete.
    */
   where: Prisma.articlesWhereUniqueInput
@@ -1493,6 +1997,49 @@ export type articlesDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * articles.products
+ */
+export type articles$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the products
+   */
+  select?: Prisma.productsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the products
+   */
+  omit?: Prisma.productsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.productsInclude<ExtArgs> | null
+  where?: Prisma.productsWhereInput
+}
+
+/**
+ * articles.article_publications
+ */
+export type articles$article_publicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the article_publications
+   */
+  select?: Prisma.article_publicationsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the article_publications
+   */
+  omit?: Prisma.article_publicationsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.article_publicationsInclude<ExtArgs> | null
+  where?: Prisma.article_publicationsWhereInput
+  orderBy?: Prisma.article_publicationsOrderByWithRelationInput | Prisma.article_publicationsOrderByWithRelationInput[]
+  cursor?: Prisma.article_publicationsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Article_publicationsScalarFieldEnum | Prisma.Article_publicationsScalarFieldEnum[]
+}
+
+/**
  * articles without action
  */
 export type articlesDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1504,4 +2051,8 @@ export type articlesDefaultArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the articles
    */
   omit?: Prisma.articlesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.articlesInclude<ExtArgs> | null
 }

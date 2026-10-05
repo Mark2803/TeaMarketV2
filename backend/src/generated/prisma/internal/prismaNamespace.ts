@@ -420,6 +420,7 @@ export const ModelName = {
   auth_codes: 'auth_codes',
   auth_sessions: 'auth_sessions',
   articles: 'articles',
+  article_publications: 'article_publications',
   home_banners: 'home_banners',
   promotions: 'promotions',
   promo_codes: 'promo_codes',
@@ -439,7 +440,9 @@ export const ModelName = {
   notification_preferences: 'notification_preferences',
   analytics_sessions: 'analytics_sessions',
   analytics_events: 'analytics_events',
-  analytics_order_attributions: 'analytics_order_attributions'
+  analytics_order_attributions: 'analytics_order_attributions',
+  admin_users: 'admin_users',
+  admin_password_reset_tokens: 'admin_password_reset_tokens'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -455,7 +458,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions" | "articles" | "home_banners" | "promotions" | "promo_codes" | "loyalty_settings" | "loyalty_accounts" | "loyalty_transactions" | "referral_settings" | "referral_codes" | "referrals" | "referral_partners" | "referral_partner_orders" | "order_discounts" | "notification_channel_settings" | "notification_templates" | "notification_campaigns" | "notification_deliveries" | "notification_preferences" | "analytics_sessions" | "analytics_events" | "analytics_order_attributions"
+    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions" | "articles" | "article_publications" | "home_banners" | "promotions" | "promo_codes" | "loyalty_settings" | "loyalty_accounts" | "loyalty_transactions" | "referral_settings" | "referral_codes" | "referrals" | "referral_partners" | "referral_partner_orders" | "order_discounts" | "notification_channel_settings" | "notification_templates" | "notification_campaigns" | "notification_deliveries" | "notification_preferences" | "analytics_sessions" | "analytics_events" | "analytics_order_attributions" | "admin_users" | "admin_password_reset_tokens"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2161,6 +2164,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    article_publications: {
+      payload: Prisma.$article_publicationsPayload<ExtArgs>
+      fields: Prisma.article_publicationsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.article_publicationsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.article_publicationsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        findFirst: {
+          args: Prisma.article_publicationsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.article_publicationsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        findMany: {
+          args: Prisma.article_publicationsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>[]
+        }
+        create: {
+          args: Prisma.article_publicationsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        createMany: {
+          args: Prisma.article_publicationsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.article_publicationsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>[]
+        }
+        delete: {
+          args: Prisma.article_publicationsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        update: {
+          args: Prisma.article_publicationsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        deleteMany: {
+          args: Prisma.article_publicationsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.article_publicationsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.article_publicationsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>[]
+        }
+        upsert: {
+          args: Prisma.article_publicationsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$article_publicationsPayload>
+        }
+        aggregate: {
+          args: Prisma.Article_publicationsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArticle_publications>
+        }
+        groupBy: {
+          args: Prisma.article_publicationsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Article_publicationsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.article_publicationsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Article_publicationsCountAggregateOutputType> | number
+        }
+      }
+    }
     home_banners: {
       payload: Prisma.$home_bannersPayload<ExtArgs>
       fields: Prisma.home_bannersFieldRefs
@@ -3641,6 +3718,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    admin_users: {
+      payload: Prisma.$admin_usersPayload<ExtArgs>
+      fields: Prisma.admin_usersFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.admin_usersFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.admin_usersFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        findFirst: {
+          args: Prisma.admin_usersFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.admin_usersFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        findMany: {
+          args: Prisma.admin_usersFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>[]
+        }
+        create: {
+          args: Prisma.admin_usersCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        createMany: {
+          args: Prisma.admin_usersCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.admin_usersCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>[]
+        }
+        delete: {
+          args: Prisma.admin_usersDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        update: {
+          args: Prisma.admin_usersUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        deleteMany: {
+          args: Prisma.admin_usersDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.admin_usersUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.admin_usersUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>[]
+        }
+        upsert: {
+          args: Prisma.admin_usersUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_usersPayload>
+        }
+        aggregate: {
+          args: Prisma.Admin_usersAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdmin_users>
+        }
+        groupBy: {
+          args: Prisma.admin_usersGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Admin_usersGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.admin_usersCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Admin_usersCountAggregateOutputType> | number
+        }
+      }
+    }
+    admin_password_reset_tokens: {
+      payload: Prisma.$admin_password_reset_tokensPayload<ExtArgs>
+      fields: Prisma.admin_password_reset_tokensFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.admin_password_reset_tokensFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.admin_password_reset_tokensFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        findFirst: {
+          args: Prisma.admin_password_reset_tokensFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.admin_password_reset_tokensFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        findMany: {
+          args: Prisma.admin_password_reset_tokensFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>[]
+        }
+        create: {
+          args: Prisma.admin_password_reset_tokensCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        createMany: {
+          args: Prisma.admin_password_reset_tokensCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.admin_password_reset_tokensCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>[]
+        }
+        delete: {
+          args: Prisma.admin_password_reset_tokensDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        update: {
+          args: Prisma.admin_password_reset_tokensUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        deleteMany: {
+          args: Prisma.admin_password_reset_tokensDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.admin_password_reset_tokensUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.admin_password_reset_tokensUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>[]
+        }
+        upsert: {
+          args: Prisma.admin_password_reset_tokensUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$admin_password_reset_tokensPayload>
+        }
+        aggregate: {
+          args: Prisma.Admin_password_reset_tokensAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdmin_password_reset_tokens>
+        }
+        groupBy: {
+          args: Prisma.admin_password_reset_tokensGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Admin_password_reset_tokensGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.admin_password_reset_tokensCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Admin_password_reset_tokensCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4051,11 +4276,31 @@ export const ArticlesScalarFieldEnum = {
   published_at: 'published_at',
   seo_title: 'seo_title',
   seo_description: 'seo_description',
+  linked_product_id: 'linked_product_id',
+  cta_text: 'cta_text',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
 
 export type ArticlesScalarFieldEnum = (typeof ArticlesScalarFieldEnum)[keyof typeof ArticlesScalarFieldEnum]
+
+
+export const Article_publicationsScalarFieldEnum = {
+  id: 'id',
+  article_id: 'article_id',
+  channel: 'channel',
+  enabled: 'enabled',
+  status: 'status',
+  external_id: 'external_id',
+  external_url: 'external_url',
+  published_at: 'published_at',
+  last_synced_at: 'last_synced_at',
+  error: 'error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Article_publicationsScalarFieldEnum = (typeof Article_publicationsScalarFieldEnum)[keyof typeof Article_publicationsScalarFieldEnum]
 
 
 export const Home_bannersScalarFieldEnum = {
@@ -4355,6 +4600,32 @@ export const Analytics_order_attributionsScalarFieldEnum = {
 } as const
 
 export type Analytics_order_attributionsScalarFieldEnum = (typeof Analytics_order_attributionsScalarFieldEnum)[keyof typeof Analytics_order_attributionsScalarFieldEnum]
+
+
+export const Admin_usersScalarFieldEnum = {
+  id: 'id',
+  username: 'username',
+  email: 'email',
+  password_hash: 'password_hash',
+  is_active: 'is_active',
+  password_changed_at: 'password_changed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Admin_usersScalarFieldEnum = (typeof Admin_usersScalarFieldEnum)[keyof typeof Admin_usersScalarFieldEnum]
+
+
+export const Admin_password_reset_tokensScalarFieldEnum = {
+  id: 'id',
+  admin_id: 'admin_id',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  used_at: 'used_at',
+  created_at: 'created_at'
+} as const
+
+export type Admin_password_reset_tokensScalarFieldEnum = (typeof Admin_password_reset_tokensScalarFieldEnum)[keyof typeof Admin_password_reset_tokensScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4675,6 +4946,7 @@ export type GlobalOmitConfig = {
   auth_codes?: Prisma.auth_codesOmit
   auth_sessions?: Prisma.auth_sessionsOmit
   articles?: Prisma.articlesOmit
+  article_publications?: Prisma.article_publicationsOmit
   home_banners?: Prisma.home_bannersOmit
   promotions?: Prisma.promotionsOmit
   promo_codes?: Prisma.promo_codesOmit
@@ -4695,6 +4967,8 @@ export type GlobalOmitConfig = {
   analytics_sessions?: Prisma.analytics_sessionsOmit
   analytics_events?: Prisma.analytics_eventsOmit
   analytics_order_attributions?: Prisma.analytics_order_attributionsOmit
+  admin_users?: Prisma.admin_usersOmit
+  admin_password_reset_tokens?: Prisma.admin_password_reset_tokensOmit
 }
 
 /* Types for Logging */

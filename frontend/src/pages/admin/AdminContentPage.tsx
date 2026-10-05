@@ -29,7 +29,7 @@ export default function AdminContentPage(){
  {tab==="hero"&&<HeroSection items={banners} collections={collections} busy={busy} setBusy={setBusy} reload={reload} setError={setError}/>} 
  {tab==="collections"&&<CollectionsSection items={collections} products={products} busy={busy} setBusy={setBusy} reload={reload} setError={setError}/>} 
  {tab==="new"&&<NewSection products={products} busy={busy} setBusy={setBusy} reload={reload} setError={setError}/>} 
- {tab==="articles"&&<ArticlesSection items={articles} busy={busy} setBusy={setBusy} reload={reload} setError={setError}/>} 
+ {tab==="articles"&&<ArticlesSection items={articles} products={products} busy={busy} setBusy={setBusy} reload={reload} setError={setError}/>} 
  </div>
 }
 
@@ -39,48 +39,27 @@ function CollectionsSection({items,products,busy,setBusy,reload,setError}:any){c
 
 function NewSection({products,busy,setBusy,reload,setError}:any){const [q,setQ]=useState("");const shown=useMemo(()=>products.filter((p:AdminProductListItem)=>!q||p.name.toLowerCase().includes(q.toLowerCase())||p.slug.includes(q.toLowerCase())),[products,q]);return <section className="admin-editor-section"><div className="admin-section-title"><div><h2>Новинки</h2><p>Главная показывает 8 случайных активных товаров с флагом «Новинка».</p></div><strong>{products.filter((p:AdminProductListItem)=>p.is_new).length} отмечено</strong></div><input className="admin-content-search" placeholder="Поиск товара" value={q} onChange={e=>setQ(e.target.value)}/><div className="admin-content-product-list">{shown.map((p:AdminProductListItem)=><label key={p.id}><input type="checkbox" checked={Boolean(p.is_new)} disabled={busy} onChange={async e=>{setBusy(true);try{await updateAdminProduct(p.id,{isNew:e.target.checked});await reload()}catch{setError("Не удалось изменить признак Новинки.")}finally{setBusy(false)}}}/><span><strong>{p.name}</strong><small>{p.slug}</small></span></label>)}</div></section>}
 
-function ArticlesSection({items,busy,setBusy,reload,setError}:any){const empty={title:"",slug:"",excerpt:"",content:"",coverUrl:"",coverAlt:"",readingTimeMinutes:5,status:"draft",isFeatured:true,sortOrder:0,publishedAt:"",seoTitle:"",seoDescription:""};const[id,setId]=useState<string|null>(null),[f,setF]=useState<any>(empty);const edit=(x:AdminArticle)=>{setId(x.id);setF({title:x.title,slug:x.slug,excerpt:x.excerpt,content:x.content,coverUrl:x.cover_url??"",coverAlt:x.cover_alt??"",readingTimeMinutes:x.reading_time_minutes,status:x.status,isFeatured:x.is_featured,sortOrder:x.sort_order,publishedAt:dt(x.published_at),seoTitle:x.seo_title??"",seoDescription:x.seo_description??""})};const save=async()=>{setBusy(true);try{const input={...f,coverUrl:f.coverUrl||null,coverAlt:f.coverAlt||null,readingTimeMinutes:Number(f.readingTimeMinutes),sortOrder:Number(f.sortOrder),publishedAt:iso(f.publishedAt),seoTitle:f.seoTitle||null,seoDescription:f.seoDescription||null};id?await updateAdminArticle(id,input):await createAdminArticle(input);setId(null);setF(empty);await reload()}catch{setError("Не удалось сохранить статью. Проверьте slug и обязательные поля.")}finally{setBusy(false)}};return <ContentSplit title="Статьи о чае" add={()=>{setId(null);setF(empty)}} list={items.map((x:AdminArticle)=><ContentRow key={x.id} title={x.title} meta={`${x.status==="published"?"Опубликована":"Черновик"} · ${x.reading_time_minutes} мин · порядок ${x.sort_order}`} onEdit={()=>edit(x)} onDelete={async()=>{if(confirm(`Удалить статью «${x.title}»?`)){await deleteAdminArticle(x.id);await reload()}}}/>)}><div className="admin-form-grid"><Field t="Название *" v={f.title} set={(v)=>setF({...f,title:v,slug:id?f.slug:translit(v)})}/><Field t="Slug *" v={f.slug} set={(v)=>setF({...f,slug:v})}/><Field wide t="Краткое описание *" area v={f.excerpt} set={(v)=>setF({...f,excerpt:v})}/><Field wide t="Текст статьи *" area rows={12} v={f.content} set={(v)=>setF({...f,content:v})}/><Field wide t="URL обложки" v={f.coverUrl} set={(v)=>setF({...f,coverUrl:v})}/><Field wide t="Alt обложки" v={f.coverAlt} set={(v)=>setF({...f,coverAlt:v})}/><Field t="Время чтения, мин" type="number" v={f.readingTimeMinutes} set={(v)=>setF({...f,readingTimeMinutes:v})}/><Field t="Порядок" type="number" v={f.sortOrder} set={(v)=>setF({...f,sortOrder:v})}/><label className="admin-field"><span>Статус</span><select value={f.status} onChange={e=>setF({...f,status:e.target.value})}><option value="draft">Черновик</option><option value="published">Опубликована</option></select></label><Field t="Дата публикации" type="datetime-local" v={f.publishedAt} set={(v)=>setF({...f,publishedAt:v})}/><Field wide t="SEO title" v={f.seoTitle} set={(v)=>setF({...f,seoTitle:v})}/><Field wide t="SEO description" area v={f.seoDescription} set={(v)=>setF({...f,seoDescription:v})}/></div><Check text="Показывать на Главной" v={f.isFeatured} set={(v)=>setF({...f,isFeatured:v})}/><SaveButton busy={busy} onClick={save}/></ContentSplit>}
+function ArticlesSection({items,products,busy,setBusy,reload,setError}:any){
+ const empty={title:"",slug:"",excerpt:"",content:"",coverUrl:"",coverAlt:"",readingTimeMinutes:5,status:"draft",isFeatured:true,sortOrder:0,publishedAt:"",seoTitle:"",seoDescription:"",linkedProductId:"",ctaText:"",publishChannels:["website"]};
+ const[id,setId]=useState<string|null>(null),[f,setF]=useState<any>(empty);
+ const edit=(x:AdminArticle)=>{setId(x.id);setF({title:x.title,slug:x.slug,excerpt:x.excerpt,content:x.content,coverUrl:x.cover_url??"",coverAlt:x.cover_alt??"",readingTimeMinutes:x.reading_time_minutes,status:x.status,isFeatured:x.is_featured,sortOrder:x.sort_order,publishedAt:dt(x.published_at),seoTitle:x.seo_title??"",seoDescription:x.seo_description??"",linkedProductId:x.linked_product_id??"",ctaText:x.cta_text??"",publishChannels:x.publish_channels?.length?x.publish_channels:["website"]})};
+ const toggleChannel=(channel:string,value:boolean)=>setF((old:any)=>({...old,publishChannels:value?[...new Set([...old.publishChannels,channel])]:old.publishChannels.filter((x:string)=>x!==channel)}));
+ const save=async()=>{setBusy(true);try{const input={...f,coverUrl:f.coverUrl||null,coverAlt:f.coverAlt||null,readingTimeMinutes:Number(f.readingTimeMinutes),sortOrder:Number(f.sortOrder),publishedAt:iso(f.publishedAt),seoTitle:f.seoTitle||null,seoDescription:f.seoDescription||null,linkedProductId:f.linkedProductId||null,ctaText:f.ctaText||null};id?await updateAdminArticle(id,input):await createAdminArticle(input);setId(null);setF(empty);await reload()}catch{setError("Не удалось сохранить статью. Проверьте slug и обязательные поля.")}finally{setBusy(false)}};
+ return <ContentSplit title="Статьи о чае" add={()=>{setId(null);setF(empty)}} list={items.map((x:AdminArticle)=><ContentRow key={x.id} title={x.title} meta={`${x.status==="published"?"Опубликована":"Черновик"} · ${x.reading_time_minutes} мин · ${(x.publish_channels??[]).map(c=>c==="website"?"Сайт":c==="dzen"?"Дзен":c==="telegram"?"Telegram":"VK").join(" + ")||"без каналов"}`} onEdit={()=>edit(x)} onDelete={async()=>{if(confirm(`Удалить статью «${x.title}»?`)){await deleteAdminArticle(x.id);await reload()}}}/>)}>
+  <div className="admin-form-grid"><Field t="Название *" v={f.title} set={(v)=>setF({...f,title:v,slug:id?f.slug:translit(v)})}/><Field t="Slug *" v={f.slug} set={(v)=>setF({...f,slug:v})}/><Field wide t="Краткое описание *" area v={f.excerpt} set={(v)=>setF({...f,excerpt:v})}/><Field wide t="Текст статьи *" area rows={12} v={f.content} set={(v)=>setF({...f,content:v})}/><Field wide t="URL обложки" v={f.coverUrl} set={(v)=>setF({...f,coverUrl:v})}/><Field wide t="Alt обложки" v={f.coverAlt} set={(v)=>setF({...f,coverAlt:v})}/><Field t="Время чтения, мин" type="number" v={f.readingTimeMinutes} set={(v)=>setF({...f,readingTimeMinutes:v})}/><Field t="Порядок" type="number" v={f.sortOrder} set={(v)=>setF({...f,sortOrder:v})}/><label className="admin-field"><span>Статус</span><select value={f.status} onChange={e=>setF({...f,status:e.target.value})}><option value="draft">Черновик</option><option value="published">Опубликована</option></select></label><Field t="Дата публикации" type="datetime-local" v={f.publishedAt} set={(v)=>setF({...f,publishedAt:v})}/><Field wide t="SEO title" v={f.seoTitle} set={(v)=>setF({...f,seoTitle:v})}/><Field wide t="SEO description" area v={f.seoDescription} set={(v)=>setF({...f,seoDescription:v})}/></div>
+  <Check text="Показывать на Главной" v={f.isFeatured} set={(v)=>setF({...f,isFeatured:v})}/>
+  <div className="admin-article-publishing"><h3>Публикация</h3><p>Отметьте каналы для этой статьи.</p><div className="admin-checkbox-row"><Check text="На сайте" v={f.publishChannels.includes("website")} set={(v)=>toggleChannel("website",v)}/><Check text="Дзен" v={f.publishChannels.includes("dzen")} set={(v)=>toggleChannel("dzen",v)}/><label className="admin-content-check is-disabled"><input type="checkbox" disabled/><span>Telegram — позже</span></label><label className="admin-content-check is-disabled"><input type="checkbox" disabled/><span>ВКонтакте — позже</span></label></div></div>
+  <div className="admin-article-selling"><h3>Продажа товара</h3><div className="admin-form-grid"><label className="admin-field"><span>Связанный товар</span><select value={f.linkedProductId} onChange={e=>setF({...f,linkedProductId:e.target.value})}><option value="">Без связанного товара</option>{products.map((p:AdminProductListItem)=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label><Field t="Текст ссылки" v={f.ctaText} set={(v)=>setF({...f,ctaText:v})}/></div><p className="admin-field-hint">Если товар выбран, ссылка на его карточку появится под статьёй на сайте и в версии для Дзена.</p></div>
+  <SaveButton busy={busy} onClick={save}/>
+ </ContentSplit>
+}
 
-type ContentSplitProps = {
-  title: string;
-  add: () => void;
-  list: ReactNode[];
-  children: ReactNode;
-};
-
-type ContentRowProps = {
-  title: string;
-  meta: string;
-  onEdit: () => void;
-  onDelete: () => void | Promise<void>;
-};
-
-type FieldProps = {
-  t: string;
-  v: string | number;
-  set: (value: string) => void;
-  wide?: boolean;
-  type?: string;
-  area?: boolean;
-  rows?: number;
-};
-
-type CheckProps = {
-  text: string;
-  v: boolean;
-  set: (value: boolean) => void;
-};
-
-type SaveButtonProps = {
-  busy: boolean;
-  onClick: () => void | Promise<void>;
-};
-
-type ProductPickerProps = {
-  products: AdminProductListItem[];
-  selected: Set<string>;
-  setSelected: Dispatch<SetStateAction<Set<string>>>;
-};
+type ContentSplitProps = { title:string; add:()=>void; list:ReactNode[]; children:ReactNode };
+type ContentRowProps = { title:string; meta:string; onEdit:()=>void; onDelete:()=>void|Promise<void> };
+type FieldProps = { t:string; v:string|number; set:(value:string)=>void; wide?:boolean; type?:string; area?:boolean; rows?:number };
+type CheckProps = { text:string; v:boolean; set:(value:boolean)=>void };
+type SaveButtonProps = { busy:boolean; onClick:()=>void|Promise<void> };
+type ProductPickerProps = { products:AdminProductListItem[]; selected:Set<string>; setSelected:Dispatch<SetStateAction<Set<string>>> };
 
 function ContentSplit({title,add,list,children}:ContentSplitProps){return <div className="admin-content-split"><section className="admin-editor-section"><div className="admin-section-title"><h2>{title}</h2><button type="button" className="admin-secondary-button" onClick={add}><Plus size={16}/>Новый</button></div><div className="admin-content-list">{list.length?list:<p>Пока ничего нет.</p>}</div></section><section className="admin-editor-section"><h2>Редактор</h2>{children}</section></div>}
 function ContentRow({title,meta,onEdit,onDelete}:ContentRowProps){return <div className="admin-content-row"><button type="button" onClick={onEdit}><strong>{title}</strong><span>{meta}</span></button><button type="button" className="admin-icon-danger" onClick={onDelete} aria-label="Удалить"><Trash2 size={17}/></button></div>}

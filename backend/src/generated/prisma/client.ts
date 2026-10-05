@@ -178,6 +178,11 @@ export type auth_sessions = Prisma.auth_sessionsModel
  */
 export type articles = Prisma.articlesModel
 /**
+ * Model article_publications
+ * 
+ */
+export type article_publications = Prisma.article_publicationsModel
+/**
  * Model home_banners
  * Управляемые Hero-плашки Главной, каждая ведёт в тематическую подборку.
  */
@@ -277,3 +282,14 @@ export type analytics_events = Prisma.analytics_eventsModel
  * Связывает заказ с той сессией, из которой он был оформлен.
  */
 export type analytics_order_attributions = Prisma.analytics_order_attributionsModel
+/**
+ * Model admin_users
+ * Администраторы панели управления.
+ */
+export type admin_users = Prisma.admin_usersModel
+/**
+ * Model admin_password_reset_tokens
+ * Одноразовые токены восстановления пароля администратора.
+ * В базе хранится только SHA-256 хеш токена.
+ */
+export type admin_password_reset_tokens = Prisma.admin_password_reset_tokensModel

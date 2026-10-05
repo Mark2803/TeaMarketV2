@@ -119,6 +119,21 @@ export default function ArticlePage() {
           article.content
         )}
       </div>
+
+      {article.linked_product && (
+        <aside className="article-product-cta">
+          {article.linked_product.image_url && (
+            <img src={article.linked_product.image_url} alt={article.linked_product.name} />
+          )}
+          <div>
+            <span>Попробовать этот чай</span>
+            <h2>{article.linked_product.name}</h2>
+            <Link className="article-product-cta__button" to={`/products/${article.linked_product.slug}`}>
+              {article.cta_text?.trim() || "Посмотреть чай и выбрать вес"}
+            </Link>
+          </div>
+        </aside>
+      )}
     </article>
   );
 }

@@ -1,9 +1,9 @@
 import {
   createHmac,
-  scryptSync,
   timingSafeEqual
 } from "node:crypto";
 import type { Request, Response } from "express";
+import { verifyAdminPasswordHash } from "./moderator-password.js";
 
 const COOKIE_NAME = "tea_admin_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 12;
@@ -41,28 +41,7 @@ function safeEqual(a: string, b: string): boolean {
 
 export function verifyAdminPassword(password: string): boolean {
   const configured = process.env.ADMIN_PASSWORD_HASH?.trim();
-
-  if (!configured) {
-    return false;
-  }
-
-  const [algorithm, salt, expected] = configured.split("$");
-
-  if (
-    algorithm !== "scrypt"
-    || !salt
-    || !expected
-  ) {
-    return false;
-  }
-
-  const actual = scryptSync(
-    password,
-    Buffer.from(salt, "hex"),
-    64
-  ).toString("hex");
-
-  return safeEqual(actual, expected);
+  return configured ? verifyAdminPasswordHash(password, configured) : false;
 }
 
 export function createAdminSessionToken(

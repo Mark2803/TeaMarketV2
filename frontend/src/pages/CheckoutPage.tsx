@@ -423,6 +423,17 @@ function CheckoutForm() {
 
   // После успешного POST /orders результат заказа имеет приоритет
   // над состоянием корзины: backend уже перевёл старую корзину в converted.
+  useEffect(() => {
+    if (!selectedDeliveryMethodId) { setPricingQuote(null); return; }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
+        .then(r=>{if(!cancelled)setPricingQuote(r.data)})
+        .catch(()=>{if(!cancelled)setPricingQuote(null)});
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount]);
+
   if (orderResult) {
     return (
       <div className="checkout-page">
@@ -592,16 +603,7 @@ function CheckoutForm() {
     });
   };
 
-  useEffect(() => {
-    if (!selectedDeliveryMethodId) { setPricingQuote(null); return; }
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
-        .then(r=>{if(!cancelled)setPricingQuote(r.data)})
-        .catch(()=>{if(!cancelled)setPricingQuote(null)});
-    }, 250);
-    return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount]);
+
 
   const handleSubmit = async () => {
     if (

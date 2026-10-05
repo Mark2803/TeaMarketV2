@@ -18,6 +18,9 @@ export type ArticleDetails =
     seo_description: string | null;
     created_at: string;
     updated_at: string;
+    linked_product_id: string | null;
+    cta_text: string | null;
+    linked_product: { id:string; name:string; slug:string; image_url:string|null } | null;
   };
 
 export type ArticlesResponse = {

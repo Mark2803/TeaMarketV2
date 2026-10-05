@@ -82,6 +82,9 @@ const articleBaseSchema = z.object({
   publishedAt: z.coerce.date().nullable().optional(),
   seoTitle: nullableText(255),
   seoDescription: nullableText(),
+  linkedProductId: z.string().uuid().nullable().optional(),
+  ctaText: nullableText(255),
+  publishChannels: z.array(z.enum(["website", "dzen", "telegram", "vk"])).optional(),
 });
 
 export const articleInputSchema = articleBaseSchema;

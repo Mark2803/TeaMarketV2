@@ -162,6 +162,19 @@ export function logoutAdmin() {
   return apiRequest<{ authenticated: false }>("/moderator/logout", { method: "POST" });
 }
 
+export function requestAdminPasswordReset() {
+  return apiRequest<{ ok: true; message: string }>("/moderator/password-reset/request", {
+    method: "POST",
+  });
+}
+
+export function confirmAdminPasswordReset(token: string, password: string) {
+  return apiRequest<{ ok: true; message: string }>("/moderator/password-reset/confirm", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export function getAdminProductCount() {
   return apiRequest<PaginatedResponse>("/moderator/products", {
     query: { page: 1, limit: 1 },
@@ -400,7 +413,7 @@ export function deleteAdminCategory(categoryId: string) {
 // ===== Admin: content / home page =====
 export type AdminCollection = { id:string; name:string; slug:string; description:string|null; imageUrl:string|null; collectionType:string; isActive:boolean; showOnHome:boolean; startsAt:string|null; endsAt:string|null; sortOrder:number; seoTitle:string|null; seoDescription:string|null; canonicalUrl:string|null; isIndexed:boolean; productCount?:number; products?:Array<{productId:string;sortOrder:number;product:AdminProductListItem}> };
 export type AdminHomeBanner = { id:string; collection_id:string; eyebrow:string|null; title:string; subtitle:string|null; image_url:string|null; image_alt:string|null; is_active:boolean; sort_order:number; starts_at:string|null; ends_at:string|null; collections:{id:string;name:string;slug:string} };
-export type AdminArticle = { id:string; slug:string; title:string; excerpt:string; content:string; cover_url:string|null; cover_alt:string|null; reading_time_minutes:number; status:"draft"|"published"; is_featured:boolean; sort_order:number; published_at:string|null; seo_title:string|null; seo_description:string|null };
+export type AdminArticle = { id:string; slug:string; title:string; excerpt:string; content:string; cover_url:string|null; cover_alt:string|null; reading_time_minutes:number; status:"draft"|"published"; is_featured:boolean; sort_order:number; published_at:string|null; seo_title:string|null; seo_description:string|null; linked_product_id:string|null; cta_text:string|null; linked_product:{id:string;name:string;slug:string}|null; publish_channels:Array<"website"|"dzen"|"telegram"|"vk"> };
 export function getAdminCollections(){return apiRequest<{data:AdminCollection[]}>("/moderator/collections",{query:{page:1,limit:100}});}
 export function getAdminCollection(id:string){return apiRequest<{data:AdminCollection}>(`/moderator/collections/${id}`);}
 export function createAdminCollection(input:any){return apiRequest<{data:AdminCollection}>("/moderator/collections",{method:"POST",body:JSON.stringify(input)});}

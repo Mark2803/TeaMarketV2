@@ -74,6 +74,7 @@ export const ModelName = {
   auth_codes: 'auth_codes',
   auth_sessions: 'auth_sessions',
   articles: 'articles',
+  article_publications: 'article_publications',
   home_banners: 'home_banners',
   promotions: 'promotions',
   promo_codes: 'promo_codes',
@@ -93,7 +94,9 @@ export const ModelName = {
   notification_preferences: 'notification_preferences',
   analytics_sessions: 'analytics_sessions',
   analytics_events: 'analytics_events',
-  analytics_order_attributions: 'analytics_order_attributions'
+  analytics_order_attributions: 'analytics_order_attributions',
+  admin_users: 'admin_users',
+  admin_password_reset_tokens: 'admin_password_reset_tokens'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -483,11 +486,31 @@ export const ArticlesScalarFieldEnum = {
   published_at: 'published_at',
   seo_title: 'seo_title',
   seo_description: 'seo_description',
+  linked_product_id: 'linked_product_id',
+  cta_text: 'cta_text',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
 
 export type ArticlesScalarFieldEnum = (typeof ArticlesScalarFieldEnum)[keyof typeof ArticlesScalarFieldEnum]
+
+
+export const Article_publicationsScalarFieldEnum = {
+  id: 'id',
+  article_id: 'article_id',
+  channel: 'channel',
+  enabled: 'enabled',
+  status: 'status',
+  external_id: 'external_id',
+  external_url: 'external_url',
+  published_at: 'published_at',
+  last_synced_at: 'last_synced_at',
+  error: 'error',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Article_publicationsScalarFieldEnum = (typeof Article_publicationsScalarFieldEnum)[keyof typeof Article_publicationsScalarFieldEnum]
 
 
 export const Home_bannersScalarFieldEnum = {
@@ -787,6 +810,32 @@ export const Analytics_order_attributionsScalarFieldEnum = {
 } as const
 
 export type Analytics_order_attributionsScalarFieldEnum = (typeof Analytics_order_attributionsScalarFieldEnum)[keyof typeof Analytics_order_attributionsScalarFieldEnum]
+
+
+export const Admin_usersScalarFieldEnum = {
+  id: 'id',
+  username: 'username',
+  email: 'email',
+  password_hash: 'password_hash',
+  is_active: 'is_active',
+  password_changed_at: 'password_changed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Admin_usersScalarFieldEnum = (typeof Admin_usersScalarFieldEnum)[keyof typeof Admin_usersScalarFieldEnum]
+
+
+export const Admin_password_reset_tokensScalarFieldEnum = {
+  id: 'id',
+  admin_id: 'admin_id',
+  token_hash: 'token_hash',
+  expires_at: 'expires_at',
+  used_at: 'used_at',
+  created_at: 'created_at'
+} as const
+
+export type Admin_password_reset_tokensScalarFieldEnum = (typeof Admin_password_reset_tokensScalarFieldEnum)[keyof typeof Admin_password_reset_tokensScalarFieldEnum]
 
 
 export const SortOrder = {

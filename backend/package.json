@@ -14,7 +14,8 @@
     "db:legacy:clear": "tsx prisma/legacy-test-clear.ts",
     "test:e2e": "tsx tests/e2e-smoke.ts",
     "db:demo:fix-images": "tsx prisma/fix-demo-images.ts",
-    "admin:hash-password": "tsx scripts/hash-admin-password.ts"
+    "admin:hash-password": "tsx scripts/hash-admin-password.ts",
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts"
   },
   "keywords": [],
   "author": "",

@@ -2,7 +2,8 @@ import { Router } from "express";
 
 import {
   getArticleBySlugController,
-  getArticlesController
+  getArticlesController,
+  getDzenRssController
 } from "./articles.controller.js";
 
 const router = Router();
@@ -10,6 +11,11 @@ const router = Router();
 router.get(
   "/",
   getArticlesController
+);
+
+router.get(
+  "/rss/dzen.xml",
+  getDzenRssController
 );
 
 router.get(

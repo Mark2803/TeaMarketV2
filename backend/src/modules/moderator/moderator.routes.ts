@@ -11,6 +11,11 @@ import {
 } from "./moderator-session.controller.js";
 
 import {
+  requestAdminPasswordResetController,
+  resetAdminPasswordController
+} from "./moderator-password-reset.controller.js";
+
+import {
   getModeratorOrderController
 } from "./moderator-order-details.controller.js";
 
@@ -187,6 +192,8 @@ import { getModeratorAnalyticsController } from "./analytics/moderator-analytics
 const router = Router();
 
 router.post("/login", loginModeratorController);
+router.post("/password-reset/request", requestAdminPasswordResetController);
+router.post("/password-reset/confirm", resetAdminPasswordController);
 router.post("/logout", logoutModeratorController);
 router.get("/session", getModeratorSessionController);
 

@@ -5,8 +5,10 @@ import type {
 
 import {
   getPublishedArticleBySlug,
-  getPublishedArticles
+  getPublishedArticles,
+  getDzenArticles
 } from "./articles.service.js";
+import { buildDzenRss } from "./articles.rss.js";
 
 export async function getArticlesController(
   req: Request,
@@ -61,4 +63,9 @@ export async function getArticleBySlugController(
   res.json({
     data: article
   });
+}
+
+export async function getDzenRssController(_req: Request,res: Response):Promise<void>{
+  const items=await getDzenArticles();
+  res.type("application/rss+xml; charset=utf-8").send(buildDzenRss(items));
 }
