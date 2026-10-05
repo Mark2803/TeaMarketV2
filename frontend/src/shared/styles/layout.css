@@ -1692,3 +1692,21 @@
     font-size: var(--font-size-xs);
   }
 }
+
+/* Mobile viewport geometry fix */
+@media (max-width: 63.999rem) {
+  .app-header,
+  .client-layout__content,
+  .bottom-navigation {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .app-header,
+  .client-layout__content,
+  .bottom-navigation {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
