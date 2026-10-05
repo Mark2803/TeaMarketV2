@@ -16,7 +16,7 @@ export default function AppHeader() {
       >
         <span className="app-header__logo-placeholder">
           <img
-            src="https://tea-master-team.ru/bimi/logo.svg"
+            src="/brand-logo.svg"
             alt=""
             className="app-header__logo-image"
             aria-hidden="true"
