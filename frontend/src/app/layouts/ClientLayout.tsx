@@ -18,6 +18,28 @@ export default function ClientLayout() {
         <Outlet />
       </main>
 
+      <footer
+        className="client-layout__footer"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          flexWrap: "wrap",
+          padding: "24px 20px 96px",
+          marginTop: "auto",
+          borderTop: "1px solid rgba(128, 128, 128, 0.18)",
+        }}
+      >
+        <span style={{ fontSize: 13, opacity: 0.75 }}>Способы оплаты</span>
+        <img
+          src="/Mir.png"
+          alt="Платёжная система Мир"
+          width={80}
+          style={{ display: "block", width: 80, height: "auto", objectFit: "contain" }}
+        />
+      </footer>
+
       <BottomNavigation />
     </div>
   );
