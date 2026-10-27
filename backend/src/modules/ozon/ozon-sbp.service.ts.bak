@@ -1,0 +1,94 @@
+import { createHash, timingSafeEqual } from "node:crypto";
+import { Prisma } from '../../generated/prisma/client.js';
+import { prisma } from '../../database/prisma.js';
+import { rublesToKopecks } from './ozon-order-preview.js';
+import { buildCreateSbpPaymentRequest, buildGetSbpPaymentDetailsRequest } from './ozon-sbp-payment.js';
+import { sbpLiveEnabled, sbpPost } from './ozon-sbp-http.js';
+import { parseCreated, parseDetails } from './ozon-sbp-parse.js';
+
+type Row = { order_id: string; ext_id: string; payment_id: string | null; sbp_payload: string | null; amount_kopecks: bigint; state: string; status: string };
+function credentials() {
+  if (!sbpLiveEnabled()) throw new Error('OZON_SBP_LIVE_NOT_ENABLED');
+  return { accessKey: process.env.OZON_ACCESS_KEY!, secretKey: process.env.OZON_SECRET_KEY! };
+}
+export type SbpOwner = { customerId: string } | { guestToken: string };
+async function ownedOrder(number: string, owner: SbpOwner) {
+  const order = await prisma.orders.findUnique({ where: { order_number: number }, include: { order_payments: true } });
+  if (!order) throw new Error('OZON_SBP_ORDER_NOT_FOUND');
+  if ('customerId' in owner) {
+    if (order.customer_id !== owner.customerId) throw new Error('OZON_SBP_ORDER_NOT_FOUND');
+  } else {
+    if (order.customer_id !== null) throw new Error('OZON_SBP_ORDER_NOT_FOUND');
+    const rows = await prisma.$queryRaw<Array<{ sbp_guest_token_hash: string | null }>>(Prisma.sql`SELECT sbp_guest_token_hash FROM orders WHERE id = ${order.id}::uuid`);
+    const expected = rows[0]?.sbp_guest_token_hash;
+    const actual = createHash('sha256').update(owner.guestToken).digest('hex');
+    if (!expected || expected.length !== actual.length || !timingSafeEqual(Buffer.from(expected), Buffer.from(actual))) throw new Error('OZON_SBP_ORDER_NOT_FOUND');
+  }
+  return order;
+}
+async function record(orderId: string): Promise<Row | null> {
+  const rows = await prisma.$queryRaw<Row[]>(Prisma.sql`SELECT order_id::text, ext_id, payment_id, sbp_payload, amount_kopecks, state, status FROM ozon_sbp_payments WHERE order_id = ${orderId}::uuid`);
+  return rows[0] ?? null;
+}
+export async function previewSbp(number: string, owner: SbpOwner) {
+  const order = await ownedOrder(number, owner);
+  const amountKopecks = rublesToKopecks(order.total_amount);
+  if (amountKopecks <= 0) throw new Error('OZON_SBP_AMOUNT_INVALID');
+  return { orderNumber: number, amountKopecks, currency: 'RUB', mode: sbpLiveEnabled() ? 'live' : 'preview', paymentCreated: false };
+}
+export async function createSbp(number: string, owner: SbpOwner) {
+  const config = credentials();
+  const order = await ownedOrder(number, owner);
+  if (order.payment_status !== 'unpaid' || order.order_payments.length !== 1 || order.order_payments[0]?.status !== 'pending') throw new Error('OZON_SBP_ORDER_NOT_PAYABLE');
+  const paymentMethod = await prisma.payment_methods.findUnique({ where: { id: order.order_payments[0]!.payment_method_id } });
+  if (!paymentMethod || paymentMethod.name !== 'СБП' || !paymentMethod.is_active) throw new Error('OZON_SBP_WRONG_PAYMENT_METHOD');
+  const amount = rublesToKopecks(order.total_amount);
+  if (amount <= 0) throw new Error('OZON_SBP_AMOUNT_INVALID');
+  const existing = await record(order.id);
+  if (existing) {
+    if (existing.amount_kopecks !== BigInt(amount)) throw new Error('OZON_SBP_AMOUNT_CHANGED');
+    if (existing.state === 'created' && existing.status === 'pending' && existing.payment_id && existing.sbp_payload) {
+      return { orderNumber: number, status: existing.status, paymentId: existing.payment_id, sbpPayload: existing.sbp_payload, reused: true };
+    }
+    // An ambiguous network failure may already have created a payment: never blindly retry.
+    throw new Error('OZON_SBP_PENDING_RECONCILIATION');
+  }
+  const extId = `SBP-${number}`;
+  const inserted = await prisma.$executeRaw(Prisma.sql`INSERT INTO ozon_sbp_payments (order_id, ext_id, amount_kopecks, state, status) VALUES (${order.id}::uuid, ${extId}, ${BigInt(amount)}, 'creating', 'pending') ON CONFLICT (order_id) DO NOTHING`);
+  if (inserted !== 1) throw new Error('OZON_SBP_PENDING_RECONCILIATION');
+  const request = buildCreateSbpPaymentRequest({ extId, amountKopecks: amount, redirectUrl: process.env.OZON_SBP_REDIRECT_URL! }, config);
+  const result = parseCreated(await sbpPost('/v1/createPayment', request));
+  if (result.isTestMode === true) throw new Error('OZON_SBP_TEST_PAYMENT_REJECTED');
+  await prisma.$executeRaw(Prisma.sql`UPDATE ozon_sbp_payments SET payment_id = ${result.paymentId}, sbp_payload = ${result.payload}, state = 'created', updated_at = now() WHERE order_id = ${order.id}::uuid AND state = 'creating'`);
+  return { orderNumber: number, status: 'pending', paymentId: result.paymentId, sbpPayload: result.payload, reused: false };
+}
+export async function reconcileSbp(number: string, owner?: SbpOwner) {
+  const config = credentials();
+  const order = owner ? await ownedOrder(number, owner) : await prisma.orders.findUnique({ where: { order_number: number } });
+  if (!order) throw new Error('OZON_SBP_ORDER_NOT_FOUND');
+  const link = await record(order.id);
+  if (!link) throw new Error('OZON_SBP_PAYMENT_NOT_FOUND');
+  if (!link.payment_id) return { orderNumber: number, state: link.state, status: link.status };
+  const request = buildGetSbpPaymentDetailsRequest(link.payment_id, config);
+  const remote = parseDetails(await sbpPost('/v1/getPaymentDetails', request), Number(link.amount_kopecks));
+  if (link.status === 'paid' && remote === 'pending') return { orderNumber: number, state: link.state, status: link.status };
+  // Refund/dispute states require separate accounting workflow; never silently overwrite paid order.
+  if (remote === 'refunded' || remote === 'disputed') {
+    await prisma.$executeRaw(Prisma.sql`UPDATE ozon_sbp_payments SET status = ${remote}, updated_at = now() WHERE order_id = ${order.id}::uuid`);
+    return { orderNumber: number, state: link.state, status: remote, requiresManualReview: true };
+  }
+  if (remote === 'paid') {
+    await prisma.$transaction(async tx => {
+      await tx.$executeRaw(Prisma.sql`UPDATE ozon_sbp_payments SET status = 'paid', updated_at = now() WHERE order_id = ${order.id}::uuid AND payment_id = ${link.payment_id}`);
+      await tx.orders.updateMany({ where: { id: order.id, payment_status: 'unpaid' }, data: { payment_status: 'paid' } });
+      await tx.order_payments.updateMany({ where: { order_id: order.id, status: 'pending' }, data: { status: 'paid', paid_at: new Date(), operation_number: link.payment_id } });
+    });
+  } else if (link.status !== 'paid') {
+    await prisma.$executeRaw(Prisma.sql`UPDATE ozon_sbp_payments SET status = ${remote}, updated_at = now() WHERE order_id = ${order.id}::uuid`);
+  }
+  return { orderNumber: number, state: link.state, status: link.status === 'paid' ? 'paid' : remote };
+}
+
+
+
+

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 
 import {
   Prisma
@@ -163,6 +163,8 @@ export async function createOrder(
         };
       }
 
+      // Standalone SBP does not depend on Ozon Delivery or Checkout.
+      // Existing active delivery methods remain responsible for their own tariffs.
       const deliveryMethod =
         await transaction
           .delivery_methods
@@ -498,6 +500,12 @@ export async function createOrder(
             `INSUFFICIENT_STOCK:${item.product_variant_id}`
           );
         }
+      }
+
+      // Bind the guest bearer token to this exact order, in the same transaction.
+      if ("guestToken" in owner && owner.guestToken) {
+        const tokenHash = createHash("sha256").update(owner.guestToken).digest("hex");
+        await transaction.$executeRaw(Prisma.sql`UPDATE orders SET sbp_guest_token_hash = ${tokenHash} WHERE id = ${order.id}::uuid AND customer_id IS NULL`);
       }
 
       // Позиции уже сохранены снимком в order_items. Не возвращаем

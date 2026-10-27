@@ -87,3 +87,76 @@
     flex: 0 0 auto;
   }
 }
+
+/* Mobile layout: browser scroll and navigation pinned to the viewport.
+   This stylesheet is imported by ClientLayout after the global layout CSS. */
+@media (max-width: 63.999rem) {
+  html, body, #root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 100%;
+  }
+
+  .client-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-bottom: calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .client-layout > .app-header {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-inline: 0;
+  }
+
+  .client-layout > .client-layout__content {
+    flex: 1 0 auto;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    overscroll-behavior: auto;
+    padding-bottom: var(--space-5);
+  }
+
+  .client-layout > .bottom-navigation {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: var(--bottom-navigation-height);
+    height: auto;
+    margin: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .client-layout__content--product,
+  .product-page,
+  .product-page__columns,
+  .product-page__primary,
+  .product-page__secondary,
+  .product-gallery,
+  .product-gallery__main {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

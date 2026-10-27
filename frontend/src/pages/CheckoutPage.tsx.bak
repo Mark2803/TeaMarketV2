@@ -1,0 +1,1235 @@
+﻿import { trackAnalyticsEvent } from "../features/analytics/analytics";
+import {
+  Check,
+  ChevronLeft,
+  CreditCard,
+  MapPin,
+  MessageSquareText,
+  PackageCheck,
+  Truck,
+  UserRound
+} from "lucide-react";
+
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
+
+import {
+  Link,
+  Navigate
+} from "react-router-dom";
+
+import {
+  useAuth
+} from "../features/auth/AuthProvider";
+
+import {
+  notifyCartChanged
+} from "../features/cart/cart.events";
+
+import {
+  useCart
+} from "../features/cart/useCart";
+
+import {
+  clearCheckoutDraft,
+  readCheckoutDraft,
+  saveCheckoutDraft
+} from "../features/checkout/checkout.storage";
+
+import type {
+  CheckoutContact,
+  GuestCheckoutAddress,
+  CheckoutValidationErrors,
+  CheckoutValidationField
+} from "../features/checkout/checkout.types";
+
+import {
+  hasCheckoutErrors,
+  validateCheckout
+} from "../features/checkout/checkout.validation";
+
+import {
+  useDelivery
+} from "../features/delivery/DeliveryProvider";
+
+import {
+  createOrder,
+  getDeliveryQuote,
+  getDeliveryMethods,
+  getPaymentMethods,
+  getPricingQuote
+} from "../shared/api/checkout";
+
+import type {
+  CreatedOrderApi,
+  DeliveryQuoteApi,
+  DeliveryMethodApi,
+  PaymentMethodApi,
+  PricingQuoteApi,
+  OzonCheckoutPreviewApi
+} from "../shared/api/checkout";
+
+function formatPrice(
+  value: number
+): string {
+  return `${value.toLocaleString("ru-RU")} в‚Ѕ`;
+}
+
+function formatAddress(
+  location: {
+    region: string;
+    city: string;
+    street: string;
+    house: string;
+    apartment: string;
+  }
+): string {
+  return [
+    location.region,
+    location.city,
+    `${location.street}, Рґ. ${location.house}`,
+    location.apartment
+      ? `РєРІ. ${location.apartment}`
+      : ""
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function isCourierMethod(
+  method: DeliveryMethodApi
+): boolean {
+  return /ozon/i.test(method.name);
+}
+
+export default function CheckoutPage() {
+  useEffect(() => { trackAnalyticsEvent("checkout_started", { path: window.location.pathname }); }, []);
+
+  const { session, isInitializing } = useAuth();
+  if (isInitializing) return <div className="checkout-page">Р—Р°РіСЂСѓР·РєР° РѕС„РѕСЂРјР»РµРЅРёСЏ Р·Р°РєР°Р·Р°вЂ¦</div>;
+  return <CheckoutForm key={session.user?.id ?? "guest"} />;
+}
+
+function CheckoutForm() {
+  const {
+    session,
+    isInitializing
+  } = useAuth();
+
+  const {
+    items,
+    totalAmount,
+    isLoading: isCartLoading,
+    error: cartError,
+    refresh: refreshCart
+  } = useCart();
+
+  const {
+    state: deliveryState
+  } = useDelivery();
+
+  const initialDraftRef = useRef(
+    readCheckoutDraft(
+      session.user?.id
+    )
+  );
+
+  const isGuest = !session.isAuthenticated;
+  const [guestContact, setGuestContact] = useState<CheckoutContact>(
+    initialDraftRef.current?.contact ?? { name: "", phone: "", email: "" }
+  );
+  const [guestAddress, setGuestAddress] = useState<GuestCheckoutAddress>(
+    initialDraftRef.current?.guestAddress ?? { city: "", street: "", house: "", apartment: "" }
+  );
+  const contact = isGuest ? guestContact : session.user;
+  const [manualAddress, setManualAddress] = useState(false);
+  const submittingRef = useRef(false);
+
+  const [deliveryMethods, setDeliveryMethods] =
+    useState<DeliveryMethodApi[]>([]);
+
+  const [paymentMethods, setPaymentMethods] =
+    useState<PaymentMethodApi[]>([]);
+
+  const [optionsLoading, setOptionsLoading] =
+    useState(true);
+
+  const [optionsError, setOptionsError] =
+    useState<string | null>(null);
+
+  const [selectedLocationId, setSelectedLocationId] =
+    useState(
+      initialDraftRef.current?.selectedLocationId
+      ?? ""
+    );
+
+  const [selectedDeliveryMethodId, setSelectedDeliveryMethodId] =
+    useState(
+      initialDraftRef.current?.selectedDeliveryMethodId
+      ?? ""
+    );
+
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] =
+    useState(
+      initialDraftRef.current?.selectedPaymentMethodId
+      ?? ""
+    );
+
+  const [orderComment, setOrderComment] =
+    useState(
+      initialDraftRef.current?.comment
+      ?? ""
+    );
+
+  const [validationErrors, setValidationErrors] =
+    useState<CheckoutValidationErrors>({});
+
+  const [isReviewing, setIsReviewing] =
+    useState(false);
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [submitError, setSubmitError] =
+    useState<string | null>(null);
+
+  const [orderResult, setOrderResult] =
+    useState<CreatedOrderApi | null>(null);
+  const [ozonPreview, setOzonPreview] = useState<OzonCheckoutPreviewApi | null>(null);
+
+  const [deliveryQuote, setDeliveryQuote] =
+    useState<DeliveryQuoteApi | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [pricingQuote, setPricingQuote] = useState<PricingQuoteApi | null>(null);
+
+  const courierAddresses = useMemo(
+    () =>
+      deliveryState.locations.filter(
+        (location) =>
+          location.type === "courier"
+      ),
+    [deliveryState.locations]
+  );
+
+  const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0;
+  const selectedLocation = useManualAddress ? {
+    ...guestAddress,
+    id: "guest",
+    type: "courier" as const,
+    label: "РђРґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё",
+    region: "",
+    postalCode: "",
+    comment: "",
+    isDefault: false,
+    recipient: { name: contact?.name ?? "", phone: contact?.phone ?? "" }
+  } : courierAddresses.find(
+      (location) =>
+        location.id === selectedLocationId
+    ) ?? null;
+
+  const selectedDeliveryMethod =
+    deliveryMethods.find(
+      (method) =>
+        method.id === selectedDeliveryMethodId
+    ) ?? null;
+
+  const selectedPaymentMethod =
+    paymentMethods.find(
+      (method) =>
+        method.id === selectedPaymentMethodId
+    ) ?? null;
+
+  const deliveryCost = deliveryQuote
+    ? Number(deliveryQuote.cost)
+    : 0;
+
+  const effectiveItemsTotal = pricingQuote?.itemsTotal ?? totalAmount;
+  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? deliveryCost;
+  const discountTotal = pricingQuote?.discountTotal ?? 0;
+  const total = pricingQuote?.totalAmount ?? (totalAmount + deliveryCost);
+
+  const deliveryQuoteAddress = selectedLocation
+    ? formatAddress(selectedLocation)
+    : "";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!selectedDeliveryMethodId || deliveryQuoteAddress.trim().length < 5) {
+      setDeliveryQuote(null);
+      setQuoteError(null);
+      setQuoteLoading(false);
+      return;
+    }
+
+    setQuoteLoading(true);
+    setQuoteError(null);
+    setDeliveryQuote(null);
+
+    const timer = window.setTimeout(() => {
+      void getDeliveryQuote(selectedDeliveryMethodId, deliveryQuoteAddress)
+        .then((response) => {
+          if (!cancelled) setDeliveryQuote(response.data);
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            setQuoteError(error instanceof Error ? error.message : "РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°СЃСЃС‡РёС‚Р°С‚СЊ РґРѕСЃС‚Р°РІРєСѓ");
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setQuoteLoading(false);
+        });
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [selectedDeliveryMethodId, deliveryQuoteAddress]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOptions() {
+      setOptionsLoading(true);
+      setOptionsError(null);
+
+      try {
+        const [delivery, payment] =
+          await Promise.all([
+            getDeliveryMethods(),
+            getPaymentMethods()
+          ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setDeliveryMethods(
+          delivery.data
+        );
+
+        setPaymentMethods(
+          payment.data
+        );
+
+        setSelectedDeliveryMethodId("");
+
+        setSelectedPaymentMethodId(
+          (current) =>
+            payment.data.some(
+              (method) =>
+                method.id === current
+            )
+              ? current
+              : payment.data[0]?.id
+                ?? ""
+        );
+      } catch (error) {
+        if (!cancelled) {
+          setOptionsError(
+            error instanceof Error
+              ? error.message
+              : "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ СЃРїРѕСЃРѕР±С‹ РґРѕСЃС‚Р°РІРєРё Рё РѕРїР»Р°С‚С‹"
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setOptionsLoading(false);
+        }
+      }
+    }
+
+    void loadOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setSelectedLocationId(
+      (current) => {
+        if (
+          courierAddresses.some(
+            (location) =>
+              location.id === current
+          )
+        ) {
+          return current;
+        }
+
+        return (
+          courierAddresses.find(
+            (location) =>
+              location.isDefault
+          )?.id
+          ?? courierAddresses[0]?.id
+          ?? ""
+        );
+      }
+    );
+  }, [courierAddresses]);
+
+  useEffect(() => {
+    if (
+      orderResult
+    ) {
+      return;
+    }
+
+    saveCheckoutDraft(
+      session.user?.id,
+      {
+        selectedLocationId,
+        selectedDeliveryMethodId,
+        selectedPaymentMethodId,
+        comment: orderComment,
+        guestAddress,
+        ...(isGuest ? { contact: guestContact } : {})
+      }
+    );
+  }, [
+    session.user?.id,
+    selectedLocationId,
+    selectedDeliveryMethodId,
+    selectedPaymentMethodId,
+    orderComment,
+    orderResult,
+    isGuest,
+    guestContact,
+    guestAddress
+  ]);
+
+  // РџРѕСЃР»Рµ СѓСЃРїРµС€РЅРѕРіРѕ POST /orders СЂРµР·СѓР»СЊС‚Р°С‚ Р·Р°РєР°Р·Р° РёРјРµРµС‚ РїСЂРёРѕСЂРёС‚РµС‚
+  // РЅР°Рґ СЃРѕСЃС‚РѕСЏРЅРёРµРј РєРѕСЂР·РёРЅС‹: backend СѓР¶Рµ РїРµСЂРµРІС‘Р» СЃС‚Р°СЂСѓСЋ РєРѕСЂР·РёРЅСѓ РІ converted.
+  useEffect(() => {
+    if (!selectedDeliveryMethodId) { setPricingQuote(null); return; }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
+        .then(r=>{if(!cancelled)setPricingQuote(r.data)})
+        .catch(()=>{if(!cancelled)setPricingQuote(null)});
+    }, 250);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount]);
+
+  if (orderResult) {
+    return (
+      <div className="checkout-page">
+        <section className="checkout-result">
+          <span className="checkout-result__icon">
+            <PackageCheck
+              size={42}
+              strokeWidth={1.6}
+              aria-hidden="true"
+            />
+          </span>
+
+          <div className="checkout-result__content">
+            <h1>Р—Р°РєР°Р· РѕС„РѕСЂРјР»РµРЅ</h1>
+
+            <p>
+              РЎРѕС…СЂР°РЅРёС‚Рµ РЅРѕРјРµСЂ Р·Р°РєР°Р·Р°, С‡С‚РѕР±С‹ РѕР±СЂР°С‚РёС‚СЊСЃСЏ РІ РјР°РіР°Р·РёРЅ.
+            </p>
+          </div>
+
+          {ozonPreview && (
+            <section className="checkout-review__card" aria-label="РўРµСЃС‚РѕРІС‹Р№ СЂРµР¶РёРј Ozon Pay">
+              <h2>Ozon Pay вЂ” С‚РµСЃС‚РѕРІР°СЏ РїРѕРґРіРѕС‚РѕРІРєР°</h2>
+              <p>Р—Р°РєР°Р· СЃРѕС…СЂР°РЅС‘РЅ. Р РµР°Р»СЊРЅР°СЏ РѕРїР»Р°С‚Р° Рё РґРѕСЃС‚Р°РІРєР° С‡РµСЂРµР· Ozon РЅРµ Р·Р°РїСѓС‰РµРЅС‹.</p>
+              <p>РЎСѓРјРјР° РґР»СЏ РїСЂРѕРІРµСЂРєРё: {formatPrice(ozonPreview.draft.payableKopecks / 100)}.</p>
+              {!ozonPreview.matchesPersistedAmounts && (
+                <p role="status">РЎСѓРјРјР° РїРѕР·РёС†РёР№ РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ РёС‚РѕРіРѕРј Р·Р°РєР°Р·Р°. РџРµСЂРµРґ РїРѕРґРєР»СЋС‡РµРЅРёРµРј РѕРїР»Р°С‚С‹ РїРѕС‚СЂРµР±СѓРµС‚СЃСЏ СЂР°СЃРїСЂРµРґРµР»РёС‚СЊ СЃРєРёРґРєРё.</p>
+              )}
+              <p>РџРµСЂРµС…РѕРґ РЅР° РїР»Р°С‚С‘Р¶РЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ РїРѕРєР° РѕС‚РєР»СЋС‡С‘РЅ.</p>
+            </section>
+          )}
+
+          <dl className="checkout-result__details">
+            <div>
+              <dt>РќРѕРјРµСЂ Р·Р°РєР°Р·Р°</dt>
+              <dd>{orderResult.order_number}</dd>
+            </div>
+
+            <div>
+              <dt>РЎСѓРјРјР°</dt>
+              <dd>
+                {formatPrice(
+                  Number(orderResult.total_amount)
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="checkout-review__card">
+            <h2>РЎРѕСЃС‚Р°РІ Р·Р°РєР°Р·Р°</h2>
+            {(Array.isArray(orderResult.order_items)
+              ? orderResult.order_items
+              : orderResult.order_items
+                ? [orderResult.order_items]
+                : []
+            ).map((item) => <p key={item.id}>
+              {item.product_name}, {item.weight_g} Рі Г— {item.quantity} вЂ” {formatPrice(Number(item.line_total))}
+            </p>)}
+            <p>РЎС‚Р°С‚СѓСЃ Р·Р°РєР°Р·Р°: {orderResult.status || "РЅРѕРІС‹Р№"}. РћРїР»Р°С‚Р°: {orderResult.payment_status || "РЅРµ РѕРїР»Р°С‡РµРЅРѕ"}.</p>
+            {(Array.isArray(orderResult.order_deliveries)
+              ? orderResult.order_deliveries
+              : orderResult.order_deliveries
+                ? [orderResult.order_deliveries]
+                : []
+            ).map((delivery) => <p key={delivery.id}>
+              {delivery.delivery_methods?.name ?? "Р”РѕСЃС‚Р°РІРєР°"}: {delivery.full_address}
+            </p>)}
+          </div>
+
+          <div className="checkout-result__actions">
+            <Link
+              to="/"
+              className="checkout-result__primary"
+            >
+              РќР° РіР»Р°РІРЅСѓСЋ
+            </Link>
+
+            {!isGuest && <Link
+              to="/profile"
+              className="checkout-result__secondary"
+            >
+              РџРµСЂРµР№С‚Рё РІ РїСЂРѕС„РёР»СЊ
+            </Link>}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (
+    isInitializing
+    || isCartLoading
+    || (!isGuest && deliveryState.isLoading)
+  ) {
+    return (
+      <div className="checkout-page">
+        <section className="checkout-section">
+          Р—Р°РіСЂСѓР·РєР° РѕС„РѕСЂРјР»РµРЅРёСЏ Р·Р°РєР°Р·Р°вЂ¦
+        </section>
+      </div>
+    );
+  }
+
+  if (
+    session.user
+    && !session.user.profileCompleted
+  ) {
+    return (
+      <Navigate
+        to="/profile/details"
+        replace
+      />
+    );
+  }
+
+  if (cartError) {
+    return <div className="checkout-page"><p role="alert">{cartError}</p>
+      <button type="button" onClick={() => void refreshCart()}>РџРѕРІС‚РѕСЂРёС‚СЊ Р·Р°РіСЂСѓР·РєСѓ РєРѕСЂР·РёРЅС‹</button>
+      <Link to="/cart">Р’РµСЂРЅСѓС‚СЊСЃСЏ РІ РєРѕСЂР·РёРЅСѓ</Link></div>;
+  }
+
+  if (items.length === 0) {
+    return (
+      <Navigate
+        to="/cart"
+        replace
+      />
+    );
+  }
+
+  const clearValidationError = (
+    field: CheckoutValidationField
+  ) => {
+    setValidationErrors(
+      (current) => {
+        const next = {
+          ...current
+        };
+
+        delete next[field];
+        return next;
+      }
+    );
+  };
+
+  const handleReview = () => {
+    const errors = validateCheckout({
+      user: contact,
+      selectedLocation,
+      selectedDeliveryMethodId,
+      selectedPaymentMethodId
+    });
+
+    setValidationErrors(errors);
+
+    if (hasCheckoutErrors(errors)) {
+      const firstField = (
+        Object.keys(errors)[0]
+      ) as CheckoutValidationField;
+
+      document
+        .getElementById(
+          `checkout-${firstField}`
+        )
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+      return;
+    }
+
+    setSubmitError(null);
+    setIsReviewing(true);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
+
+
+
+  const handleSubmit = async () => {
+    if (
+      submittingRef.current
+      || !contact
+      || !selectedLocation
+      || !selectedDeliveryMethod
+      || !selectedPaymentMethod
+    ) {
+      return;
+    }
+
+    const errors = validateCheckout({ user: contact, selectedLocation,
+      selectedDeliveryMethodId, selectedPaymentMethodId });
+    if (hasCheckoutErrors(errors)) {
+      setValidationErrors(errors);
+      setIsReviewing(false);
+      return;
+    }
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const response =
+        await createOrder({
+          customerName:
+            contact.name,
+          phone:
+            contact.phone,
+          email:
+            contact.email.trim()
+            || undefined,
+          comment:
+            orderComment.trim()
+            || undefined,
+          deliveryMethodId:
+            selectedDeliveryMethod.id,
+          delivery: {
+            recipientName:
+              selectedLocation.recipient.name,
+            phone:
+              selectedLocation.recipient.phone,
+            fullAddress:
+              formatAddress(selectedLocation),
+            comment:
+              selectedLocation.comment
+              || undefined
+          },
+          paymentMethodId:
+            selectedPaymentMethod.id,
+          promoCode: promoCode.trim() || undefined,
+          referralCode: referralCode.trim() || undefined
+        });
+
+      setOrderResult(response.data);
+      setOzonPreview(response.ozonCheckoutPreview ?? null);
+
+      clearCheckoutDraft(
+        session.user?.id
+      );
+
+      // РћР±РЅРѕРІР»СЏРµРј РіР»РѕР±Р°Р»СЊРЅС‹Рµ РёРЅРґРёРєР°С‚РѕСЂС‹ РєРѕСЂР·РёРЅС‹, РЅРѕ РЅРµ Р¶РґС‘Рј РїРѕРІС‚РѕСЂРЅРѕР№
+      // Р·Р°РіСЂСѓР·РєРё СѓР¶Рµ Р·Р°РєСЂС‹С‚РѕР№ (converted) РєРѕСЂР·РёРЅС‹ РїРµСЂРµРґ РїРѕРєР°Р·РѕРј СЂРµР·СѓР»СЊС‚Р°С‚Р°.
+      notifyCartChanged();
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС„РѕСЂРјРёС‚СЊ Р·Р°РєР°Р·"
+      );
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isReviewing) {
+    return (
+      <div className="checkout-page">
+        <header className="checkout-page__header">
+          <button
+            type="button"
+            className="checkout-page__back"
+            onClick={() =>
+              setIsReviewing(false)
+            }
+          >
+            <ChevronLeft
+              size={20}
+              aria-hidden="true"
+            />
+
+            Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє РѕС„РѕСЂРјР»РµРЅРёСЋ
+          </button>
+
+          <h1>РџСЂРѕРІРµСЂРєР° Р·Р°РєР°Р·Р°</h1>
+        </header>
+
+        <section className="checkout-review">
+          <div className="checkout-review__grid">
+            <article className="checkout-review__card">
+              <h3>РџРѕР»СѓС‡Р°С‚РµР»СЊ</h3>
+              <strong>{selectedLocation?.recipient.name}</strong>
+              <span>{selectedLocation?.recipient.phone}</span>
+            </article>
+
+            <article className="checkout-review__card">
+              <h3>РђРґСЂРµСЃ</h3>
+              <strong>{selectedLocation?.label}</strong>
+              {selectedLocation && (
+                <span>
+                  {formatAddress(selectedLocation)}
+                </span>
+              )}
+            </article>
+
+            <article className="checkout-review__card">
+              <h3>Р”РѕСЃС‚Р°РІРєР°</h3>
+              <strong>
+                {selectedDeliveryMethod?.name}
+              </strong>
+              <span>
+                {selectedDeliveryMethod?.deliveryTerm
+                  || "РЎСЂРѕРє СѓС‚РѕС‡РЅСЏРµС‚СЃСЏ"}
+              </span>
+            </article>
+
+            <article className="checkout-review__card">
+              <h3>РћРїР»Р°С‚Р°</h3>
+              <strong>
+                {selectedPaymentMethod?.name}
+              </strong>
+              <span>
+                РћР¶РёРґР°РµС‚ РѕРїР»Р°С‚С‹.
+              </span>
+            </article>
+          </div>
+
+          <article className="checkout-review__card">
+            <h3>РЎРѕСЃС‚Р°РІ Р·Р°РєР°Р·Р°</h3>
+
+            <div className="checkout-review__items">
+              {items.map(
+                (item) => (
+                  <div
+                    key={item.id}
+                    className="checkout-review__item"
+                  >
+                    <span>
+                      {item.product.name}, {item.variant.weightG} Рі Г— {item.quantity}
+                    </span>
+
+                    <strong>
+                      {formatPrice(
+                        Number(item.lineTotal)
+                      )}
+                    </strong>
+                  </div>
+                )
+              )}
+            </div>
+          </article>
+
+          <dl className="checkout-review__totals">
+            <div>
+              <dt>РўРѕРІР°СЂС‹</dt>
+              <dd>{formatPrice(effectiveItemsTotal)}</dd>
+            </div>
+
+            <div>
+              <dt>Р”РѕСЃС‚Р°РІРєР°</dt>
+              <dd>{formatPrice(effectiveDeliveryCost)}</dd>
+            </div>
+
+            {discountTotal > 0 && <div><dt>РЎРєРёРґРєР°</dt><dd>в€’{formatPrice(discountTotal)}</dd></div>}
+
+            <div className="checkout-review__total">
+              <dt>РС‚РѕРіРѕ</dt>
+              <dd>{formatPrice(total)}</dd>
+            </div>
+          </dl>
+
+          {submitError && (
+            <p className="checkout-field-error">
+              {submitError}
+            </p>
+          )}
+
+          <button
+            type="button"
+            className="checkout-review__place-order"
+            disabled={isSubmitting}
+            onClick={() => {
+              void handleSubmit();
+            }}
+          >
+            {isSubmitting
+              ? "РЎРѕР·РґР°С‘Рј Р·Р°РєР°Р·вЂ¦"
+              : "РћС„РѕСЂРјРёС‚СЊ Р·Р°РєР°Р·"}
+          </button>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="checkout-page">
+      <header className="checkout-page__header">
+        <Link
+          to="/cart"
+          className="checkout-page__back"
+        >
+          <ChevronLeft
+            size={20}
+            aria-hidden="true"
+          />
+
+          Р’РµСЂРЅСѓС‚СЊСЃСЏ РІ РєРѕСЂР·РёРЅСѓ
+        </Link>
+
+        <h1>РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°</h1>
+      </header>
+
+      {optionsError && (
+        <p className="checkout-field-error">
+          {optionsError}
+        </p>
+      )}
+
+      <div className="checkout-page__layout">
+        <div className="checkout-page__main">
+          <section
+            id="checkout-recipient"
+            className={
+              validationErrors.recipient
+                ? "checkout-section checkout-section--error"
+                : "checkout-section"
+            }
+          >
+            <div className="checkout-section__heading">
+              <span className="checkout-section__step">1</span>
+              <span className="checkout-section__icon">
+                <UserRound size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h2>РљРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ</h2>
+                <p>{isGuest ? "РџРѕРєСѓРїРєР° Р±РµР· СЂРµРіРёСЃС‚СЂР°С†РёРё" : "РџРѕР»СѓС‡РµРЅС‹ РёР· РїСЂРѕС„РёР»СЏ"}</p>
+              </div>
+            </div>
+
+            {isGuest ? (
+              <div className="checkout-form-fields">
+                {([
+                  ["name", "РРјСЏ РїРѕР»СѓС‡Р°С‚РµР»СЏ", "text", "name", 255],
+                  ["phone", "РўРµР»РµС„РѕРЅ", "tel", "tel", 32],
+                  ["email", "Р­Р»РµРєС‚СЂРѕРЅРЅР°СЏ РїРѕС‡С‚Р° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)", "email", "email", 320]
+                ] as const).map(([field, label, type, autoComplete, maxLength]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input type={type} autoComplete={autoComplete} maxLength={maxLength}
+                      required={field !== "email"} value={guestContact[field]}
+                      onChange={(event) => {
+                        setGuestContact((current) => ({ ...current, [field]: event.target.value }));
+                        clearValidationError("recipient");
+                      }} />
+                  </label>
+                ))}
+              </div>
+            ) : (
+            <div className="checkout-recipient">
+              <strong>{contact?.name}</strong>
+              <span>{contact?.phone}</span>
+              {contact?.email && (
+                <span>{contact.email}</span>
+              )}
+              <Link to="/profile/details">
+                РР·РјРµРЅРёС‚СЊ Р»РёС‡РЅС‹Рµ РґР°РЅРЅС‹Рµ
+              </Link>
+            </div>
+            )}
+
+            {validationErrors.recipient && (
+              <p className="checkout-field-error">
+                {validationErrors.recipient}
+              </p>
+            )}
+          </section>
+
+          <section
+            id="checkout-location"
+            className={
+              validationErrors.location
+                ? "checkout-section checkout-section--error"
+                : "checkout-section"
+            }
+          >
+            <div className="checkout-section__heading">
+              <span className="checkout-section__step">2</span>
+              <span className="checkout-section__icon">
+                <MapPin size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h2>РђРґСЂРµСЃ РґРѕСЃС‚Р°РІРєРё</h2>
+                <p>{useManualAddress ? "РЈРєР°Р¶РёС‚Рµ Р°РґСЂРµСЃ РїРѕР»СѓС‡РµРЅРёСЏ Р·Р°РєР°Р·Р°" : "РЎРѕС…СЂР°РЅС‘РЅРЅС‹Рµ Р°РґСЂРµСЃР°"}</p>
+              </div>
+            </div>
+
+            {useManualAddress ? (
+              <div className="checkout-form-fields">
+                {([
+                  ["city", "Р“РѕСЂРѕРґ"], ["street", "РЈР»РёС†Р°"],
+                  ["house", "Р”РѕРј / РєРѕСЂРїСѓСЃ"], ["apartment", "РљРІР°СЂС‚РёСЂР° (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)"]
+                ] as const).map(([field, label]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input value={guestAddress[field]} maxLength={255}
+                      required={field !== "apartment"}
+                      onChange={(event) => {
+                        setGuestAddress((current) => ({ ...current, [field]: event.target.value }));
+                        clearValidationError("location");
+                      }} />
+                  </label>
+                ))}
+              </div>
+            ) : courierAddresses.length > 0 ? (
+              <div className="checkout-locations">
+                {courierAddresses.map(
+                  (location) => {
+                    const selected =
+                      location.id === selectedLocationId;
+
+                    return (
+                      <button
+                        key={location.id}
+                        type="button"
+                        className={
+                          selected
+                            ? "checkout-location checkout-location--selected"
+                            : "checkout-location"
+                        }
+                        onClick={() => {
+                          setSelectedLocationId(location.id);
+                          clearValidationError("location");
+                        }}
+                      >
+                        <span className="checkout-location__marker">
+                          {selected ? (
+                            <Check size={17} aria-hidden="true" />
+                          ) : (
+                            <MapPin size={17} aria-hidden="true" />
+                          )}
+                        </span>
+
+                        <span className="checkout-location__content">
+                          <strong>{location.label}</strong>
+                          <span>{formatAddress(location)}</span>
+                          <small>
+                            {location.recipient.name}, {location.recipient.phone}
+                          </small>
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            ) : null}
+            {!isGuest && courierAddresses.length > 0 && (
+              <button type="button" onClick={() => {
+                setManualAddress((current) => !current);
+                clearValidationError("location");
+              }}>{manualAddress ? "Р’С‹Р±СЂР°С‚СЊ СЃРѕС…СЂР°РЅС‘РЅРЅС‹Р№ Р°РґСЂРµСЃ" : "РЈРєР°Р·Р°С‚СЊ РґСЂСѓРіРѕР№ Р°РґСЂРµСЃ"}</button>
+            )}
+
+            {validationErrors.location && (
+              <p className="checkout-field-error">
+                {validationErrors.location}
+              </p>
+            )}
+          </section>
+
+          <section
+            id="checkout-delivery"
+            className={
+              validationErrors.delivery
+                ? "checkout-section checkout-section--error"
+                : "checkout-section"
+            }
+          >
+            <div className="checkout-section__heading">
+              <span className="checkout-section__step">3</span>
+              <span className="checkout-section__icon">
+                <Truck size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h2>РЎРїРѕСЃРѕР± РґРѕСЃС‚Р°РІРєРё</h2>
+                <p>Р’С‹Р±РµСЂРёС‚Рµ РїРѕРґС…РѕРґСЏС‰РёР№ РІР°СЂРёР°РЅС‚</p>
+              </div>
+            </div>
+
+            {optionsLoading ? (
+              <p>Р—Р°РіСЂСѓР¶Р°РµРј СЃРїРѕСЃРѕР±С‹ РґРѕСЃС‚Р°РІРєРёвЂ¦</p>
+            ) : (
+              <div className="checkout-delivery-options">
+                <p role="status">РћС„РѕСЂРјР»РµРЅРёРµ РґРѕСЃС‚Р°РІРєРё С‡РµСЂРµР· Ozon РїРѕРєР° РІ С‚РµСЃС‚РѕРІРѕРј СЂРµР¶РёРјРµ. Р РµР°Р»СЊРЅС‹Рµ Р·Р°РєР°Р·С‹ Рё С‚Р°СЂРёС„С‹ РЅРµРґРѕСЃС‚СѓРїРЅС‹.</p>
+                {deliveryMethods.filter(isCourierMethod).map(
+                  (method) => {
+                    const enabled = false; // Ozon API is not connected: preview only.
+                    const selected =
+                      method.id === selectedDeliveryMethodId;
+
+                    return (
+                      <button
+                        key={method.id}
+                        type="button"
+                        disabled={!enabled}
+                        className={
+                          selected
+                            ? "checkout-delivery-option checkout-delivery-option--selected"
+                            : "checkout-delivery-option"
+                        }
+                        onClick={() => {
+                          if (!enabled) return;
+                          setSelectedDeliveryMethodId(method.id);
+                          clearValidationError("delivery");
+                        }}
+                      >
+                        <span className="checkout-delivery-option__marker">
+                          {selected && (
+                            <Check size={17} aria-hidden="true" />
+                          )}
+                        </span>
+
+                        <span className="checkout-delivery-option__content">
+                          <strong>{method.name}</strong>
+                          <small>
+                            {"Ozon Р”РѕСЃС‚Р°РІРєР°: РІС‹Р±РѕСЂ РџР’Р— Рё СЂР°СЃС‡С‘С‚ С‚Р°СЂРёС„Р° РїРѕСЏРІСЏС‚СЃСЏ РїРѕСЃР»Рµ РїРѕРґРєР»СЋС‡РµРЅРёСЏ API"}
+                          </small>
+                        </span>
+
+                        <span className="checkout-delivery-option__details">
+                          <strong>РўР°СЂРёС„ СѓС‚РѕС‡РЅСЏРµС‚СЃСЏ</strong>
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            )}
+
+            {validationErrors.delivery && (
+              <p className="checkout-field-error">
+                {validationErrors.delivery}
+              </p>
+            )}
+          </section>
+
+          <section
+            id="checkout-payment"
+            className={
+              validationErrors.payment
+                ? "checkout-section checkout-section--error"
+                : "checkout-section"
+            }
+          >
+            <div className="checkout-section__heading">
+              <span className="checkout-section__step">4</span>
+              <span className="checkout-section__icon">
+                <CreditCard size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h2>РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹</h2>
+                <p>Р’С‹Р±РµСЂРёС‚Рµ РїРѕРґС…РѕРґСЏС‰РёР№ РІР°СЂРёР°РЅС‚</p>
+              </div>
+            </div>
+
+            {optionsLoading ? (
+              <p>Р—Р°РіСЂСѓР¶Р°РµРј СЃРїРѕСЃРѕР±С‹ РѕРїР»Р°С‚С‹вЂ¦</p>
+            ) : (
+              <div className="checkout-payment-options">
+                {paymentMethods.map(
+                  (method) => {
+                    const selected =
+                      method.id === selectedPaymentMethodId;
+
+                    return (
+                      <button
+                        key={method.id}
+                        type="button"
+                        className={
+                          selected
+                            ? "checkout-payment-option checkout-payment-option--selected"
+                            : "checkout-payment-option"
+                        }
+                        onClick={() => {
+                          setSelectedPaymentMethodId(method.id);
+                          clearValidationError("payment");
+                        }}
+                      >
+                        <span className="checkout-payment-option__marker">
+                          {selected ? (
+                            <Check size={17} aria-hidden="true" />
+                          ) : (
+                            <CreditCard size={18} aria-hidden="true" />
+                          )}
+                        </span>
+
+                        <span className="checkout-payment-option__content">
+                          <strong>{method.name}</strong>
+                          <span>
+                            Р’С‹Р±СЂР°РЅРЅС‹Р№ СЃРїРѕСЃРѕР± Р±СѓРґРµС‚ СѓРєР°Р·Р°РЅ РІ Р·Р°РєР°Р·Рµ.
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            )}
+
+            {validationErrors.payment && (
+              <p className="checkout-field-error">
+                {validationErrors.payment}
+              </p>
+            )}
+          </section>
+
+          <section className="checkout-section">
+            <div className="checkout-section__heading"><div><h2>РЎРєРёРґРєРё</h2><p>РќРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ</p></div></div>
+            <div className="checkout-loyalty">
+              <label className="checkout-loyalty__block"><span>РџСЂРѕРјРѕРєРѕРґ</span><input value={promoCode} onChange={e=>setPromoCode(e.target.value.toUpperCase())} placeholder="TEA10" /></label>
+              <label className="checkout-loyalty__block"><span>Р РµС„РµСЂР°Р»СЊРЅС‹Р№ РєРѕРґ</span><input value={referralCode} onChange={e=>setReferralCode(e.target.value.toUpperCase())} placeholder="РљРѕРґ РґСЂСѓРіР°" /></label>
+            </div>
+            {pricingQuote?.discounts.length ? <p className="checkout-loyalty__message">{pricingQuote.discounts.map(x=>`${x.name}: в€’${formatPrice(x.amount)}`).join(" В· ")}</p> : null}
+          </section>
+
+          <section className="checkout-section">
+            <div className="checkout-section__heading">
+              <span className="checkout-section__step">5</span>
+              <span className="checkout-section__icon">
+                <MessageSquareText size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h2>РљРѕРјРјРµРЅС‚Р°СЂРёР№</h2>
+                <p>РќРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ</p>
+              </div>
+            </div>
+
+            <textarea
+              value={orderComment}
+              maxLength={2000}
+              placeholder="РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє Р·Р°РєР°Р·Сѓ"
+              onChange={(event) =>
+                setOrderComment(event.target.value)
+              }
+            />
+          </section>
+        </div>
+
+        <aside className="checkout-summary">
+          <h2>Р’Р°С€ Р·Р°РєР°Р·</h2>
+
+          <div className="checkout-summary__items">
+            {items.map(
+              (item) => (
+                <div key={item.id}>
+                  <span>
+                    {item.product.name}, {item.variant.weightG} Рі Г— {item.quantity}
+                  </span>
+                  <strong>
+                    {formatPrice(Number(item.lineTotal))}
+                  </strong>
+                </div>
+              )
+            )}
+          </div>
+
+          <dl className="checkout-summary__totals">
+            <div>
+              <dt>РўРѕРІР°СЂС‹</dt>
+              <dd>{formatPrice(effectiveItemsTotal)}</dd>
+            </div>
+
+            <div>
+              <dt>Р”РѕСЃС‚Р°РІРєР°</dt>
+              <dd>
+                {!selectedDeliveryMethod
+                  ? "РќРµ РІС‹Р±СЂР°РЅР°"
+                  : quoteLoading
+                    ? "Р Р°СЃСЃС‡РёС‚С‹РІР°РµС‚СЃСЏвЂ¦"
+                    : quoteError
+                      ? "РћС€РёР±РєР° СЂР°СЃС‡С‘С‚Р°"
+                      : deliveryQuote
+                        ? formatPrice(effectiveDeliveryCost)
+                        : "РЈРєР°Р¶РёС‚Рµ Р°РґСЂРµСЃ"}
+              </dd>
+            </div>
+
+            {discountTotal > 0 && <div><dt>РЎРєРёРґРєР°</dt><dd>в€’{formatPrice(discountTotal)}</dd></div>}
+
+            <div className="checkout-summary__total">
+              <dt>РС‚РѕРіРѕ</dt>
+              <dd>{formatPrice(total)}</dd>
+            </div>
+          </dl>
+
+          <button
+            type="button"
+            className="checkout-summary__submit"
+            disabled={
+              optionsLoading
+              || Boolean(optionsError)
+              || quoteLoading
+              || Boolean(quoteError)
+              || !deliveryQuote
+            }
+            onClick={handleReview}
+          >
+            РџСЂРѕРІРµСЂРёС‚СЊ Р·Р°РєР°Р·
+          </button>
+        </aside>
+      </div>
+    </div>
+  );
+}

@@ -57,8 +57,26 @@ interface PaymentMethodsResponse {
   data: PaymentMethodApi[];
 }
 
+export interface OzonCheckoutPreviewApi {
+  provider: "ozon_pay_checkout";
+  mode: "preview";
+  paymentCreated: false;
+  checkoutUrl: null;
+  paymentConfirmed: false;
+  matchesPersistedAmounts: boolean;
+  blockers: string[];
+  draft: {
+    orderNumber: string;
+    itemsTotalKopecks: number;
+    payableKopecks: number;
+  };
+}
+
 interface CreateOrderResponse {
   data: CreatedOrderApi;
+  ozonCheckoutPreview?: OzonCheckoutPreviewApi;
+  ozonCheckout?: { checkoutUrl: string; orderNumber: string; status: string; reused: boolean };
+  ozonCheckoutError?: string;
 }
 
 export interface CreateOrderPayload {
@@ -127,3 +145,77 @@ export function createOrder(
 
 export interface PricingQuoteApi { grossItemsTotal:number; itemsTotal:number; deliveryCost:number; discountTotal:number; totalAmount:number; loyaltySpent:number; discounts:Array<{sourceType:string;sourceId:string|null;code:string|null;name:string;amount:number}> }
 export function getPricingQuote(payload:{deliveryMethodId:string;promoCode?:string;referralCode?:string;loyaltyToSpend?:number}){return apiRequest<{data:PricingQuoteApi}>("/pricing/quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify(payload)})}
+
+export function retryOzonCheckout(orderNumber: string) {
+  return apiRequest<{data:{checkoutUrl:string;orderNumber:string;status:string;reused:boolean}}>(
+    `/ozon/orders/${encodeURIComponent(orderNumber)}/checkout`,
+    { method: "POST", headers: { "x-guest-token": getGuestCartToken(), ...getAuthHeaders() } }
+  );
+}
+export function checkOzonPayment(orderNumber: string) {
+  return apiRequest<{data:{orderNumber:string;status:string;state:string}}>(
+    `/ozon/orders/${encodeURIComponent(orderNumber)}/payment`,
+    { headers: { "x-guest-token": getGuestCartToken(), ...getAuthHeaders() } }
+  );
+}
+export function getOzonCapabilities() {
+  return apiRequest<{mode:"disabled"|"preview"|"live";canCreateLivePayment:boolean;canCreateLiveShipment:boolean;deliveryViaCheckout:boolean}>("/ozon/capabilities");
+}
+export interface OzonDiagnosticPreviewPayload {
+  orderNumber: string;
+  items: Array<{
+    name: string;
+    quantity: number;
+    unitPriceKopecks: number;
+    vat?: string;
+    sellerSku?: string;
+    sellerExtId?: string;
+  }>;
+  deliveryKopecks: number;
+  deliveryEnabled: boolean;
+}
+
+export interface OzonDiagnosticPreviewResponse {
+  mode: "preview";
+  createsOrder: false;
+  createsPayment: false;
+  createsShipment: false;
+  draft: {
+    orderNumber: string;
+    currency: "RUB";
+    itemsTotalKopecks: number;
+    deliveryKopecks: number;
+    payableKopecks: number;
+    deliveryEnabled: boolean;
+    missingSellerIdentifiers: number;
+    missingVat: number;
+    readyForLive: boolean;
+  };
+}
+
+export function previewOzonCheckout(
+  payload: OzonDiagnosticPreviewPayload
+): Promise<OzonDiagnosticPreviewResponse> {
+  return apiRequest<OzonDiagnosticPreviewResponse>(
+    "/ozon/checkout-preview",
+    {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }
+  );
+}
+
+export type SbpPaymentResponse = { data: { orderNumber: string; status: string; paymentId: string; sbpPayload: string; reused: boolean } };
+export function getSbpCapabilities() {
+  return apiRequest<{ mode: "live" | "preview"; canCreateLivePayment: boolean }>("/ozon/sbp/capabilities");
+}
+export function createSbpPayment(orderNumber: string) {
+  return apiRequest<SbpPaymentResponse>(`/ozon/sbp/orders/${encodeURIComponent(orderNumber)}/payment`, {
+    method: "POST", headers: { "x-guest-token": getGuestCartToken(), ...getAuthHeaders() }
+  });
+}
+export function checkSbpPayment(orderNumber: string) {
+  return apiRequest<{data:{orderNumber:string;status:string;state:string}}>(`/ozon/sbp/orders/${encodeURIComponent(orderNumber)}/payment`, {
+    headers: { "x-guest-token": getGuestCartToken(), ...getAuthHeaders() }
+  });
+}

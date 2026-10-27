@@ -1,0 +1,81 @@
+/* Storefront layout: final overrides after legacy layout rules. */
+.client-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible;
+  padding-bottom: calc(var(--bottom-navigation-height) + env(safe-area-inset-bottom, 0px));
+}
+.client-layout > .client-layout__content {
+  display: block;
+  flex: 1 0 auto;
+  width: min(100%, var(--content-max-width));
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+.client-layout > .bottom-navigation {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-self: auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: var(--bottom-navigation-height);
+  height: auto;
+  margin: 0;
+  padding: 0 max(env(safe-area-inset-right, 0px), 0px) env(safe-area-inset-bottom, 0px) max(env(safe-area-inset-left, 0px), 0px);
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  box-sizing: border-box;
+}
+@media (max-width: 47.999rem) {
+  html, body, #root { width: 100%; min-width: 0; max-width: 100%; }
+  .client-layout > .app-header,
+  .client-layout > .client-layout__content {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+  .client-layout > .client-layout__content { padding: var(--space-4); }
+  .client-layout > .client-layout__content:has(.product-page) { padding: 0; }
+  .client-layout .product-page,
+  .client-layout .product-page__columns,
+  .client-layout .product-page__primary,
+  .client-layout .product-page__secondary {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .client-layout .product-page { padding: 0 var(--space-4) var(--space-6); }
+  .client-layout .product-page__columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .client-layout .product-page__secondary { position: static; }
+  .client-layout .product-gallery,
+  .client-layout .product-gallery__main,
+  .client-layout .product-info,
+  .client-layout .product-variants,
+  .client-layout .product-purchase {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .client-layout .product-gallery__main,
+  .client-layout .product-gallery__main img { min-height: 0; }
+}
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .client-layout > .client-layout__content { padding-bottom: var(--space-6); }
+}

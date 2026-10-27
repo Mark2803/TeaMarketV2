@@ -1,6 +1,8 @@
 import { Router } from "express";
 
 import healthRouter from "./health.js";
+import ozonRouter from "../modules/ozon/ozon.routes.js";
+import ozonPaymentStatusRouter from "../modules/ozon/ozon-payment-status.routes.js";
 
 import productsRouter from "../modules/products/products.routes.js";
 import categoriesRouter from "../modules/categories/categories.routes.js";
@@ -27,6 +29,8 @@ import moderatorRouter from "../modules/moderator/moderator.routes.js";
 const router = Router();
 
 router.use("/health", healthRouter);
+router.use("/ozon", ozonRouter);
+router.use("/ozon", ozonPaymentStatusRouter);
 
 router.use("/products", productsRouter);
 router.use("/categories", categoriesRouter);

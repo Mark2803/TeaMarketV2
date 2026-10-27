@@ -1,0 +1,48 @@
+/* Checkout is a separate layout, not a client-layout scrolling pane.
+   Override the global viewport lock used by the mobile storefront. */
+@media (max-width: 47.999rem) {
+  html:has(.checkout-layout),
+  html:has(.checkout-layout) body,
+  html:has(.checkout-layout) #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: clip !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto;
+  }
+
+  html:has(.checkout-layout) .checkout-layout {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    box-sizing: border-box;
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:has(.checkout-layout) .checkout-layout__content,
+  html:has(.checkout-layout) .checkout-page,
+  html:has(.checkout-layout) .checkout-page__layout,
+  html:has(.checkout-layout) .checkout-page__main {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  html:has(.checkout-layout) .checkout-page__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html:has(.checkout-layout) .checkout-section,
+  html:has(.checkout-layout) .checkout-summary {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

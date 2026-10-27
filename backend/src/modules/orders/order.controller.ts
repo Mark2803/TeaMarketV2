@@ -13,6 +13,11 @@ import {
 } from "./order.service.js";
 
 import { prisma } from "../../database/prisma.js";
+import { ozonIntegrationMode } from "../ozon/ozon-checkout.js";
+import { ozonLiveReady, createOrGetOzonCheckout } from "../ozon/ozon-live.service.js";
+import { previewPersistedOrder } from "../ozon/ozon-order-preview.js";
+import { inspectPersistedOrderForHostedCheckout } from "../ozon/ozon-order-readiness.js";
+import { prepareHostedCheckoutHandoff } from "../ozon/ozon-hosted-handoff.js";
 
 function getOrderOwner(
   req: Request,
@@ -216,8 +221,33 @@ export async function createOrderController(
       }
     }
 
+    // Existing order creation and its transaction remain unchanged.
+    // Offline-only Ozon preview is computed from persisted server values.
+    let ozonCheckoutPreview = null;
+    let ozonHostedReadiness = null;
+    let ozonHostedHandoff = null;
+    try {
+      if (ozonIntegrationMode() === "preview") {
+        ozonCheckoutPreview = previewPersistedOrder(result.order);
+        ozonHostedReadiness = inspectPersistedOrderForHostedCheckout(result.order);
+        ozonHostedHandoff = prepareHostedCheckoutHandoff(result.order);
+      }
+    } catch {
+      // Preview failures must never undo or misrepresent a saved order.
+    }
+    let ozonCheckout: { checkoutUrl: string; orderNumber: string; status: string; reused: boolean } | null = null;
+    let ozonCheckoutError: string | null = null;
+    if (ozonLiveReady() && (await prisma.payment_methods.findUnique({ where: { id: bodyResult.data.paymentMethodId }, select: { name: true } }))?.name === 'Банковская карта онлайн') {
+      try { ozonCheckout = await createOrGetOzonCheckout(result.order.order_number, owner); }
+      catch (error) { ozonCheckoutError = error instanceof Error ? error.message : "OZON_CHECKOUT_FAILED"; }
+    }
     res.status(201).json({
-      data: result.order
+      data: result.order,
+      ...(ozonCheckout ? { ozonCheckout } : {}),
+      ...(ozonCheckoutError ? { ozonCheckoutError } : {}),
+      ...(ozonCheckoutPreview ? { ozonCheckoutPreview } : {}),
+      ...(ozonHostedReadiness ? { ozonHostedReadiness } : {}),
+      ...(ozonHostedHandoff ? { ozonHostedHandoff } : {})
     });
   } catch (error) {
     if (

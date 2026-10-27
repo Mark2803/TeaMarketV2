@@ -1,4 +1,6 @@
 import "../../shared/styles/unified-header.css";
+import "../../shared/styles/storefront-navigation-final.css";
+import "../../shared/styles/mobile-fixed-bars.css";
 
 import {
   Outlet

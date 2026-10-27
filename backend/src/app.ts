@@ -1,4 +1,4 @@
-import compression from "compression";
+﻿import compression from "compression";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -11,6 +11,7 @@ import apiRouter from "./routes/index.js";
 const app = express();
 
 app.disable("x-powered-by");
+app.set("trust proxy", "loopback");
 
 app.use(helmet());
 
