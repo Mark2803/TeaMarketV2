@@ -91,6 +91,11 @@ export default function ContactsPage() {
           </span>
         </div>
       </section>
+
+      <div className="contacts-page__legal" aria-label="Реквизиты продавца">
+        <span>ИНН 780632012138</span>
+        <span>ОГРНИП 325784700260989</span>
+      </div>
     </div>
   );
 }

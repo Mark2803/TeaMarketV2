@@ -17,6 +17,7 @@ import "./shared/styles/category-subcategories.css";
 import "./shared/styles/articles.css";
 import "./shared/styles/admin.css";
 import "./shared/styles/home-desktop-horizontal-sections.css";
+import "./shared/styles/viewport-shell-fix.css";
 
 ReactDOM.createRoot(
   document.getElementById("root")!

@@ -117,3 +117,13 @@
     padding: var(--space-4) var(--space-5);
   }
 }
+
+.contacts-page__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  padding: 0 var(--space-2) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}

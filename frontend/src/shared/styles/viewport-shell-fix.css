@@ -1,0 +1,66 @@
+/* Unified viewport shell for storefront on all screen sizes.
+   Header and bottom navigation remain visible; only main content scrolls. */
+.client-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.client-layout > .app-header {
+  grid-row: 1;
+  position: relative;
+  top: auto;
+  min-width: 0;
+  flex-shrink: 0;
+}
+.client-layout > .client-layout__content,
+.client-layout > .client-layout__content--catalog,
+.client-layout > .client-layout__content--product {
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-5);
+}
+.client-layout > .bottom-navigation {
+  grid-row: 3;
+  align-self: end;
+  position: relative;
+  inset: auto;
+  z-index: 100;
+  min-width: 0;
+  min-height: var(--bottom-navigation-height);
+  height: auto;
+  flex: 0 0 auto;
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (min-width: 64rem) {
+  .client-layout > .app-header {
+    width: min(calc(100% - 2 * var(--space-4)), var(--content-max-width));
+  }
+  .client-layout > .client-layout__content,
+  .client-layout > .client-layout__content--catalog,
+  .client-layout > .client-layout__content--product {
+    width: min(calc(100% - 2 * var(--space-4)), var(--content-max-width));
+    margin: 0 auto;
+    padding: var(--space-4) 0 var(--space-6);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .client-layout > .bottom-navigation {
+    width: min(40rem, calc(100% - 2 * var(--space-4)));
+    margin: 0 auto;
+    border: 1px solid var(--color-border);
+    border-bottom: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}
