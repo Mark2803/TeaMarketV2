@@ -58,10 +58,6 @@ export function validateCheckout(
       "Выберите доступный способ доставки.";
   }
 
-  if (!input.selectedPaymentMethodId) {
-    errors.payment =
-      "Выберите способ оплаты.";
-  }
 
   return errors;
 }

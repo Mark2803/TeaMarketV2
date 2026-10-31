@@ -1,0 +1,46 @@
+/* Desktop: use native document scrolling for mouse wheels and touchpads.
+   Keep the header sticky and the bottom navigation fixed. */
+@media (min-width: 64rem) {
+  html, body, #root {
+    height: auto;
+    min-height: 100%;
+    overflow-y: visible;
+  }
+
+  .client-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .client-layout > .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 110;
+    flex-shrink: 0;
+  }
+
+  .client-layout > .client-layout__content,
+  .client-layout > .client-layout__content--catalog,
+  .client-layout > .client-layout__content--product {
+    height: auto;
+    min-height: 0;
+    flex: 1 0 auto;
+    overflow: visible;
+    overscroll-behavior-y: auto;
+    padding-bottom: calc(var(--bottom-navigation-height) + var(--space-6));
+  }
+
+  .client-layout > .bottom-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 120;
+    margin: 0;
+  }
+}

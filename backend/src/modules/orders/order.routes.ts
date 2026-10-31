@@ -13,7 +13,11 @@ import {
   getCustomerOrdersController
 } from "./order-history.controller.js";
 
+import { getAccessibleOrder, payAccessibleOrder } from "./order-access.controller.js";
+
 const router = Router();
+router.get("/access/:orderId", authMiddleware, getAccessibleOrder);
+router.post("/access/:orderId/pay", authMiddleware, payAccessibleOrder);
 
 /**
  * Создание заказа доступно гостю.

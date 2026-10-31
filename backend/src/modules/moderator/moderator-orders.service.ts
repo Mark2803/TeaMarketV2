@@ -1,3 +1,4 @@
+import { refreshModeratorOrderPayments } from "./moderator-payment-sync.service.js";
 import type {
   Prisma
 } from "../../generated/prisma/client.js";
@@ -138,6 +139,17 @@ export async function getModeratorOrders(
         where
       })
     ]);
+
+  await refreshModeratorOrderPayments(items.filter((item) => item.payment_status !== "paid").map((item) => item.id));
+  const updated = await prisma.orders.findMany({
+    where: { id: { in: items.map((item) => item.id) } },
+    select: { id: true, payment_status: true, updated_at: true }
+  });
+  const statusById = new Map(updated.map((item) => [item.id, item]));
+  for (const item of items) {
+    const latest = statusById.get(item.id);
+    if (latest) { item.payment_status = latest.payment_status; item.updated_at = latest.updated_at; }
+  }
 
   return {
     items,

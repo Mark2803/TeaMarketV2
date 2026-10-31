@@ -31,6 +31,7 @@ const HomePage = lazy(() => import("../../pages/HomePage"));
 const NotFoundPage = lazy(() => import("../../pages/NotFoundPage"));
 const NewProductsPage = lazy(() => import("../../pages/NewProductsPage"));
 const OrderDetailsPage = lazy(() => import("../../pages/OrderDetailsPage"));
+const GuestOrderPage = lazy(() => import("../../pages/GuestOrderPage"));
 const OrdersPage = lazy(() => import("../../pages/OrdersPage"));
 const ProductPage = lazy(() => import("../../pages/ProductPage"));
 const ProfileDetailsPage = lazy(() => import("../../pages/ProfileDetailsPage"));
@@ -83,6 +84,7 @@ export default function AppRouter() {
           <Route path="profile/details" element={<ProfileDetailsPage />} />
           <Route path="profile/delivery-addresses" element={<DeliveryAddressesPage />} />
           <Route path="profile/orders" element={<OrdersPage />} />
+          <Route path="order/:orderId" element={<GuestOrderPage />} />
           <Route path="profile/orders/:orderNumber" element={<OrderDetailsPage />} />
         </Route>
 

@@ -59,6 +59,8 @@ interface PaymentMethodsResponse {
 
 interface CreateOrderResponse {
   data: CreatedOrderApi;
+  accessToken: string;
+  payment: { confirmationUrl: string | null; configured: boolean; error: string | null };
 }
 
 export interface CreateOrderPayload {
@@ -73,7 +75,7 @@ export interface CreateOrderPayload {
     fullAddress: string;
     comment?: string;
   };
-  paymentMethodId: string;
+  paymentMethodId?: string;
   promoCode?: string;
   referralCode?: string;
   loyaltyToSpend?: number;

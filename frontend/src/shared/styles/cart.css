@@ -479,3 +479,24 @@
     width: 100%;
   }
 }
+/* Unpaid orders inside the cart */
+.cart-page__tabs { display:flex; gap:8px; flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--color-border); }
+.cart-page__tabs button { padding:12px 18px; border:1px solid var(--color-border); border-radius:var(--radius-button); background:var(--color-surface); color:var(--color-text); font:inherit; cursor:pointer; }
+.cart-page__tabs button.cart-page__tab--active { background:#294635; border-color:#294635; color:#fff; }
+.cart-pending { display:grid; gap:20px; }
+.cart-pending__heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.cart-pending__heading h2 { font-family:var(--font-family-heading); font-size:var(--font-size-xl); }
+.cart-pending__heading button { background:transparent; border:1px solid var(--color-border); border-radius:var(--radius-button); padding:9px 14px; cursor:pointer; }
+.cart-pending__list { display:grid; gap:16px; }
+.cart-pending__order, .cart-pending__empty { border:1px solid var(--color-border); border-radius:var(--radius-lg); background:var(--color-surface); padding:20px; }
+.cart-pending__order-top, .cart-pending__order-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.cart-pending__status { font-size:13px; color:#7d5718; background:#f8edda; border-radius:100px; padding:6px 12px; }
+.cart-pending__date { color:var(--color-text-muted); font-size:14px; margin-top:6px; }
+.cart-pending__items { display:grid; gap:8px; margin:18px 0; color:var(--color-text-muted); }
+.cart-pending__order-bottom { padding-top:14px; border-top:1px solid var(--color-border); }
+.cart-pending__actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.cart-pending__actions a { padding:10px 14px; color:var(--color-text); text-decoration:underline; }
+.cart-pending__actions button { background:#294635; color:white; border:0; border-radius:var(--radius-button); padding:12px 18px; cursor:pointer; font:inherit; font-weight:600; }
+.cart-pending__actions button:disabled { opacity:.6; cursor:wait; }
+.cart-pending__error { color:var(--color-danger); }
+.cart-pending__empty p + p { margin-top:10px; color:var(--color-text-muted); font-size:14px; }

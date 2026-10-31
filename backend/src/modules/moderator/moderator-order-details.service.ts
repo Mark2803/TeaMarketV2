@@ -1,3 +1,4 @@
+import { refreshModeratorOrderPayments } from "./moderator-payment-sync.service.js";
 import { prisma } from "../../database/prisma.js";
 
 /**
@@ -7,6 +8,8 @@ import { prisma } from "../../database/prisma.js";
 export async function getModeratorOrderByNumber(
   orderNumber: string
 ) {
+  const existing = await prisma.orders.findUnique({ where: { order_number: orderNumber }, select: { id: true, payment_status: true } });
+  if (existing && existing.payment_status !== "paid") await refreshModeratorOrderPayments([existing.id]);
   return prisma.orders.findUnique({
     where: {
       order_number:

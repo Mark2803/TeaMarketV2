@@ -13,6 +13,7 @@ import analyticsRouter from "../modules/analytics/analytics.routes.js";
 
 import cartRouter from "../modules/cart/cart.routes.js";
 import ordersRouter from "../modules/orders/order.routes.js";
+import { synchronizeYooKassaPayment } from "../modules/orders/yookassa.service.js";
 
 import deliveryMethodsRouter from "../modules/delivery-methods/delivery-methods.routes.js";
 import paymentMethodsRouter from "../modules/payment-methods/payment-methods.routes.js";
@@ -43,6 +44,14 @@ router.use("/payment-methods", paymentMethodsRouter);
 router.use("/auth", authRouter);
 router.use("/profile", profileRouter);
 
+router.post("/payments/yookassa/webhook", async (req, res, next) => {
+  try {
+    const id = req.body?.object?.id;
+    if (typeof id !== "string" || !/^[a-zA-Z0-9-]{1,100}$/.test(id)) { res.sendStatus(400); return; }
+    await synchronizeYooKassaPayment(id);
+    res.sendStatus(200);
+  } catch (error) { next(error); }
+});
 router.use("/orders", ordersRouter);
 router.use("/cart", cartRouter);
 

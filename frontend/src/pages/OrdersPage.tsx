@@ -1,3 +1,4 @@
+import { getSavedOrders } from "../features/checkout/order-access.storage";
 import {
   ChevronRight,
   Clock3,
@@ -12,7 +13,6 @@ import {
 
 import {
   Link,
-  Navigate
 } from "react-router-dom";
 
 import BackLink from "../shared/components/BackLink";
@@ -138,12 +138,13 @@ export default function OrdersPage() {
   }
 
   if (!session.isAuthenticated) {
-    return (
-      <Navigate
-        to="/auth"
-        replace
-      />
-    );
+    const saved = getSavedOrders();
+    return <main className="orders-page"><h1>Мои заказы</h1>
+      {saved.length === 0 ? <p>В этом браузере пока нет сохранённых заказов.</p> : saved.map(order =>
+        <p key={order.id}><Link to={`/order/${order.id}?access=${order.accessToken}`}>Заказ № {order.orderNumber}</Link></p>
+      )}
+      <p>Заказы сохранены только в этом браузере. Сохраните ссылку на заказ для доступа с другого устройства.</p>
+    </main>;
   }
 
   return (

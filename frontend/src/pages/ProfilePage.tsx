@@ -61,6 +61,14 @@ function GuestProfile() {
         </div>
 
         <Link
+          to="/profile/orders"
+          className="profile-primary-action"
+        >
+          <PackageCheck size={19} strokeWidth={1.8} aria-hidden="true" />
+          Мои заказы (без регистрации)
+        </Link>
+
+        <Link
           to="/auth"
           className="profile-primary-action"
         >

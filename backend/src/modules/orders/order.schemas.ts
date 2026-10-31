@@ -125,11 +125,7 @@ export const createOrderSchema =
 
     loyaltyToSpend: z.coerce.number().min(0).default(0),
 
-    paymentMethodId:
-      z.string()
-        .uuid(
-          "Некорректный способ оплаты"
-        )
+    paymentMethodId: z.string().uuid().optional()
   });
 
 export type CreateOrderInput =

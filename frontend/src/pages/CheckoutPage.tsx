@@ -1,9 +1,9 @@
+import { getSavedOrderAccess, saveOrderAccess } from "../features/checkout/order-access.storage";
 import { trackAnalyticsEvent } from "../features/analytics/analytics";
 import {
   Check,
   ChevronLeft,
   Clock3,
-  CreditCard,
   MapPin,
   MessageSquareText,
   PackageCheck,
@@ -61,7 +61,6 @@ import {
   createOrder,
   getDeliveryQuote,
   getDeliveryMethods,
-  getPaymentMethods,
   getPricingQuote
 } from "../shared/api/checkout";
 
@@ -69,7 +68,6 @@ import type {
   CreatedOrderApi,
   DeliveryQuoteApi,
   DeliveryMethodApi,
-  PaymentMethodApi,
   PricingQuoteApi
 } from "../shared/api/checkout";
 
@@ -154,9 +152,6 @@ function CheckoutForm() {
   const [deliveryMethods, setDeliveryMethods] =
     useState<DeliveryMethodApi[]>([]);
 
-  const [paymentMethods, setPaymentMethods] =
-    useState<PaymentMethodApi[]>([]);
-
   const [optionsLoading, setOptionsLoading] =
     useState(true);
 
@@ -175,11 +170,7 @@ function CheckoutForm() {
       ?? ""
     );
 
-  const [selectedPaymentMethodId, setSelectedPaymentMethodId] =
-    useState(
-      initialDraftRef.current?.selectedPaymentMethodId
-      ?? ""
-    );
+  const selectedPaymentMethodId = "";
 
   const [orderComment, setOrderComment] =
     useState(
@@ -241,12 +232,6 @@ function CheckoutForm() {
         method.id === selectedDeliveryMethodId
     ) ?? null;
 
-  const selectedPaymentMethod =
-    paymentMethods.find(
-      (method) =>
-        method.id === selectedPaymentMethodId
-    ) ?? null;
-
   const deliveryCost = deliveryQuote
     ? Number(deliveryQuote.cost)
     : 0;
@@ -303,11 +288,7 @@ function CheckoutForm() {
       setOptionsError(null);
 
       try {
-        const [delivery, payment] =
-          await Promise.all([
-            getDeliveryMethods(),
-            getPaymentMethods()
-          ]);
+        const delivery = await getDeliveryMethods();
 
         if (cancelled) {
           return;
@@ -315,10 +296,6 @@ function CheckoutForm() {
 
         setDeliveryMethods(
           delivery.data
-        );
-
-        setPaymentMethods(
-          payment.data
         );
 
         setSelectedDeliveryMethodId(
@@ -335,22 +312,12 @@ function CheckoutForm() {
                 ?? ""
         );
 
-        setSelectedPaymentMethodId(
-          (current) =>
-            payment.data.some(
-              (method) =>
-                method.id === current
-            )
-              ? current
-              : payment.data[0]?.id
-                ?? ""
-        );
       } catch (error) {
         if (!cancelled) {
           setOptionsError(
             error instanceof Error
               ? error.message
-              : "Не удалось загрузить способы доставки и оплаты"
+              : "Не удалось загрузить способы доставки"
           );
         }
       } finally {
@@ -447,10 +414,10 @@ function CheckoutForm() {
           </span>
 
           <div className="checkout-result__content">
-            <h1>Заказ оформлен</h1>
+            <h1>Заказ создан</h1>
 
             <p>
-              Сохраните номер заказа, чтобы обратиться в магазин.
+              Сохраните номер заказа. Онлайн-оплата станет доступна после подключения ЮKassa.
             </p>
           </div>
 
@@ -611,7 +578,6 @@ function CheckoutForm() {
       || !contact
       || !selectedLocation
       || !selectedDeliveryMethod
-      || !selectedPaymentMethod
     ) {
       return;
     }
@@ -653,13 +619,36 @@ function CheckoutForm() {
               selectedLocation.comment
               || undefined
           },
-          paymentMethodId:
-            selectedPaymentMethod.id,
           promoCode: promoCode.trim() || undefined,
           referralCode: referralCode.trim() || undefined
         });
 
       setOrderResult(response.data);
+      // A guest must retain access to the created order before leaving this site.
+      // An outdated backend may create an order without returning accessToken.
+      const accessToken = response.accessToken;
+      if (!accessToken || !/^[0-9a-f]{64}$/i.test(accessToken)) {
+        setSubmitError("Заказ создан, но сервер не вернул ключ доступа к нему. Не оформляйте повторный заказ: проверьте версию backend.");
+        return;
+      }
+      try {
+        saveOrderAccess({
+          id: response.data.id,
+          orderNumber: response.data.order_number,
+          accessToken
+        });
+        if (getSavedOrderAccess(response.data.id) !== accessToken) {
+          throw new Error("ORDER_ACCESS_STORAGE_FAILED");
+        }
+      } catch {
+        setSubmitError("Заказ создан, но браузер не смог сохранить доступ к нему. Проверьте настройки хранения данных сайта. Не оформляйте повторный заказ.");
+        return;
+      }
+      // The order page works without sign-in in the same browser.
+      if (response.payment?.confirmationUrl) {
+        window.location.assign(response.payment.confirmationUrl);
+        return;
+      }
 
       clearCheckoutDraft(
         session.user?.id
@@ -739,7 +728,7 @@ function CheckoutForm() {
             <article className="checkout-review__card">
               <h3>Оплата</h3>
               <strong>
-                {selectedPaymentMethod?.name}
+                ЮKassa — онлайн-оплата
               </strong>
               <span>
                 Ожидает оплаты.
@@ -1070,76 +1059,6 @@ function CheckoutForm() {
             {validationErrors.delivery && (
               <p className="checkout-field-error">
                 {validationErrors.delivery}
-              </p>
-            )}
-          </section>
-
-          <section
-            id="checkout-payment"
-            className={
-              validationErrors.payment
-                ? "checkout-section checkout-section--error"
-                : "checkout-section"
-            }
-          >
-            <div className="checkout-section__heading">
-              <span className="checkout-section__step">4</span>
-              <span className="checkout-section__icon">
-                <CreditCard size={21} aria-hidden="true" />
-              </span>
-              <div>
-                <h2>Способ оплаты</h2>
-                <p>Выберите подходящий вариант</p>
-              </div>
-            </div>
-
-            {optionsLoading ? (
-              <p>Загружаем способы оплаты…</p>
-            ) : (
-              <div className="checkout-payment-options">
-                {paymentMethods.map(
-                  (method) => {
-                    const selected =
-                      method.id === selectedPaymentMethodId;
-
-                    return (
-                      <button
-                        key={method.id}
-                        type="button"
-                        className={
-                          selected
-                            ? "checkout-payment-option checkout-payment-option--selected"
-                            : "checkout-payment-option"
-                        }
-                        onClick={() => {
-                          setSelectedPaymentMethodId(method.id);
-                          clearValidationError("payment");
-                        }}
-                      >
-                        <span className="checkout-payment-option__marker">
-                          {selected ? (
-                            <Check size={17} aria-hidden="true" />
-                          ) : (
-                            <CreditCard size={18} aria-hidden="true" />
-                          )}
-                        </span>
-
-                        <span className="checkout-payment-option__content">
-                          <strong>{method.name}</strong>
-                          <span>
-                            Выбранный способ будет указан в заказе.
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  }
-                )}
-              </div>
-            )}
-
-            {validationErrors.payment && (
-              <p className="checkout-field-error">
-                {validationErrors.payment}
               </p>
             )}
           </section>

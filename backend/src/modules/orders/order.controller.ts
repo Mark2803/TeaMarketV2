@@ -13,6 +13,8 @@ import {
 } from "./order.service.js";
 
 import { prisma } from "../../database/prisma.js";
+import { initiateYooKassaPayment } from "./yookassa.service.js";
+import { issueOrderAccessToken } from "./order-access.js";
 
 function getOrderOwner(
   req: Request,
@@ -216,8 +218,21 @@ export async function createOrderController(
       }
     }
 
+    const accessToken = issueOrderAccessToken(result.order.id);
+    const storefront = process.env.STOREFRONT_URL || "http://localhost:5173";
+    const returnUrl = `${storefront.replace(/\/$/, "")}/order/${result.order.id}?access=${accessToken}`;
+    let confirmationUrl: string | null = null;
+    let paymentError: string | null = null;
+    try {
+      confirmationUrl = await initiateYooKassaPayment(result.order.id, returnUrl);
+    } catch (error) {
+      paymentError = error instanceof Error ? error.message : "PAYMENT_INIT_FAILED";
+      console.error("YooKassa payment initialization failed", error);
+    }
     res.status(201).json({
-      data: result.order
+      data: result.order,
+      accessToken,
+      payment: { confirmationUrl, configured: Boolean(process.env.YOOKASSA_SHOP_ID && process.env.YOOKASSA_SECRET_KEY), error: paymentError }
     });
   } catch (error) {
     if (
