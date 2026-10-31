@@ -20,35 +20,17 @@ type ProductPurchaseProps = {
   onShare: () => void;
 };
 
-export default function ProductPurchase(
-  props: ProductPurchaseProps
-) {
+export default function ProductPurchase(props: ProductPurchaseProps) {
   return (
     <section className="product-purchase">
       <div className="product-purchase__quantity-row">
-        <h2>
-          Количество
-        </h2>
-
+        <h2>Количество</h2>
         <div className="product-quantity">
-          <button
-            type="button"
-            onClick={props.onDecrease}
-            disabled={props.quantity <= 1}
-            aria-label="Уменьшить количество"
-          >
+          <button type="button" onClick={props.onDecrease} disabled={props.quantity <= 1} aria-label="Уменьшить количество">
             <Minus size={17} />
           </button>
-
-          <strong>
-            {props.quantity}
-          </strong>
-
-          <button
-            type="button"
-            onClick={props.onIncrease}
-            aria-label="Увеличить количество"
-          >
+          <strong>{props.quantity}</strong>
+          <button type="button" onClick={props.onIncrease} aria-label="Увеличить количество">
             <Plus size={17} />
           </button>
         </div>
@@ -57,54 +39,33 @@ export default function ProductPurchase(
       <button
         type="button"
         className="product-add-cart"
-        disabled={
-          props.disabled
-          || props.isAdding
-        }
+        disabled={props.disabled || props.isAdding}
         onClick={props.onAddToCart}
+        aria-busy={props.isAdding}
       >
-        {props.isAdding
-          ? <LoaderCircle className="product-spin" size={21} />
-          : <ShoppingCart size={21} />}
-
-        {props.disabled
-          ? "Нет в наличии"
-          : props.isAdding
-            ? "Добавляем..."
-            : "Добавить в корзину"}
+        <span style={{ display: props.isAdding ? "none" : "inline-flex" }} aria-hidden="true">
+          <ShoppingCart size={21} />
+        </span>
+        <span style={{ display: props.isAdding ? "inline-flex" : "none" }} aria-hidden="true">
+          <LoaderCircle className="product-spin" size={21} />
+        </span>
+        <span>
+          {props.disabled ? "Нет в наличии" : props.isAdding ? "Добавляем..." : "Добавить в корзину"}
+        </span>
       </button>
 
       {props.message && (
-        <p className="product-purchase__message">
-          {props.message}
-        </p>
+        <p className="product-purchase__message">{props.message}</p>
       )}
 
       <div className="product-purchase__secondary">
-        <button
-          type="button"
-          onClick={props.onToggleFavorite}
-        >
-          <Heart
-            size={21}
-            fill={
-              props.favorite
-                ? "currentColor"
-                : "none"
-            }
-          />
-
-          {props.favorite
-            ? "В избранном"
-            : "В избранное"}
+        <button type="button" onClick={props.onToggleFavorite}>
+          <Heart size={21} fill={props.favorite ? "currentColor" : "none"} />
+          <span>{props.favorite ? "В избранном" : "В избранное"}</span>
         </button>
-
-        <button
-          type="button"
-          onClick={props.onShare}
-        >
+        <button type="button" onClick={props.onShare}>
           <Share2 size={20} />
-          Поделиться
+          <span>Поделиться</span>
         </button>
       </div>
     </section>
