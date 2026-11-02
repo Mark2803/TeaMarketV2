@@ -24,7 +24,7 @@ export default function AppHeader() {
         </span>
 
         <span className="app-header__brand-text">
-          Чайный Мастер
+          Чайный Маркет
         </span>
       </Link>
 

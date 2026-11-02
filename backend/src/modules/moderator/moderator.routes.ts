@@ -1,4 +1,8 @@
+import yandexShipmentsRouter from "./yandex-shipments.routes.js";
+import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
+import orderPackingRouter from "./order-packing.routes.js";
 import { Router } from "express";
+import shippingPackagesRouter from "./shipping-packages.routes.js";
 
 import {
   moderatorAuthMiddleware
@@ -202,6 +206,10 @@ router.use(
 );
 
 
+router.use("/yandex-delivery-test", yandexDeliveryTestRouter);
+router.use("/shipping-packages", shippingPackagesRouter);
+router.use("/order-packing", orderPackingRouter);
+router.use("/yandex-shipments", yandexShipmentsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
 
 router.get("/notifications", getNotificationOverview);

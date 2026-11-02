@@ -489,3 +489,113 @@
 .admin-login-link { color: var(--color-primary); font-size: var(--font-size-sm); font-weight: 600; text-align: center; text-decoration: none; }
 .admin-login-link:hover { text-decoration: underline; }
 .admin-form-success { margin: 0; padding: .75rem .85rem; border-radius: var(--radius-sm); background: rgba(46, 125, 50, .09); color: #256b2a; font-size: var(--font-size-sm); line-height: 1.45; }
+
+/* Admin scrolling and containment: keep wide tables inside their own scroll area. */
+.admin-shell { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.admin-main { min-width: 0; max-width: 100%; width: 100%; overflow-x: clip; }
+.admin-content { box-sizing: border-box; min-width: 0; max-width: 100%; }
+.admin-content > * { min-width: 0; max-width: 100%; }
+.admin-orders-table-card, .admin-products-table-card, .admin-stock-table-card,
+.admin-category-table-card { min-width: 0; max-width: 100%; }
+.admin-orders-table-wrap, .admin-products-table-wrap, .admin-stock-table-wrap,
+.admin-category-table-wrap, .admin-analytics-table-wrap {
+  display: block; width: 100%; max-width: 100%; min-width: 0;
+  overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+}
+.admin-pagination { flex-wrap: wrap; min-width: 0; }
+.admin-pagination button { white-space: nowrap; }
+@media (min-width: 761px) {
+  .admin-shell { grid-template-columns: 16rem minmax(0, 1fr); }
+  .admin-sidebar { box-sizing: border-box; }
+}
+@media (max-width: 760px) {
+  .admin-main { overflow-x: clip; }
+}
+
+/* 2026-11-01: One scroll owner for admin pages; no page-length grid stretching. */
+.admin-shell {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: minmax(0, 1fr);
+}
+.admin-sidebar {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.admin-topbar { flex: 0 0 auto; }
+.admin-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+.admin-content > * { min-width: 0; }
+.admin-content :is(table, .admin-orders-table, .admin-products-table, .admin-stock-table) {
+  max-width: none;
+}
+@media (max-width: 760px) {
+  .admin-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .admin-sidebar {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+    height: auto;
+    max-height: 36vh;
+    min-height: 0;
+    overflow-y: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding: .65rem .75rem;
+  }
+  .admin-brand { padding-bottom: .5rem; }
+  .admin-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: .4rem;
+    padding-bottom: .25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-nav a {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding: .55rem .7rem;
+  }
+  .admin-logout { margin-top: .5rem; }
+  .admin-main {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+  }
+  .admin-content {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    padding: .85rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .admin-topbar { min-height: 3.25rem; height: auto; }
+}

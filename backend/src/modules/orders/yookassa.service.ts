@@ -1,4 +1,5 @@
 import { prisma } from "../../database/prisma.js";
+import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
 
 const API = "https://api.yookassa.ru/v3/payments";
 
@@ -37,6 +38,7 @@ export async function initiateYooKassaPayment(orderId: string, returnUrlOverride
   if (!order || !order.order_payments.length) throw new Error("ORDER_PAYMENT_NOT_FOUND");
   if (order.payment_status === "paid" || order.status === "cancelled") return null;
   let row = order.order_payments[0];
+  if (!row) throw new Error("ORDER_PAYMENT_NOT_FOUND");
   // Existing pending payment is reused, never create a second live payment.
   if (row.operation_number) {
     const existing = await providerRequest(`${API}/${encodeURIComponent(row.operation_number)}`);
@@ -101,6 +103,23 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
       });
     });
+    // Provider-verified payment only. The carrier request has an atomic DB guard,
+    // so repeated YooKassa webhooks cannot create duplicate shipments.
+    try {
+      const order = await prisma.orders.findUnique({
+        where: { id: record.order_id },
+        include: { order_deliveries: true }
+      });
+      const delivery = order?.order_deliveries;
+      if (order?.payment_status === "paid" && delivery &&
+          (/yandex|яндекс/i.test(delivery.delivery_service ?? "") ||
+           /^\[ПВЗ Яндекс [a-zA-Z0-9-]{20,80}\]/.test(delivery.full_address ?? ""))) {
+        await createYandexShipmentAfterPayment(order.order_number);
+      }
+    } catch (error) {
+      // Payment must stay paid even if the carrier is unavailable.
+      console.error("YANDEX_AUTO_SHIPMENT_ERROR", record.order_id, error);
+    }
   } else if (payment.status === "canceled") {
     await prisma.order_payments.updateMany({
       where: { id: record.id, status: { not: "succeeded" } },

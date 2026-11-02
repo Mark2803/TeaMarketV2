@@ -90,7 +90,7 @@ function ProductPageContent({
       product.seoTitle;
 
     return () => {
-      document.title = "Чайный Мастер";
+      document.title = "Чайный Маркет";
     };
   }, [product.seoTitle]);
 

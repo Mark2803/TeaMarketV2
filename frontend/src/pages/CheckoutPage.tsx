@@ -1,7 +1,10 @@
+import YandexPickupMap, { type PickupPoint } from "../shared/widgets/YandexPickupMap";
+import { apiRequest } from "../shared/api/client";
 import { getSavedOrderAccess, saveOrderAccess } from "../features/checkout/order-access.storage";
 import { trackAnalyticsEvent } from "../features/analytics/analytics";
 import {
   Check,
+  X,
   ChevronLeft,
   Clock3,
   MapPin,
@@ -61,7 +64,8 @@ import {
   createOrder,
   getDeliveryQuote,
   getDeliveryMethods,
-  getPricingQuote
+  getPricingQuote,
+  getYandexPickupQuote
 } from "../shared/api/checkout";
 
 import type {
@@ -96,14 +100,6 @@ function formatAddress(
   ]
     .filter(Boolean)
     .join(", ");
-}
-
-function isCourierMethod(
-  method: DeliveryMethodApi
-): boolean {
-  return /курьер/i.test(
-    method.name
-  );
 }
 
 export default function CheckoutPage() {
@@ -149,8 +145,54 @@ function CheckoutForm() {
   const [manualAddress, setManualAddress] = useState(false);
   const submittingRef = useRef(false);
 
+  const [testPickupPoints, setTestPickupPoints] = useState<PickupPoint[]>([]);
+  const [testPickupError, setTestPickupError] = useState("");
+  const [testPickupLoading, setTestPickupLoading] = useState(false);
+  const [testPickupSelected, setTestPickupSelected] = useState("");
+  const [pickupModalOpen, setPickupModalOpen] = useState(false);
+  const [pickupConfirmed, setPickupConfirmed] = useState<PickupPoint | null>(null);
+  const [yandexQuote, setYandexQuote] = useState<{price:number;deliveryDays:number|null}|null>(null);
+  const [yandexError, setYandexError] = useState<string|null>(null);
+  const [yandexLoading, setYandexLoading] = useState(false);
+  const openPickupModal = () => {
+    setPickupModalOpen(true);
+    if (!testPickupPoints.length && !testPickupLoading) void loadTestPickupPoints();
+  };
+  useEffect(() => {
+    if (!pickupModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPickupModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [pickupModalOpen]);
+  const loadTestPickupPoints = async () => {
+    setTestPickupLoading(true); setTestPickupError("");
+    try {
+      const response = await apiRequest<{data:{points:PickupPoint[]}}>("/yandex-test/points");
+      // Sandbox reference destination: verified with Yandex pricing-calculator.
+      // Do not use this fallback in production or substitute it for the customer's selection.
+      const referencePoint: PickupPoint = {
+        id: "01946f4f013c7337874ec2fb848a58a4",
+        name: "Контрольный ПВЗ Яндекса (тестовый)",
+        address: "г. Москва, Ленинградский проспект, 37к9",
+        city: "Москва",
+      };
+      const points = response.data.points;
+      setTestPickupPoints(
+        points.some(point => point.id === referencePoint.id)
+          ? points
+          : [referencePoint, ...points]
+      );
+    } catch (error) { setTestPickupError(error instanceof Error ? error.message : "Ошибка загрузки ПВЗ"); }
+    finally { setTestPickupLoading(false); }
+  };
   const [deliveryMethods, setDeliveryMethods] =
     useState<DeliveryMethodApi[]>([]);
+  const visibleDeliveryMethods = deliveryMethods.filter(
+    method => /яндекс|yandex/i.test(method.name)
+      && !/курьер|до двери|door|courier/i.test(method.name)
+  );
 
   const [optionsLoading, setOptionsLoading] =
     useState(true);
@@ -210,8 +252,14 @@ function CheckoutForm() {
     [deliveryState.locations]
   );
 
+  const pickupMode = Boolean(deliveryMethods.find(m=>m.id===selectedDeliveryMethodId && /яндекс|yandex/i.test(m.name)));
   const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0;
-  const selectedLocation = useManualAddress ? {
+  const selectedLocation = pickupMode && pickupConfirmed ? {
+    id: "yandex-pickup", type:"courier" as const, label:pickupConfirmed.name,
+    region:"", city:"Москва", street:pickupConfirmed.address, house:"ПВЗ", apartment:"",
+    postalCode:"", comment:"", isDefault:false,
+    recipient:{name:contact?.name??"",phone:contact?.phone??""}
+  } : useManualAddress ? {
     ...guestAddress,
     id: "guest",
     type: "courier" as const,
@@ -232,14 +280,17 @@ function CheckoutForm() {
         method.id === selectedDeliveryMethodId
     ) ?? null;
 
+  const isYandex = Boolean(selectedDeliveryMethod && /яндекс|yandex/i.test(selectedDeliveryMethod.name));
+  const deliveryDestination = isYandex ? pickupConfirmed?.id ?? null : null;
+  const yandexReady = !isYandex || (Boolean(deliveryDestination) && Boolean(yandexQuote) && !yandexError && !yandexLoading);
   const deliveryCost = deliveryQuote
     ? Number(deliveryQuote.cost)
     : 0;
 
   const effectiveItemsTotal = pricingQuote?.itemsTotal ?? totalAmount;
-  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? deliveryCost;
+  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? (isYandex ? (yandexQuote?.price ?? 0) : deliveryCost);
   const discountTotal = pricingQuote?.discountTotal ?? 0;
-  const total = pricingQuote?.totalAmount ?? (totalAmount + deliveryCost);
+  const total = pricingQuote?.totalAmount ?? (totalAmount + effectiveDeliveryCost);
 
   const deliveryQuoteAddress = selectedLocation
     ? formatAddress(selectedLocation)
@@ -248,7 +299,7 @@ function CheckoutForm() {
   useEffect(() => {
     let cancelled = false;
 
-    if (!selectedDeliveryMethodId || deliveryQuoteAddress.trim().length < 5) {
+    if (!selectedDeliveryMethodId || isYandex || deliveryQuoteAddress.trim().length < 5) {
       setDeliveryQuote(null);
       setQuoteError(null);
       setQuoteLoading(false);
@@ -278,7 +329,19 @@ function CheckoutForm() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [selectedDeliveryMethodId, deliveryQuoteAddress]);
+  }, [selectedDeliveryMethodId, deliveryQuoteAddress, isYandex]);
+
+  useEffect(() => {
+    let cancelled=false;
+    setYandexQuote(null);setYandexError(null);
+    if (!isYandex || !deliveryDestination) {setYandexLoading(false);return;}
+    setYandexLoading(true);
+    void getYandexPickupQuote(deliveryDestination)
+      .then(r=>{if(!cancelled)setYandexQuote(r.data)})
+      .catch(e=>{if(!cancelled)setYandexError(e instanceof Error?e.message:"Доставка в этот ПВЗ недоступна")})
+      .finally(()=>{if(!cancelled)setYandexLoading(false)});
+    return ()=>{cancelled=true};
+  },[isYandex,deliveryDestination,totalAmount]);
 
   useEffect(() => {
     let cancelled = false;
@@ -298,19 +361,14 @@ function CheckoutForm() {
           delivery.data
         );
 
-        setSelectedDeliveryMethodId(
-          (current) =>
-            delivery.data.some(
-              (method) =>
-                method.id === current
-                && isCourierMethod(method)
-            )
-              ? current
-              : delivery.data.find(
-                  isCourierMethod
-                )?.id
-                ?? ""
-        );
+        setSelectedDeliveryMethodId((current) => {
+          const pickupMethods = delivery.data.filter(method =>
+            /яндекс|yandex/i.test(method.name) &&
+            !/курьер|до двери|door|courier/i.test(method.name)
+          );
+          return pickupMethods.some(method => method.id === current)
+            ? current : pickupMethods[0]?.id ?? "";
+        });
 
       } catch (error) {
         if (!cancelled) {
@@ -391,15 +449,15 @@ function CheckoutForm() {
   // После успешного POST /orders результат заказа имеет приоритет
   // над состоянием корзины: backend уже перевёл старую корзину в converted.
   useEffect(() => {
-    if (!selectedDeliveryMethodId) { setPricingQuote(null); return; }
+    if (!selectedDeliveryMethodId || (isYandex && !yandexQuote)) { setPricingQuote(null); return; }
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
+      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,destinationStationId:isYandex?deliveryDestination??undefined:undefined,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
         .then(r=>{if(!cancelled)setPricingQuote(r.data)})
         .catch(()=>{if(!cancelled)setPricingQuote(null)});
     }, 250);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount]);
+  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount, isYandex, deliveryDestination, yandexQuote?.price]);
 
   if (orderResult) {
     return (
@@ -542,6 +600,8 @@ function CheckoutForm() {
       selectedPaymentMethodId
     });
 
+    if(isYandex && pickupConfirmed) delete errors.location;
+    if(isYandex && (!yandexReady || !pricingQuote)) errors.delivery="Дождитесь подтверждения тарифа и итоговой суммы";
     setValidationErrors(errors);
 
     if (hasCheckoutErrors(errors)) {
@@ -584,6 +644,8 @@ function CheckoutForm() {
 
     const errors = validateCheckout({ user: contact, selectedLocation,
       selectedDeliveryMethodId, selectedPaymentMethodId });
+    if(isYandex && pickupConfirmed) delete errors.location;
+    if(isYandex && (!yandexReady || !pricingQuote)) errors.delivery="Нет подтверждённой стоимости доставки";
     if (hasCheckoutErrors(errors)) {
       setValidationErrors(errors);
       setIsReviewing(false);
@@ -608,13 +670,14 @@ function CheckoutForm() {
             || undefined,
           deliveryMethodId:
             selectedDeliveryMethod.id,
+          destinationStationId: isYandex ? pickupConfirmed?.id : undefined,
           delivery: {
             recipientName:
               selectedLocation.recipient.name,
             phone:
               selectedLocation.recipient.phone,
             fullAddress:
-              formatAddress(selectedLocation),
+              isYandex && pickupConfirmed ? pickupConfirmed.address : formatAddress(selectedLocation),
             comment:
               selectedLocation.comment
               || undefined
@@ -886,7 +949,7 @@ function CheckoutForm() {
             )}
           </section>
 
-          <section
+          {!isYandex && <section
             id="checkout-location"
             className={
               validationErrors.location
@@ -976,7 +1039,7 @@ function CheckoutForm() {
                 {validationErrors.location}
               </p>
             )}
-          </section>
+          </section>}
 
           <section
             id="checkout-delivery"
@@ -1001,9 +1064,9 @@ function CheckoutForm() {
               <p>Загружаем способы доставки…</p>
             ) : (
               <div className="checkout-delivery-options">
-                {deliveryMethods.map(
+                {visibleDeliveryMethods.map(
                   (method) => {
-                    const enabled = isCourierMethod(method);
+                    const enabled = true;
                     const selected =
                       method.id === selectedDeliveryMethodId;
 
@@ -1040,7 +1103,7 @@ function CheckoutForm() {
 
                         <span className="checkout-delivery-option__details">
                           <strong>
-                            {formatPrice(Number(method.baseCost))}
+                            {/яндекс|yandex/i.test(method.name) ? (isYandex && yandexQuote ? formatPrice(yandexQuote.price) : "По тарифу Яндекса") : formatPrice(Number(method.baseCost))}
                           </strong>
                           {method.deliveryTerm && (
                             <span>
@@ -1056,6 +1119,32 @@ function CheckoutForm() {
               </div>
             )}
 
+            <div className="checkout-delivery-option" aria-disabled="true" style={{opacity:0.65,marginTop:12,marginBottom:16}}>
+              <span className="checkout-delivery-option__content"><strong>Яндекс Доставка — до двери</strong><small>Появится после подключения расчёта курьерского тарифа по адресу получателя</small></span>
+            </div>
+            <div className="checkout-pickup-method">
+              <div className="checkout-pickup-method__head">
+                <MapPin size={21} aria-hidden="true" />
+                <div>
+                  <strong>Яндекс Доставка — пункт выдачи</strong>
+                  <small>Выберите удобный пункт на карте</small>
+                </div>
+              </div>
+              {pickupConfirmed ? (
+                <div className="checkout-pickup-method__address">
+                  <strong>{pickupConfirmed.name}</strong>
+                  <span>{pickupConfirmed.address}</span>
+                </div>
+              ) : null}
+              <button type="button" className="checkout-pickup-method__button" onClick={openPickupModal}>
+                <MapPin size={17} aria-hidden="true" />
+                {pickupConfirmed ? "Изменить пункт выдачи" : "Выбрать пункт выдачи"}
+              </button>
+              {isYandex && yandexLoading && <small>Рассчитываем тариф Яндекса…</small>}
+              {isYandex && yandexError && <p role="alert" style={{color:"#b43c34"}}>{yandexError}. Выберите другой ПВЗ: пока Яндекс не подтвердит тариф, продолжить оформление нельзя.</p>}
+              {isYandex && yandexQuote && <strong>Доставка: {formatPrice(yandexQuote.price)} · {yandexQuote.deliveryDays ?? "?"} дн.</strong>}
+              <small className="checkout-pickup-method__note">Тестовый контур Яндекса. Стоимость подтверждается повторно при создании заказа.</small>
+            </div>
             {validationErrors.delivery && (
               <p className="checkout-field-error">
                 {validationErrors.delivery}
@@ -1128,9 +1217,13 @@ function CheckoutForm() {
                     ? "Рассчитывается…"
                     : quoteError
                       ? "Ошибка расчёта"
-                      : deliveryQuote
-                        ? formatPrice(effectiveDeliveryCost)
-                        : "Укажите адрес"}
+                      : isYandex && yandexLoading
+                        ? "Рассчитывается…"
+                        : isYandex && yandexError
+                          ? "ПВЗ недоступен"
+                          : (isYandex ? yandexQuote : deliveryQuote)
+                            ? formatPrice(effectiveDeliveryCost)
+                            : isYandex ? "Выберите доступный ПВЗ" : "Укажите адрес"}
               </dd>
             </div>
 
@@ -1150,14 +1243,63 @@ function CheckoutForm() {
               || Boolean(optionsError)
               || quoteLoading
               || Boolean(quoteError)
-              || !deliveryQuote
+              || (isYandex ? !yandexReady || !pricingQuote : !deliveryQuote)
             }
             onClick={handleReview}
           >
             Проверить заказ
           </button>
+          {isYandex && !yandexReady && <p role="status" style={{marginTop:12,fontSize:13}}>{yandexLoading ? "Ожидаем расчёт Яндекса…" : yandexError ? "Яндекс не подтвердил доставку в выбранный ПВЗ. Выберите другой пункт получения на карте." : "Для продолжения выберите ПВЗ с доступным тарифом Яндекса."}</p>}
+          {isYandex && yandexError && <button type="button" onClick={openPickupModal} className="checkout-pickup-method__button" style={{marginTop:12}}>Выбрать другой ПВЗ</button>}
         </aside>
       </div>
+      {pickupModalOpen && (
+        <div className="checkout-pickup-overlay" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setPickupModalOpen(false);
+        }}>
+          <section className="checkout-pickup-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-pickup-title">
+            <header className="checkout-pickup-dialog__header">
+              <div>
+                <h2 id="checkout-pickup-title">Выбор пункта выдачи</h2>
+                <p>Пункты Яндекс Доставки на карте</p>
+              </div>
+              <button type="button" aria-label="Закрыть карту" className="checkout-pickup-dialog__close" onClick={() => setPickupModalOpen(false)}><X size={22}/></button>
+            </header>
+            <div className="checkout-pickup-dialog__body">
+              {testPickupLoading && <p>Загружаем пункты выдачи…</p>}
+              {testPickupError && <p role="alert">{testPickupError} <button type="button" onClick={() => void loadTestPickupPoints()}>Повторить</button></p>}
+              <div style={{border:"1px solid #9ba99c",borderRadius:12,padding:14,marginBottom:14,background:"#f1f4ee"}}>
+                <strong>Контрольный пункт Яндекса — тестовый маршрут</strong>
+                <p style={{margin:"6px 0 12px"}}>Москва, Ленинградский проспект, 37к9. Для этого ПВЗ тестовый калькулятор ранее подтвердил доставку. Цена рассчитывается заново для текущей корзины.</p>
+                <button type="button" className="checkout-pickup-method__button" onClick={() => {
+                  const point: PickupPoint = {id:"01946f4f013c7337874ec2fb848a58a4",name:"Контрольный ПВЗ Яндекса (тестовый)",address:"г. Москва, Ленинградский проспект, 37к9",city:"Москва"};
+                  setTestPickupSelected(point.id);
+                  setPickupConfirmed(point);
+                  const yandex = deliveryMethods.find(m => /яндекс|yandex/i.test(m.name) && !/курьер|до двери|door|courier/i.test(m.name));
+                  if (yandex) setSelectedDeliveryMethodId(yandex.id);
+                  setPickupModalOpen(false);
+                }}>Выбрать контрольный ПВЗ</button>
+              </div>
+              {testPickupPoints.length > 0 && (
+                <YandexPickupMap points={testPickupPoints} selectedId={testPickupSelected} onSelect={p => setTestPickupSelected(p.id)} title="Поиск по адресу или названию" />
+              )}
+            </div>
+            <footer className="checkout-pickup-dialog__footer">
+              <span>{testPickupSelected ? testPickupPoints.find(p => p.id === testPickupSelected)?.address : "Выберите пункт на карте"}</span>
+              <button type="button" disabled={!testPickupSelected} onClick={() => {
+                const point = testPickupPoints.find(p => p.id === testPickupSelected);
+                if (point) {
+                  setPickupConfirmed(point);
+                  const yandex = deliveryMethods.find(m=>/яндекс|yandex/i.test(m.name));
+                  if (yandex) setSelectedDeliveryMethodId(yandex.id);
+                }
+                setPickupModalOpen(false);
+              }}>Подтвердить пункт</button>
+            </footer>
+            <p className="checkout-pickup-dialog__disclaimer">Тестовый контур Яндекса. Недоступные маршруты не допускаются к оформлению.</p>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

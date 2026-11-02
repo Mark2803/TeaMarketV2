@@ -269,3 +269,13 @@ export type admin_users = Prisma.admin_usersModel
  * В базе хранится только SHA-256 хеш токена.
  */
 export type admin_password_reset_tokens = Prisma.admin_password_reset_tokensModel
+/**
+ * Model shipping_packages
+ * 
+ */
+export type shipping_packages = Prisma.shipping_packagesModel
+/**
+ * Model order_packing_plans
+ * 
+ */
+export type order_packing_plans = Prisma.order_packing_plansModel

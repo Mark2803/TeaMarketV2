@@ -29,6 +29,10 @@ export type AggregateProduct_variants = {
 
 export type Product_variantsAvgAggregateOutputType = {
   weight_g: runtime.Decimal | null
+  package_length_cm: runtime.Decimal | null
+  package_width_cm: runtime.Decimal | null
+  package_height_cm: runtime.Decimal | null
+  shipping_weight_g: runtime.Decimal | null
   price: runtime.Decimal | null
   old_price: runtime.Decimal | null
   stock_quantity: number | null
@@ -37,6 +41,10 @@ export type Product_variantsAvgAggregateOutputType = {
 
 export type Product_variantsSumAggregateOutputType = {
   weight_g: runtime.Decimal | null
+  package_length_cm: runtime.Decimal | null
+  package_width_cm: runtime.Decimal | null
+  package_height_cm: runtime.Decimal | null
+  shipping_weight_g: runtime.Decimal | null
   price: runtime.Decimal | null
   old_price: runtime.Decimal | null
   stock_quantity: number | null
@@ -48,6 +56,10 @@ export type Product_variantsMinAggregateOutputType = {
   product_id: string | null
   sku: string | null
   weight_g: runtime.Decimal | null
+  package_length_cm: runtime.Decimal | null
+  package_width_cm: runtime.Decimal | null
+  package_height_cm: runtime.Decimal | null
+  shipping_weight_g: runtime.Decimal | null
   price: runtime.Decimal | null
   old_price: runtime.Decimal | null
   stock_quantity: number | null
@@ -63,6 +75,10 @@ export type Product_variantsMaxAggregateOutputType = {
   product_id: string | null
   sku: string | null
   weight_g: runtime.Decimal | null
+  package_length_cm: runtime.Decimal | null
+  package_width_cm: runtime.Decimal | null
+  package_height_cm: runtime.Decimal | null
+  shipping_weight_g: runtime.Decimal | null
   price: runtime.Decimal | null
   old_price: runtime.Decimal | null
   stock_quantity: number | null
@@ -78,6 +94,10 @@ export type Product_variantsCountAggregateOutputType = {
   product_id: number
   sku: number
   weight_g: number
+  package_length_cm: number
+  package_width_cm: number
+  package_height_cm: number
+  shipping_weight_g: number
   price: number
   old_price: number
   stock_quantity: number
@@ -92,6 +112,10 @@ export type Product_variantsCountAggregateOutputType = {
 
 export type Product_variantsAvgAggregateInputType = {
   weight_g?: true
+  package_length_cm?: true
+  package_width_cm?: true
+  package_height_cm?: true
+  shipping_weight_g?: true
   price?: true
   old_price?: true
   stock_quantity?: true
@@ -100,6 +124,10 @@ export type Product_variantsAvgAggregateInputType = {
 
 export type Product_variantsSumAggregateInputType = {
   weight_g?: true
+  package_length_cm?: true
+  package_width_cm?: true
+  package_height_cm?: true
+  shipping_weight_g?: true
   price?: true
   old_price?: true
   stock_quantity?: true
@@ -111,6 +139,10 @@ export type Product_variantsMinAggregateInputType = {
   product_id?: true
   sku?: true
   weight_g?: true
+  package_length_cm?: true
+  package_width_cm?: true
+  package_height_cm?: true
+  shipping_weight_g?: true
   price?: true
   old_price?: true
   stock_quantity?: true
@@ -126,6 +158,10 @@ export type Product_variantsMaxAggregateInputType = {
   product_id?: true
   sku?: true
   weight_g?: true
+  package_length_cm?: true
+  package_width_cm?: true
+  package_height_cm?: true
+  shipping_weight_g?: true
   price?: true
   old_price?: true
   stock_quantity?: true
@@ -141,6 +177,10 @@ export type Product_variantsCountAggregateInputType = {
   product_id?: true
   sku?: true
   weight_g?: true
+  package_length_cm?: true
+  package_width_cm?: true
+  package_height_cm?: true
+  shipping_weight_g?: true
   price?: true
   old_price?: true
   stock_quantity?: true
@@ -243,6 +283,10 @@ export type Product_variantsGroupByOutputType = {
   product_id: string
   sku: string
   weight_g: runtime.Decimal
+  package_length_cm: runtime.Decimal | null
+  package_width_cm: runtime.Decimal | null
+  package_height_cm: runtime.Decimal | null
+  shipping_weight_g: runtime.Decimal | null
   price: runtime.Decimal
   old_price: runtime.Decimal | null
   stock_quantity: number
@@ -281,6 +325,10 @@ export type product_variantsWhereInput = {
   product_id?: Prisma.UuidFilter<"product_variants"> | string
   sku?: Prisma.StringFilter<"product_variants"> | string
   weight_g?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFilter<"product_variants"> | number
@@ -298,6 +346,10 @@ export type product_variantsOrderByWithRelationInput = {
   product_id?: Prisma.SortOrder
   sku?: Prisma.SortOrder
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrderInput | Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -319,6 +371,10 @@ export type product_variantsWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.product_variantsWhereInput | Prisma.product_variantsWhereInput[]
   product_id?: Prisma.UuidFilter<"product_variants"> | string
   weight_g?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFilter<"product_variants"> | number
@@ -336,6 +392,10 @@ export type product_variantsOrderByWithAggregationInput = {
   product_id?: Prisma.SortOrder
   sku?: Prisma.SortOrder
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrderInput | Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrderInput | Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -359,6 +419,10 @@ export type product_variantsScalarWhereWithAggregatesInput = {
   product_id?: Prisma.UuidWithAggregatesFilter<"product_variants"> | string
   sku?: Prisma.StringWithAggregatesFilter<"product_variants"> | string
   weight_g?: Prisma.DecimalWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.DecimalNullableWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.DecimalNullableWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.DecimalNullableWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.DecimalNullableWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.DecimalNullableWithAggregatesFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntWithAggregatesFilter<"product_variants"> | number
@@ -373,6 +437,10 @@ export type product_variantsCreateInput = {
   id?: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -390,6 +458,10 @@ export type product_variantsUncheckedCreateInput = {
   product_id: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -405,6 +477,10 @@ export type product_variantsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -422,6 +498,10 @@ export type product_variantsUncheckedUpdateInput = {
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -438,6 +518,10 @@ export type product_variantsCreateManyInput = {
   product_id: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -452,6 +536,10 @@ export type product_variantsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -467,6 +555,10 @@ export type product_variantsUncheckedUpdateManyInput = {
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -492,6 +584,10 @@ export type product_variantsCountOrderByAggregateInput = {
   product_id?: Prisma.SortOrder
   sku?: Prisma.SortOrder
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -504,6 +600,10 @@ export type product_variantsCountOrderByAggregateInput = {
 
 export type product_variantsAvgOrderByAggregateInput = {
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -515,6 +615,10 @@ export type product_variantsMaxOrderByAggregateInput = {
   product_id?: Prisma.SortOrder
   sku?: Prisma.SortOrder
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -530,6 +634,10 @@ export type product_variantsMinOrderByAggregateInput = {
   product_id?: Prisma.SortOrder
   sku?: Prisma.SortOrder
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -542,6 +650,10 @@ export type product_variantsMinOrderByAggregateInput = {
 
 export type product_variantsSumOrderByAggregateInput = {
   weight_g?: Prisma.SortOrder
+  package_length_cm?: Prisma.SortOrder
+  package_width_cm?: Prisma.SortOrder
+  package_height_cm?: Prisma.SortOrder
+  shipping_weight_g?: Prisma.SortOrder
   price?: Prisma.SortOrder
   old_price?: Prisma.SortOrder
   stock_quantity?: Prisma.SortOrder
@@ -626,6 +738,10 @@ export type product_variantsCreateWithoutCart_itemsInput = {
   id?: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -642,6 +758,10 @@ export type product_variantsUncheckedCreateWithoutCart_itemsInput = {
   product_id: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -672,6 +792,10 @@ export type product_variantsUpdateWithoutCart_itemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -688,6 +812,10 @@ export type product_variantsUncheckedUpdateWithoutCart_itemsInput = {
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -702,6 +830,10 @@ export type product_variantsCreateWithoutProductsInput = {
   id?: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -717,6 +849,10 @@ export type product_variantsUncheckedCreateWithoutProductsInput = {
   id?: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -762,6 +898,10 @@ export type product_variantsScalarWhereInput = {
   product_id?: Prisma.UuidFilter<"product_variants"> | string
   sku?: Prisma.StringFilter<"product_variants"> | string
   weight_g?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.DecimalNullableFilter<"product_variants"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFilter<"product_variants"> | number
@@ -776,6 +916,10 @@ export type product_variantsCreateManyProductsInput = {
   id?: string
   sku: string
   weight_g: runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: number
@@ -790,6 +934,10 @@ export type product_variantsUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -805,6 +953,10 @@ export type product_variantsUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -820,6 +972,10 @@ export type product_variantsUncheckedUpdateManyWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   weight_g?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  package_length_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_width_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  package_height_cm?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  shipping_weight_g?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   old_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   stock_quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -866,6 +1022,10 @@ export type product_variantsSelect<ExtArgs extends runtime.Types.Extensions.Inte
   product_id?: boolean
   sku?: boolean
   weight_g?: boolean
+  package_length_cm?: boolean
+  package_width_cm?: boolean
+  package_height_cm?: boolean
+  shipping_weight_g?: boolean
   price?: boolean
   old_price?: boolean
   stock_quantity?: boolean
@@ -884,6 +1044,10 @@ export type product_variantsSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   product_id?: boolean
   sku?: boolean
   weight_g?: boolean
+  package_length_cm?: boolean
+  package_width_cm?: boolean
+  package_height_cm?: boolean
+  shipping_weight_g?: boolean
   price?: boolean
   old_price?: boolean
   stock_quantity?: boolean
@@ -900,6 +1064,10 @@ export type product_variantsSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   product_id?: boolean
   sku?: boolean
   weight_g?: boolean
+  package_length_cm?: boolean
+  package_width_cm?: boolean
+  package_height_cm?: boolean
+  shipping_weight_g?: boolean
   price?: boolean
   old_price?: boolean
   stock_quantity?: boolean
@@ -916,6 +1084,10 @@ export type product_variantsSelectScalar = {
   product_id?: boolean
   sku?: boolean
   weight_g?: boolean
+  package_length_cm?: boolean
+  package_width_cm?: boolean
+  package_height_cm?: boolean
+  shipping_weight_g?: boolean
   price?: boolean
   old_price?: boolean
   stock_quantity?: boolean
@@ -926,7 +1098,7 @@ export type product_variantsSelectScalar = {
   updated_at?: boolean
 }
 
-export type product_variantsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "product_id" | "sku" | "weight_g" | "price" | "old_price" | "stock_quantity" | "is_available" | "status" | "sort_order" | "created_at" | "updated_at", ExtArgs["result"]["product_variants"]>
+export type product_variantsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "product_id" | "sku" | "weight_g" | "package_length_cm" | "package_width_cm" | "package_height_cm" | "shipping_weight_g" | "price" | "old_price" | "stock_quantity" | "is_available" | "status" | "sort_order" | "created_at" | "updated_at", ExtArgs["result"]["product_variants"]>
 export type product_variantsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cart_items?: boolean | Prisma.product_variants$cart_itemsArgs<ExtArgs>
   products?: boolean | Prisma.productsDefaultArgs<ExtArgs>
@@ -950,6 +1122,10 @@ export type $product_variantsPayload<ExtArgs extends runtime.Types.Extensions.In
     product_id: string
     sku: string
     weight_g: runtime.Decimal
+    package_length_cm: runtime.Decimal | null
+    package_width_cm: runtime.Decimal | null
+    package_height_cm: runtime.Decimal | null
+    shipping_weight_g: runtime.Decimal | null
     price: runtime.Decimal
     old_price: runtime.Decimal | null
     stock_quantity: number
@@ -1387,6 +1563,10 @@ export interface product_variantsFieldRefs {
   readonly product_id: Prisma.FieldRef<"product_variants", 'String'>
   readonly sku: Prisma.FieldRef<"product_variants", 'String'>
   readonly weight_g: Prisma.FieldRef<"product_variants", 'Decimal'>
+  readonly package_length_cm: Prisma.FieldRef<"product_variants", 'Decimal'>
+  readonly package_width_cm: Prisma.FieldRef<"product_variants", 'Decimal'>
+  readonly package_height_cm: Prisma.FieldRef<"product_variants", 'Decimal'>
+  readonly shipping_weight_g: Prisma.FieldRef<"product_variants", 'Decimal'>
   readonly price: Prisma.FieldRef<"product_variants", 'Decimal'>
   readonly old_price: Prisma.FieldRef<"product_variants", 'Decimal'>
   readonly stock_quantity: Prisma.FieldRef<"product_variants", 'Int'>

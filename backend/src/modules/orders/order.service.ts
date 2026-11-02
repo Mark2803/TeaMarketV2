@@ -6,6 +6,7 @@ import {
 
 import { prisma } from "../../database/prisma.js";
 import { calculatePricing } from "../pricing/pricing.service.js";
+import { quoteYandexPickup,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
 import { sendTemplateEmail } from "../notifications/notification.service.js";
 
 import type {
@@ -54,7 +55,8 @@ export type CreateOrderError =
   | "DELIVERY_METHOD_NOT_FOUND"
   | "PAYMENT_METHOD_NOT_FOUND"
   | "PRODUCT_VARIANT_NOT_FOUND"
-  | "INSUFFICIENT_STOCK";
+  | "INSUFFICIENT_STOCK"
+  | "DELIVERY_QUOTE_UNAVAILABLE";
 
 export type CreateOrderResult =
   | {
@@ -181,15 +183,11 @@ export async function createOrder(
         };
       }
 
-      const paymentMethod =
-        await transaction
-          .payment_methods
-          .findFirst({
-            where: {
-              id: input.paymentMethodId,
-              is_active: true
-            }
-          });
+      // Only online payment methods are allowed; never fall back to cash on delivery.
+      const paymentMethod = input.paymentMethodId
+        ? await transaction.payment_methods.findFirst({where:{id:input.paymentMethodId,is_active:true}})
+        : (await transaction.payment_methods.findMany({where:{is_active:true}}))
+            .find(method=>/юкас|yookassa|онлайн|online|банковск|карт/i.test(method.name)) ?? null;
 
       if (!paymentMethod) {
         return {
@@ -269,6 +267,18 @@ export async function createOrder(
           }
         });
 
+      const yandexMethod = /яндекс|yandex/i.test(deliveryMethod.name);
+      if (yandexMethod && !input.destinationStationId) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
+      let carrierPrice = Number(deliveryMethod.base_cost);
+      if (yandexMethod) {
+        try {
+          const carrier = await quoteYandexPickup(freshItems.map(i=>({sku:i.product_variants.sku,quantity:i.quantity})), input.destinationStationId!);
+          carrierPrice = carrier.price;
+        } catch (error) {
+          if (error instanceof CarrierQuoteError) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
+          throw error;
+        }
+      }
       const pricing = await calculatePricing(
         freshItems.map((item) => ({
           productId: item.product_variants.product_id,
@@ -278,7 +288,7 @@ export async function createOrder(
           categoryIds: item.product_variants.products.product_categories.map((x) => x.category_id),
           collectionIds: item.product_variants.products.collection_products.map((x) => x.collection_id)
         })),
-        Number(deliveryMethod.base_cost),
+        carrierPrice,
         input.promoCode,
         input.referralCode,
         input.loyaltyToSpend,
@@ -397,7 +407,10 @@ export async function createOrder(
                   deliveryMethod.id,
 
                 cost:
-                  deliveryMethod.base_cost,
+                  deliveryCost.toFixed(2),
+
+                delivery_service:
+                  yandexMethod ? "Yandex Delivery" : deliveryMethod.name,
 
                 recipient_name:
                   input.delivery
@@ -407,7 +420,7 @@ export async function createOrder(
                   input.delivery.phone,
 
                 full_address:
-                  input.delivery
+                  yandexMethod ? `[ПВЗ Яндекс ${input.destinationStationId}] ${input.delivery.fullAddress}` : input.delivery
                     .fullAddress,
 
                 comment:

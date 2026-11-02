@@ -73,12 +73,15 @@ function sendCreateOrderError(
       | "DELIVERY_METHOD_NOT_FOUND"
       | "PAYMENT_METHOD_NOT_FOUND"
       | "PRODUCT_VARIANT_NOT_FOUND"
-      | "INSUFFICIENT_STOCK";
+      | "INSUFFICIENT_STOCK"
+      | "DELIVERY_QUOTE_UNAVAILABLE";
     productVariantId?: string;
     availableQuantity?: number;
   }
 ) {
   switch (result.error) {
+    case "DELIVERY_QUOTE_UNAVAILABLE":
+      res.status(422).json({error:{code:"DELIVERY_QUOTE_UNAVAILABLE",message:"Яндекс не подтвердил доставку в выбранный ПВЗ. Выберите другой пункт."}});return;
     case "CART_NOT_FOUND":
       res.status(404).json({
         error: {

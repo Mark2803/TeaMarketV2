@@ -139,7 +139,7 @@ export default function HomePage() {
         <HomeHeroCarousel banners={homeBannersQuery.data?.data ?? []} />
       ) : (
         <header className="home-db-heading">
-          <p>Каталог Чайный Мастер</p>
+          <p>Каталог Чайный Маркет</p>
           <h1>Китайский чай из реальной базы данных</h1>
           <span>Hero-плашки пока не добавлены в базу данных.</span>
         </header>

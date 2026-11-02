@@ -58,6 +58,7 @@ const AdminPromotionsPage = lazy(() => import("../../pages/admin/AdminPromotions
 const AdminNotificationsPage = lazy(() => import("../../pages/admin/AdminNotificationsPage"));
 const AdminAnalyticsPage = lazy(() => import("../../pages/admin/AdminAnalyticsPage"));
 const AdminSettingsPage = lazy(() => import("../../pages/admin/AdminSettingsPage"));
+const AdminDeliveryPage = lazy(() => import("../../pages/admin/AdminDeliveryPage"));
 
 
 export default function AppRouter() {
@@ -114,6 +115,8 @@ export default function AppRouter() {
           <Route path="home" element={<AdminPlaceholderPage />} />
           <Route path="articles" element={<AdminPlaceholderPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="delivery" element={<Navigate to="/admin/delivery/shipments" replace />} />
+          <Route path="delivery/:section" element={<AdminDeliveryPage />} />
           <Route path="orders/:orderNumber" element={<AdminOrderEditPage />} />
           <Route path="customers" element={<AdminCustomersPage />} />
           <Route path="customers/:id" element={<AdminCustomerEditPage />} />

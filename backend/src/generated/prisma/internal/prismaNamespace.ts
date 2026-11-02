@@ -442,7 +442,9 @@ export const ModelName = {
   analytics_events: 'analytics_events',
   analytics_order_attributions: 'analytics_order_attributions',
   admin_users: 'admin_users',
-  admin_password_reset_tokens: 'admin_password_reset_tokens'
+  admin_password_reset_tokens: 'admin_password_reset_tokens',
+  shipping_packages: 'shipping_packages',
+  order_packing_plans: 'order_packing_plans'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -458,7 +460,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions" | "articles" | "article_publications" | "home_banners" | "promotions" | "promo_codes" | "loyalty_settings" | "loyalty_accounts" | "loyalty_transactions" | "referral_settings" | "referral_codes" | "referrals" | "referral_partners" | "referral_partner_orders" | "order_discounts" | "notification_channel_settings" | "notification_templates" | "notification_campaigns" | "notification_deliveries" | "notification_preferences" | "analytics_sessions" | "analytics_events" | "analytics_order_attributions" | "admin_users" | "admin_password_reset_tokens"
+    modelProps: "cart_items" | "carts" | "categories" | "collection_products" | "collections" | "customer_addresses" | "customers" | "delivery_methods" | "favorites" | "order_deliveries" | "order_items" | "order_payments" | "order_status_history" | "orders" | "payment_methods" | "product_categories" | "product_images" | "product_variants" | "products" | "product_relations" | "auth_codes" | "auth_sessions" | "articles" | "article_publications" | "home_banners" | "promotions" | "promo_codes" | "loyalty_settings" | "loyalty_accounts" | "loyalty_transactions" | "referral_settings" | "referral_codes" | "referrals" | "referral_partners" | "referral_partner_orders" | "order_discounts" | "notification_channel_settings" | "notification_templates" | "notification_campaigns" | "notification_deliveries" | "notification_preferences" | "analytics_sessions" | "analytics_events" | "analytics_order_attributions" | "admin_users" | "admin_password_reset_tokens" | "shipping_packages" | "order_packing_plans"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3866,6 +3868,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    shipping_packages: {
+      payload: Prisma.$shipping_packagesPayload<ExtArgs>
+      fields: Prisma.shipping_packagesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.shipping_packagesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.shipping_packagesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        findFirst: {
+          args: Prisma.shipping_packagesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.shipping_packagesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        findMany: {
+          args: Prisma.shipping_packagesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>[]
+        }
+        create: {
+          args: Prisma.shipping_packagesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        createMany: {
+          args: Prisma.shipping_packagesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.shipping_packagesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>[]
+        }
+        delete: {
+          args: Prisma.shipping_packagesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        update: {
+          args: Prisma.shipping_packagesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        deleteMany: {
+          args: Prisma.shipping_packagesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.shipping_packagesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.shipping_packagesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>[]
+        }
+        upsert: {
+          args: Prisma.shipping_packagesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$shipping_packagesPayload>
+        }
+        aggregate: {
+          args: Prisma.Shipping_packagesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateShipping_packages>
+        }
+        groupBy: {
+          args: Prisma.shipping_packagesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shipping_packagesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.shipping_packagesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Shipping_packagesCountAggregateOutputType> | number
+        }
+      }
+    }
+    order_packing_plans: {
+      payload: Prisma.$order_packing_plansPayload<ExtArgs>
+      fields: Prisma.order_packing_plansFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.order_packing_plansFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.order_packing_plansFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        findFirst: {
+          args: Prisma.order_packing_plansFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.order_packing_plansFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        findMany: {
+          args: Prisma.order_packing_plansFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>[]
+        }
+        create: {
+          args: Prisma.order_packing_plansCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        createMany: {
+          args: Prisma.order_packing_plansCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.order_packing_plansCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>[]
+        }
+        delete: {
+          args: Prisma.order_packing_plansDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        update: {
+          args: Prisma.order_packing_plansUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        deleteMany: {
+          args: Prisma.order_packing_plansDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.order_packing_plansUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.order_packing_plansUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>[]
+        }
+        upsert: {
+          args: Prisma.order_packing_plansUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$order_packing_plansPayload>
+        }
+        aggregate: {
+          args: Prisma.Order_packing_plansAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrder_packing_plans>
+        }
+        groupBy: {
+          args: Prisma.order_packing_plansGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Order_packing_plansGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.order_packing_plansCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Order_packing_plansCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4172,6 +4322,10 @@ export const Product_variantsScalarFieldEnum = {
   product_id: 'product_id',
   sku: 'sku',
   weight_g: 'weight_g',
+  package_length_cm: 'package_length_cm',
+  package_width_cm: 'package_width_cm',
+  package_height_cm: 'package_height_cm',
+  shipping_weight_g: 'shipping_weight_g',
   price: 'price',
   old_price: 'old_price',
   stock_quantity: 'stock_quantity',
@@ -4628,6 +4782,34 @@ export const Admin_password_reset_tokensScalarFieldEnum = {
 export type Admin_password_reset_tokensScalarFieldEnum = (typeof Admin_password_reset_tokensScalarFieldEnum)[keyof typeof Admin_password_reset_tokensScalarFieldEnum]
 
 
+export const Shipping_packagesScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  inner_length_cm: 'inner_length_cm',
+  inner_width_cm: 'inner_width_cm',
+  inner_height_cm: 'inner_height_cm',
+  outer_length_cm: 'outer_length_cm',
+  outer_width_cm: 'outer_width_cm',
+  outer_height_cm: 'outer_height_cm',
+  tare_weight_g: 'tare_weight_g',
+  is_active: 'is_active',
+  sort_order: 'sort_order',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Shipping_packagesScalarFieldEnum = (typeof Shipping_packagesScalarFieldEnum)[keyof typeof Shipping_packagesScalarFieldEnum]
+
+
+export const Order_packing_plansScalarFieldEnum = {
+  order_id: 'order_id',
+  plan_json: 'plan_json',
+  updated_at: 'updated_at'
+} as const
+
+export type Order_packing_plansScalarFieldEnum = (typeof Order_packing_plansScalarFieldEnum)[keyof typeof Order_packing_plansScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4969,6 +5151,8 @@ export type GlobalOmitConfig = {
   analytics_order_attributions?: Prisma.analytics_order_attributionsOmit
   admin_users?: Prisma.admin_usersOmit
   admin_password_reset_tokens?: Prisma.admin_password_reset_tokensOmit
+  shipping_packages?: Prisma.shipping_packagesOmit
+  order_packing_plans?: Prisma.order_packing_plansOmit
 }
 
 /* Types for Logging */

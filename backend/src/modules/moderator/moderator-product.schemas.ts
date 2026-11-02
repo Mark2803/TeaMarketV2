@@ -21,6 +21,10 @@ const createModeratorProductVariantBaseSchema =
   z.object({
     sku: z.string().trim().min(1, "SKU обязателен").max(100, "SKU слишком длинный"),
     weightG: z.number().positive("Вес должен быть больше 0"),
+    packageLengthCm: z.number().positive("Длина упаковки должна быть больше 0").nullable().optional(),
+    packageWidthCm: z.number().positive("Ширина упаковки должна быть больше 0").nullable().optional(),
+    packageHeightCm: z.number().positive("Высота упаковки должна быть больше 0").nullable().optional(),
+    shippingWeightG: z.number().positive("Вес с упаковкой должен быть больше 0").nullable().optional(),
     price: z.number().min(0, "Цена не может быть отрицательной"),
     oldPrice: z.number().positive().nullable().optional(),
     stockQuantity: z.number().int().min(0).default(0),
@@ -131,6 +135,10 @@ const updateModeratorProductVariantBaseSchema =
   z.object({
     sku: z.string().trim().min(1, "SKU обязателен").max(100, "SKU слишком длинный").optional(),
     weightG: z.number().positive().optional(),
+    packageLengthCm: z.number().positive("Длина упаковки должна быть больше 0").nullable().optional(),
+    packageWidthCm: z.number().positive("Ширина упаковки должна быть больше 0").nullable().optional(),
+    packageHeightCm: z.number().positive("Высота упаковки должна быть больше 0").nullable().optional(),
+    shippingWeightG: z.number().positive("Вес с упаковкой должен быть больше 0").nullable().optional(),
     price: z.number().min(0).optional(),
     oldPrice: z.number().positive().nullable().optional(),
     stockQuantity: z.number().int().min(0).optional(),

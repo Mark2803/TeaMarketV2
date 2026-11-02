@@ -16,7 +16,7 @@ export default function ContactsPage() {
 
       <header className="contacts-page__heading">
         <span className="contacts-page__eyebrow">
-          Чайный Мастер
+          Чайный Маркет
         </span>
 
         <h1>Контакты</h1>

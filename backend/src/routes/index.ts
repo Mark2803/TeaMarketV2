@@ -24,6 +24,7 @@ import favoritesRouter from "../modules/favorites/favorites.routes.js";
 import customerAddressesRouter from "../modules/customer-addresses/customer-addresses.routes.js";
 
 import moderatorRouter from "../modules/moderator/moderator.routes.js";
+import yandexTestPointsRouter from "./yandex-test-points.js";
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.use("/pricing", pricingRouter);
 router.use("/analytics", analyticsRouter);
 
 router.use("/delivery-methods", deliveryMethodsRouter);
+router.use("/yandex-test", yandexTestPointsRouter);
 router.use("/payment-methods", paymentMethodsRouter);
 
 router.use("/auth", authRouter);

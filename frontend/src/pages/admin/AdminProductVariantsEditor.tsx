@@ -9,6 +9,10 @@ export type AdminEditableVariant = {
   id: string;
   sku: string;
   weight_g: string | number;
+  package_length_cm?: string | number | null;
+  package_width_cm?: string | number | null;
+  package_height_cm?: string | number | null;
+  shipping_weight_g?: string | number | null;
   price: string | number;
   old_price?: string | number | null;
   stock_quantity: number;
@@ -26,6 +30,10 @@ type Props = {
 type VariantForm = {
   sku: string;
   weightG: string;
+  packageLengthCm: string;
+  packageWidthCm: string;
+  packageHeightCm: string;
+  shippingWeightG: string;
   price: string;
   oldPrice: string;
   stockQuantity: string;
@@ -37,6 +45,10 @@ type VariantForm = {
 const emptyVariant: VariantForm = {
   sku: "",
   weightG: "",
+  packageLengthCm: "",
+  packageWidthCm: "",
+  packageHeightCm: "",
+  shippingWeightG: "",
   price: "",
   oldPrice: "",
   stockQuantity: "0",
@@ -49,6 +61,10 @@ function toForm(variant: AdminEditableVariant): VariantForm {
   return {
     sku: variant.sku,
     weightG: String(variant.weight_g),
+    packageLengthCm: variant.package_length_cm == null ? "" : String(variant.package_length_cm),
+    packageWidthCm: variant.package_width_cm == null ? "" : String(variant.package_width_cm),
+    packageHeightCm: variant.package_height_cm == null ? "" : String(variant.package_height_cm),
+    shippingWeightG: variant.shipping_weight_g == null ? "" : String(variant.shipping_weight_g),
     price: String(variant.price),
     oldPrice: variant.old_price == null ? "" : String(variant.old_price),
     stockQuantity: String(variant.stock_quantity),
@@ -62,6 +78,10 @@ function parseForm(form: VariantForm) {
   const sku = form.sku.trim();
   const weightG = Number(form.weightG.replace(",", "."));
   const price = Number(form.price.replace(",", "."));
+  const packageLengthCm = Number(form.packageLengthCm.replace(",", "."));
+  const packageWidthCm = Number(form.packageWidthCm.replace(",", "."));
+  const packageHeightCm = Number(form.packageHeightCm.replace(",", "."));
+  const shippingWeightG = Number(form.shippingWeightG.replace(",", "."));
   const oldPrice = form.oldPrice.trim()
     ? Number(form.oldPrice.replace(",", "."))
     : null;
@@ -71,6 +91,16 @@ function parseForm(form: VariantForm) {
   if (!sku) throw new Error("Укажите SKU.");
   if (!form.weightG.trim() || !Number.isFinite(weightG) || weightG <= 0) {
     throw new Error("Вес должен быть больше 0.");
+  }
+  for (const [label, raw, value] of [
+    ["Длина упаковки", form.packageLengthCm, packageLengthCm],
+    ["Ширина упаковки", form.packageWidthCm, packageWidthCm],
+    ["Высота упаковки", form.packageHeightCm, packageHeightCm],
+    ["Вес с упаковкой", form.shippingWeightG, shippingWeightG],
+  ] as const) {
+    if (!raw.trim() || !Number.isFinite(value) || value <= 0) {
+      throw new Error(`${label} должна быть больше 0.`);
+    }
   }
   if (!form.price.trim() || !Number.isFinite(price) || price < 0) {
     throw new Error("Цена должна быть числом от 0.");
@@ -88,6 +118,10 @@ function parseForm(form: VariantForm) {
   return {
     sku,
     weightG,
+    packageLengthCm,
+    packageWidthCm,
+    packageHeightCm,
+    shippingWeightG,
     price,
     oldPrice,
     stockQuantity,
@@ -112,6 +146,7 @@ export default function AdminProductVariantsEditor({
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [transportDrafts, setTransportDrafts] = useState<Record<string, Pick<VariantForm, "packageLengthCm" | "packageWidthCm" | "packageHeightCm" | "shippingWeightG">>>({});
   const [error, setError] = useState("");
 
   const sorted = useMemo(
@@ -191,6 +226,43 @@ export default function AdminProductVariantsEditor({
       await onChanged();
     } catch (e) {
       setError(errorMessage(e, "Не удалось сохранить вариант."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const setTransportField = (
+    variant: AdminEditableVariant,
+    field: "packageLengthCm" | "packageWidthCm" | "packageHeightCm" | "shippingWeightG",
+    value: string,
+  ) => {
+    setTransportDrafts((current) => ({
+      ...current,
+      [variant.id]: { ...toForm(variant), ...current[variant.id], [field]: value },
+    }));
+    setError("");
+    setMessage("");
+  };
+
+  const saveTransport = async (variant: AdminEditableVariant) => {
+    try {
+      const payload = parseForm({ ...toForm(variant), ...transportDrafts[variant.id] });
+      setBusy(true);
+      setError("");
+      setMessage("");
+      await apiRequest(`/moderator/products/${productId}/variants/${variant.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      setTransportDrafts((current) => {
+        const next = { ...current };
+        delete next[variant.id];
+        return next;
+      });
+      setMessage(`Транспортные характеристики ${variant.sku} сохранены.`);
+      await onChanged();
+    } catch (e) {
+      setError(errorMessage(e, "Не удалось сохранить транспортные характеристики."));
     } finally {
       setBusy(false);
     }
@@ -311,6 +383,22 @@ export default function AdminProductVariantsEditor({
         </label>
       </div>
 
+      {creating ? <div className="admin-transport-section">
+        <div className="admin-editor-section-heading">
+          <div>
+            <h3>Транспортные характеристики</h3>
+            <p>Фактические размеры одной товарной упаковки. Объём рассчитывается автоматически.</p>
+          </div>
+        </div>
+        <div className="admin-form-grid admin-form-grid-four">
+          <label className="admin-field"><span>Длина, см *</span><input inputMode="decimal" value={form.packageLengthCm} onChange={(e) => setField("packageLengthCm", e.target.value)} /></label>
+          <label className="admin-field"><span>Ширина, см *</span><input inputMode="decimal" value={form.packageWidthCm} onChange={(e) => setField("packageWidthCm", e.target.value)} /></label>
+          <label className="admin-field"><span>Высота, см *</span><input inputMode="decimal" value={form.packageHeightCm} onChange={(e) => setField("packageHeightCm", e.target.value)} /></label>
+          <label className="admin-field"><span>Вес с упаковкой, г *</span><input inputMode="decimal" value={form.shippingWeightG} onChange={(e) => setField("shippingWeightG", e.target.value)} /></label>
+          <div className="admin-field admin-transport-volume"><span>Объём</span><strong>{[form.packageLengthCm, form.packageWidthCm, form.packageHeightCm].every((v) => Number(v.replace(",", ".")) > 0) ? `${(Number(form.packageLengthCm.replace(",", ".")) * Number(form.packageWidthCm.replace(",", ".")) * Number(form.packageHeightCm.replace(",", ".")) / 1000).toFixed(2)} л` : "—"}</strong></div>
+        </div>
+      </div> : null}
+
       <div className="admin-variant-editor-actions">
         <button
           className="admin-primary-button"
@@ -372,6 +460,8 @@ export default function AdminProductVariantsEditor({
             <tr>
               <th>Вес</th>
               <th>SKU</th>
+              <th>Габариты</th>
+              <th>Вес с уп.</th>
               <th>Цена</th>
               <th>Старая цена</th>
               <th>Остаток</th>
@@ -385,6 +475,8 @@ export default function AdminProductVariantsEditor({
               <tr key={variant.id}>
                 <td data-label="Вес">{Number(variant.weight_g)} г</td>
                 <td data-label="SKU"><strong>{variant.sku}</strong></td>
+                <td data-label="Габариты">{variant.package_length_cm != null && variant.package_width_cm != null && variant.package_height_cm != null ? `${Number(variant.package_length_cm)} × ${Number(variant.package_width_cm)} × ${Number(variant.package_height_cm)} см` : "—"}</td>
+                <td data-label="Вес с уп.">{variant.shipping_weight_g == null ? "—" : `${Number(variant.shipping_weight_g)} г`}</td>
                 <td data-label="Цена">
                   {Number(variant.price).toLocaleString("ru-RU")} ₽
                 </td>
@@ -427,6 +519,59 @@ export default function AdminProductVariantsEditor({
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="admin-transport-section">
+        <div className="admin-editor-section-heading">
+          <div>
+            <h3>Транспортные характеристики вариантов</h3>
+            <p>Поля всегда доступны для каждого SKU. Сохраняются отдельно от основных данных товара.</p>
+          </div>
+        </div>
+        {sorted.map((variant) => {
+          const values = { ...toForm(variant), ...transportDrafts[variant.id] };
+          const volumeValues = [values.packageLengthCm, values.packageWidthCm, values.packageHeightCm].map((v) => Number(v.replace(",", ".")));
+          const volume = volumeValues.every((v) => Number.isFinite(v) && v > 0)
+            ? `${(volumeValues[0]! * volumeValues[1]! * volumeValues[2]! / 1000).toFixed(2)} л`
+            : "—";
+          return (
+            <div className="admin-variant-editor" key={variant.id} style={{ marginBottom: 16 }}>
+              <h3 style={{ marginTop: 0 }}>{Number(variant.weight_g)} г — {variant.sku}</h3>
+              <div className="admin-form-grid admin-form-grid-four">
+                {([
+                  ["packageLengthCm", "Длина, см"],
+                  ["packageWidthCm", "Ширина, см"],
+                  ["packageHeightCm", "Высота, см"],
+                  ["shippingWeightG", "Вес с упаковкой, г"],
+                ] as const).map(([field, label]) => (
+                  <label className="admin-field" key={field}>
+                    <span>{label} *</span>
+                    <input
+                      inputMode="decimal"
+                      value={values[field]}
+                      disabled={busy}
+                      onChange={(e) => setTransportField(variant, field, e.target.value)}
+                    />
+                  </label>
+                ))}
+                <div className="admin-field admin-transport-volume">
+                  <span>Расчётный объём</span>
+                  <strong>{volume}</strong>
+                </div>
+              </div>
+              <div className="admin-variant-editor-actions">
+                <button
+                  type="button"
+                  className="admin-primary-button"
+                  disabled={busy || !transportDrafts[variant.id]}
+                  onClick={() => saveTransport(variant)}
+                >
+                  <Save size={17} /> Сохранить габариты
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

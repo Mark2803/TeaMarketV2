@@ -111,6 +111,11 @@ export async function createModeratorProductVariant(
         weight_g:
           input.weightG,
 
+        package_length_cm: input.packageLengthCm ?? null,
+        package_width_cm: input.packageWidthCm ?? null,
+        package_height_cm: input.packageHeightCm ?? null,
+        shipping_weight_g: input.shippingWeightG ?? null,
+
         price:
           input.price,
 

@@ -40,7 +40,7 @@ export default function AdminResetPasswordPage() {
         <div className="admin-login-brand">
           <div className="admin-login-brand-row">
             <img className="admin-login-brand-logo" src="/brand-logo.svg" alt="" />
-            <strong>Чайный Мастер</strong>
+            <strong>Чайный Маркет</strong>
           </div>
           <span>Восстановление доступа</span>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiRequest } from "../../shared/api/client";
 import {
   getAdminAnalytics,
   getAdminOrders,
@@ -42,6 +43,19 @@ const status: Record<string, string> = {
 
 export default function AdminDashboardPage() {
   const [cfg, setCfg] = useState(loadDashboardWidgets);
+  const [shipmentAlerts, setShipmentAlerts] = useState<{order_number:string;shipment_status:string|null;error_code:string|null}[]>([]);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const result = await apiRequest<{data:Array<{order_number:string;payment_status:string;shipment_status:string|null;error_code:string|null}>}>("/moderator/yandex-shipments");
+        if (active) setShipmentAlerts(result.data.filter(row => row.payment_status === "paid" && (row.shipment_status === "rejected" || row.shipment_status === "uncertain" || !row.shipment_status)));
+      } catch (error) { console.error("Failed to load Yandex shipment alerts", error); }
+    };
+    void load();
+    const interval = window.setInterval(() => void load(), 60000);
+    return () => { active = false; window.clearInterval(interval); };
+  }, []);
   const [data, setData] = useState<Data>({
     products: null,
     newOrders: null,
@@ -196,10 +210,18 @@ export default function AdminDashboardPage() {
       <div className="admin-page-heading">
         <div>
           <h1>Главная</h1>
-          <p>Управление магазином «Чайный Мастер»</p>
+          <p>Управление магазином «Чайный Маркет»</p>
         </div>
       </div>
 
+      {shipmentAlerts.length > 0 && <div className="admin-section-card" role="alert">
+        <h2>Внимание: отправления Яндекс Доставки ({shipmentAlerts.length})</h2>
+        <p>Оплаченные заказы с ошибкой оформления или без подтверждённой заявки:</p>
+        <ul>{shipmentAlerts.slice(0, 10).map(row => <li key={row.order_number}>
+          {row.order_number} — {row.shipment_status === "uncertain" ? "результат неизвестен, не повторяйте до проверки" : row.shipment_status === "rejected" ? `отклонено (${row.error_code ?? "ошибка"})` : "заявка не создана"}
+        </li>)}</ul>
+        <Link to="/admin/delivery/shipments">Открыть отправления</Link>
+      </div>}
       <div className="admin-dashboard-grid">
         {enabled.map((item) => (
           <div

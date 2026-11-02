@@ -186,6 +186,22 @@ export async function updateModeratorProductVariant(
             }
           : {}),
 
+        ...(input.packageLengthCm !== undefined
+          ? { package_length_cm: input.packageLengthCm }
+          : {}),
+
+        ...(input.packageWidthCm !== undefined
+          ? { package_width_cm: input.packageWidthCm }
+          : {}),
+
+        ...(input.packageHeightCm !== undefined
+          ? { package_height_cm: input.packageHeightCm }
+          : {}),
+
+        ...(input.shippingWeightG !== undefined
+          ? { shipping_weight_g: input.shippingWeightG }
+          : {}),
+
         ...(input.price !== undefined
           ? {
               price:

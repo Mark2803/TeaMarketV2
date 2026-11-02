@@ -11,6 +11,7 @@ import {
   Tags,
   Users,
   FileText,
+  Truck,
 } from "lucide-react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 
@@ -22,6 +23,7 @@ const items = [
   ["/admin/categories", "Каталог", Tags],
   ["/admin/stock", "Остатки", Boxes],
   ["/admin/orders", "Заказы", PackageOpen],
+  ["/admin/delivery", "Доставка", Truck],
   ["/admin/customers", "Покупатели", Users],
   ["/admin/promotions", "Акции", Megaphone],
   ["/admin/content", "Контент", FileText],
@@ -47,7 +49,7 @@ export default function AdminLayout() {
         <div className="admin-brand">
           <div className="admin-brand-row">
             <img className="admin-brand-logo" src="/brand-logo.svg" alt="" />
-            <strong>Чайный Мастер</strong>
+            <strong>Чайный Маркет</strong>
           </div>
           <span>Панель управления</span>
         </div>

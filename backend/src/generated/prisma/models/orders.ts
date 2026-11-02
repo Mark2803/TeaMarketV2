@@ -374,6 +374,7 @@ export type ordersWhereInput = {
   ordered_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   order_deliveries?: Prisma.XOR<Prisma.Order_deliveriesNullableScalarRelationFilter, Prisma.order_deliveriesWhereInput> | null
+  order_packing_plans?: Prisma.XOR<Prisma.Order_packing_plansNullableScalarRelationFilter, Prisma.order_packing_plansWhereInput> | null
   order_items?: Prisma.Order_itemsListRelationFilter
   order_payments?: Prisma.Order_paymentsListRelationFilter
   order_status_history?: Prisma.Order_status_historyListRelationFilter
@@ -405,6 +406,7 @@ export type ordersOrderByWithRelationInput = {
   ordered_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   order_deliveries?: Prisma.order_deliveriesOrderByWithRelationInput
+  order_packing_plans?: Prisma.order_packing_plansOrderByWithRelationInput
   order_items?: Prisma.order_itemsOrderByRelationAggregateInput
   order_payments?: Prisma.order_paymentsOrderByRelationAggregateInput
   order_status_history?: Prisma.order_status_historyOrderByRelationAggregateInput
@@ -439,6 +441,7 @@ export type ordersWhereUniqueInput = Prisma.AtLeast<{
   ordered_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"orders"> | Date | string
   order_deliveries?: Prisma.XOR<Prisma.Order_deliveriesNullableScalarRelationFilter, Prisma.order_deliveriesWhereInput> | null
+  order_packing_plans?: Prisma.XOR<Prisma.Order_packing_plansNullableScalarRelationFilter, Prisma.order_packing_plansWhereInput> | null
   order_items?: Prisma.Order_itemsListRelationFilter
   order_payments?: Prisma.Order_paymentsListRelationFilter
   order_status_history?: Prisma.Order_status_historyListRelationFilter
@@ -527,6 +530,7 @@ export type ordersCreateInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
@@ -558,6 +562,7 @@ export type ordersUncheckedCreateInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
@@ -587,6 +592,7 @@ export type ordersUpdateInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
@@ -618,6 +624,7 @@ export type ordersUncheckedUpdateInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
@@ -918,6 +925,20 @@ export type ordersUpdateOneRequiredWithoutOrder_discountsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ordersUpdateToOneWithWhereWithoutOrder_discountsInput, Prisma.ordersUpdateWithoutOrder_discountsInput>, Prisma.ordersUncheckedUpdateWithoutOrder_discountsInput>
 }
 
+export type ordersCreateNestedOneWithoutOrder_packing_plansInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedCreateWithoutOrder_packing_plansInput>
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutOrder_packing_plansInput
+  connect?: Prisma.ordersWhereUniqueInput
+}
+
+export type ordersUpdateOneRequiredWithoutOrder_packing_plansNestedInput = {
+  create?: Prisma.XOR<Prisma.ordersCreateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedCreateWithoutOrder_packing_plansInput>
+  connectOrCreate?: Prisma.ordersCreateOrConnectWithoutOrder_packing_plansInput
+  upsert?: Prisma.ordersUpsertWithoutOrder_packing_plansInput
+  connect?: Prisma.ordersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ordersUpdateToOneWithWhereWithoutOrder_packing_plansInput, Prisma.ordersUpdateWithoutOrder_packing_plansInput>, Prisma.ordersUncheckedUpdateWithoutOrder_packing_plansInput>
+}
+
 export type ordersCreateWithoutCustomersInput = {
   id?: string
   order_number: string
@@ -941,6 +962,7 @@ export type ordersCreateWithoutCustomersInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
@@ -970,6 +992,7 @@ export type ordersUncheckedCreateWithoutCustomersInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
@@ -1052,6 +1075,7 @@ export type ordersCreateWithoutOrder_deliveriesInput = {
   archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
@@ -1082,6 +1106,7 @@ export type ordersUncheckedCreateWithoutOrder_deliveriesInput = {
   archived_at?: Date | string | null
   ordered_at?: Date | string
   updated_at?: Date | string
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
@@ -1126,6 +1151,7 @@ export type ordersUpdateWithoutOrder_deliveriesInput = {
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
@@ -1156,6 +1182,7 @@ export type ordersUncheckedUpdateWithoutOrder_deliveriesInput = {
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
@@ -1185,6 +1212,7 @@ export type ordersCreateWithoutOrder_itemsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
@@ -1215,6 +1243,7 @@ export type ordersUncheckedCreateWithoutOrder_itemsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
@@ -1259,6 +1288,7 @@ export type ordersUpdateWithoutOrder_itemsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
@@ -1289,6 +1319,7 @@ export type ordersUncheckedUpdateWithoutOrder_itemsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
@@ -1317,6 +1348,7 @@ export type ordersCreateWithoutOrder_paymentsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
@@ -1347,6 +1379,7 @@ export type ordersUncheckedCreateWithoutOrder_paymentsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
@@ -1391,6 +1424,7 @@ export type ordersUpdateWithoutOrder_paymentsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
@@ -1421,6 +1455,7 @@ export type ordersUncheckedUpdateWithoutOrder_paymentsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
@@ -1449,6 +1484,7 @@ export type ordersCreateWithoutOrder_status_historyInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
@@ -1479,6 +1515,7 @@ export type ordersUncheckedCreateWithoutOrder_status_historyInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
@@ -1523,6 +1560,7 @@ export type ordersUpdateWithoutOrder_status_historyInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
@@ -1553,6 +1591,7 @@ export type ordersUncheckedUpdateWithoutOrder_status_historyInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
@@ -1581,6 +1620,7 @@ export type ordersCreateWithoutOrder_discountsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
@@ -1611,6 +1651,7 @@ export type ordersUncheckedCreateWithoutOrder_discountsInput = {
   ordered_at?: Date | string
   updated_at?: Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedCreateNestedOneWithoutOrdersInput
   order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
   order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
   order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
@@ -1655,6 +1696,7 @@ export type ordersUpdateWithoutOrder_discountsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
@@ -1685,9 +1727,146 @@ export type ordersUncheckedUpdateWithoutOrder_discountsInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+}
+
+export type ordersCreateWithoutOrder_packing_plansInput = {
+  id?: string
+  order_number: string
+  customer_name: string
+  phone: string
+  email?: string | null
+  status?: string
+  payment_status?: string
+  items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
+  delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
+  ordered_at?: Date | string
+  updated_at?: Date | string
+  order_deliveries?: Prisma.order_deliveriesCreateNestedOneWithoutOrdersInput
+  order_items?: Prisma.order_itemsCreateNestedManyWithoutOrdersInput
+  order_payments?: Prisma.order_paymentsCreateNestedManyWithoutOrdersInput
+  order_status_history?: Prisma.order_status_historyCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsCreateNestedManyWithoutOrdersInput
+  customers?: Prisma.customersCreateNestedOneWithoutOrdersInput
+}
+
+export type ordersUncheckedCreateWithoutOrder_packing_plansInput = {
+  id?: string
+  order_number: string
+  customer_id?: string | null
+  customer_name: string
+  phone: string
+  email?: string | null
+  status?: string
+  payment_status?: string
+  items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: string | null
+  loyalty_spent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: string | null
+  delivery_cost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: string | null
+  cancellation_reason?: string | null
+  is_archived?: boolean
+  archived_at?: Date | string | null
+  ordered_at?: Date | string
+  updated_at?: Date | string
+  order_deliveries?: Prisma.order_deliveriesUncheckedCreateNestedOneWithoutOrdersInput
+  order_items?: Prisma.order_itemsUncheckedCreateNestedManyWithoutOrdersInput
+  order_payments?: Prisma.order_paymentsUncheckedCreateNestedManyWithoutOrdersInput
+  order_status_history?: Prisma.order_status_historyUncheckedCreateNestedManyWithoutOrdersInput
+  order_discounts?: Prisma.order_discountsUncheckedCreateNestedManyWithoutOrdersInput
+}
+
+export type ordersCreateOrConnectWithoutOrder_packing_plansInput = {
+  where: Prisma.ordersWhereUniqueInput
+  create: Prisma.XOR<Prisma.ordersCreateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedCreateWithoutOrder_packing_plansInput>
+}
+
+export type ordersUpsertWithoutOrder_packing_plansInput = {
+  update: Prisma.XOR<Prisma.ordersUpdateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedUpdateWithoutOrder_packing_plansInput>
+  create: Prisma.XOR<Prisma.ordersCreateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedCreateWithoutOrder_packing_plansInput>
+  where?: Prisma.ordersWhereInput
+}
+
+export type ordersUpdateToOneWithWhereWithoutOrder_packing_plansInput = {
+  where?: Prisma.ordersWhereInput
+  data: Prisma.XOR<Prisma.ordersUpdateWithoutOrder_packing_plansInput, Prisma.ordersUncheckedUpdateWithoutOrder_packing_plansInput>
+}
+
+export type ordersUpdateWithoutOrder_packing_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  order_number?: Prisma.StringFieldUpdateOperationsInput | string
+  customer_name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_status?: Prisma.StringFieldUpdateOperationsInput | string
+  items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
+  order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
+  order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUpdateManyWithoutOrdersNestedInput
+  customers?: Prisma.customersUpdateOneWithoutOrdersNestedInput
+}
+
+export type ordersUncheckedUpdateWithoutOrder_packing_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  order_number?: Prisma.StringFieldUpdateOperationsInput | string
+  customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customer_name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_status?: Prisma.StringFieldUpdateOperationsInput | string
+  items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  gross_items_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discount_total?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  promo_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loyalty_spent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  referral_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_cost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancellation_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
+  order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
+  order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
+  order_discounts?: Prisma.order_discountsUncheckedUpdateManyWithoutOrdersNestedInput
 }
 
 export type ordersCreateManyCustomersInput = {
@@ -1737,6 +1916,7 @@ export type ordersUpdateWithoutCustomersInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUpdateManyWithoutOrdersNestedInput
@@ -1766,6 +1946,7 @@ export type ordersUncheckedUpdateWithoutCustomersInput = {
   ordered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order_deliveries?: Prisma.order_deliveriesUncheckedUpdateOneWithoutOrdersNestedInput
+  order_packing_plans?: Prisma.order_packing_plansUncheckedUpdateOneWithoutOrdersNestedInput
   order_items?: Prisma.order_itemsUncheckedUpdateManyWithoutOrdersNestedInput
   order_payments?: Prisma.order_paymentsUncheckedUpdateManyWithoutOrdersNestedInput
   order_status_history?: Prisma.order_status_historyUncheckedUpdateManyWithoutOrdersNestedInput
@@ -1878,6 +2059,7 @@ export type ordersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   ordered_at?: boolean
   updated_at?: boolean
   order_deliveries?: boolean | Prisma.orders$order_deliveriesArgs<ExtArgs>
+  order_packing_plans?: boolean | Prisma.orders$order_packing_plansArgs<ExtArgs>
   order_items?: boolean | Prisma.orders$order_itemsArgs<ExtArgs>
   order_payments?: boolean | Prisma.orders$order_paymentsArgs<ExtArgs>
   order_status_history?: boolean | Prisma.orders$order_status_historyArgs<ExtArgs>
@@ -1966,6 +2148,7 @@ export type ordersSelectScalar = {
 export type ordersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "order_number" | "customer_id" | "customer_name" | "phone" | "email" | "status" | "payment_status" | "items_total" | "gross_items_total" | "discount_total" | "promo_code" | "loyalty_spent" | "referral_code" | "delivery_cost" | "total_amount" | "comment" | "cancellation_reason" | "is_archived" | "archived_at" | "ordered_at" | "updated_at", ExtArgs["result"]["orders"]>
 export type ordersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order_deliveries?: boolean | Prisma.orders$order_deliveriesArgs<ExtArgs>
+  order_packing_plans?: boolean | Prisma.orders$order_packing_plansArgs<ExtArgs>
   order_items?: boolean | Prisma.orders$order_itemsArgs<ExtArgs>
   order_payments?: boolean | Prisma.orders$order_paymentsArgs<ExtArgs>
   order_status_history?: boolean | Prisma.orders$order_status_historyArgs<ExtArgs>
@@ -1984,6 +2167,7 @@ export type $ordersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "orders"
   objects: {
     order_deliveries: Prisma.$order_deliveriesPayload<ExtArgs> | null
+    order_packing_plans: Prisma.$order_packing_plansPayload<ExtArgs> | null
     order_items: Prisma.$order_itemsPayload<ExtArgs>[]
     order_payments: Prisma.$order_paymentsPayload<ExtArgs>[]
     order_status_history: Prisma.$order_status_historyPayload<ExtArgs>[]
@@ -2408,6 +2592,7 @@ readonly fields: ordersFieldRefs;
 export interface Prisma__ordersClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   order_deliveries<T extends Prisma.orders$order_deliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_deliveriesArgs<ExtArgs>>): Prisma.Prisma__order_deliveriesClient<runtime.Types.Result.GetResult<Prisma.$order_deliveriesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  order_packing_plans<T extends Prisma.orders$order_packing_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_packing_plansArgs<ExtArgs>>): Prisma.Prisma__order_packing_plansClient<runtime.Types.Result.GetResult<Prisma.$order_packing_plansPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   order_items<T extends Prisma.orders$order_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   order_payments<T extends Prisma.orders$order_paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_paymentsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   order_status_history<T extends Prisma.orders$order_status_historyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.orders$order_status_historyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$order_status_historyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2881,6 +3066,25 @@ export type orders$order_deliveriesArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.order_deliveriesInclude<ExtArgs> | null
   where?: Prisma.order_deliveriesWhereInput
+}
+
+/**
+ * orders.order_packing_plans
+ */
+export type orders$order_packing_plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the order_packing_plans
+   */
+  select?: Prisma.order_packing_plansSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the order_packing_plans
+   */
+  omit?: Prisma.order_packing_plansOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.order_packing_plansInclude<ExtArgs> | null
+  where?: Prisma.order_packing_plansWhereInput
 }
 
 /**

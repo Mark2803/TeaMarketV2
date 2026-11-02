@@ -96,7 +96,9 @@ export const ModelName = {
   analytics_events: 'analytics_events',
   analytics_order_attributions: 'analytics_order_attributions',
   admin_users: 'admin_users',
-  admin_password_reset_tokens: 'admin_password_reset_tokens'
+  admin_password_reset_tokens: 'admin_password_reset_tokens',
+  shipping_packages: 'shipping_packages',
+  order_packing_plans: 'order_packing_plans'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -382,6 +384,10 @@ export const Product_variantsScalarFieldEnum = {
   product_id: 'product_id',
   sku: 'sku',
   weight_g: 'weight_g',
+  package_length_cm: 'package_length_cm',
+  package_width_cm: 'package_width_cm',
+  package_height_cm: 'package_height_cm',
+  shipping_weight_g: 'shipping_weight_g',
   price: 'price',
   old_price: 'old_price',
   stock_quantity: 'stock_quantity',
@@ -836,6 +842,34 @@ export const Admin_password_reset_tokensScalarFieldEnum = {
 } as const
 
 export type Admin_password_reset_tokensScalarFieldEnum = (typeof Admin_password_reset_tokensScalarFieldEnum)[keyof typeof Admin_password_reset_tokensScalarFieldEnum]
+
+
+export const Shipping_packagesScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  inner_length_cm: 'inner_length_cm',
+  inner_width_cm: 'inner_width_cm',
+  inner_height_cm: 'inner_height_cm',
+  outer_length_cm: 'outer_length_cm',
+  outer_width_cm: 'outer_width_cm',
+  outer_height_cm: 'outer_height_cm',
+  tare_weight_g: 'tare_weight_g',
+  is_active: 'is_active',
+  sort_order: 'sort_order',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Shipping_packagesScalarFieldEnum = (typeof Shipping_packagesScalarFieldEnum)[keyof typeof Shipping_packagesScalarFieldEnum]
+
+
+export const Order_packing_plansScalarFieldEnum = {
+  order_id: 'order_id',
+  plan_json: 'plan_json',
+  updated_at: 'updated_at'
+} as const
+
+export type Order_packing_plansScalarFieldEnum = (typeof Order_packing_plansScalarFieldEnum)[keyof typeof Order_packing_plansScalarFieldEnum]
 
 
 export const SortOrder = {

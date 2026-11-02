@@ -7,6 +7,10 @@ export type AdminProductVariant = {
   id: string;
   sku: string;
   weight_g: number | string;
+  package_length_cm?: number | string | null;
+  package_width_cm?: number | string | null;
+  package_height_cm?: number | string | null;
+  shipping_weight_g?: number | string | null;
   price: number | string;
   old_price: number | string | null;
   stock_quantity: number;
@@ -532,3 +536,9 @@ export function deleteAdminNotificationCampaign(id:string){return apiRequest(`/m
 // ===== Admin: analytics =====
 export type AdminAnalyticsData={period:{from:string;to:string};overview:{visitors:number;orders:number;revenue:number;averageCheck:number;orderConversion:number;buyoutRate:number};funnel:Array<{key:string;label:string;value:number}>;dynamics:Array<{date:string;visitors:number;orders:number;revenue:number}>;sources:Array<{source:string;visitors:number;cartSessions:number;orders:number;conversion:number;revenue:number}>;products:Array<{id:string;name:string;views:number;cartSessions:number;sold:number;conversion:number;revenue:number}>;customers:{newCustomers:number;repeatCustomers:number;repeatShare:number};marketing:{promoOrders:number;loyaltyOrders:number;discountTotal:number;marketingRevenue:number;discountEntries:number}};
 export function getAdminAnalytics(from:string,to:string){return apiRequest<{data:AdminAnalyticsData}>("/moderator/analytics",{query:{from,to}})}
+
+// Estimated packing; saved snapshots are not carrier-approved shipments.
+export type PackingParcel = {package_id:string;code:string;dimensions_cm:number[];weight_g:number;placements:Array<{sku:string;position_cm:number[];orientation:number[];base_direction:number;weight_g:number}>};
+export type PackingPlan = {status:string;missing_skus:string[];parcels:PackingParcel[];total_weight_g:number|null;estimated:boolean;unpacked_skus?:string[];geometry_model?:string};
+export function getOrderPacking(orderNumber:string){return apiRequest<{data:PackingPlan;saved:{plan_json:PackingPlan;updated_at:string}|null}>(`/moderator/order-packing/${encodeURIComponent(orderNumber)}`);}
+export function saveOrderPacking(orderNumber:string,packageId?:string){return apiRequest<{data:PackingPlan}>(`/moderator/order-packing/${encodeURIComponent(orderNumber)}`,{method:"POST",body:JSON.stringify(packageId?{packageId}:{})});}
