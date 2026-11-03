@@ -69,6 +69,7 @@ export const createOrderSchema =
         .optional(),
 
     destinationStationId: z.string().regex(/^[a-zA-Z0-9-]{20,80}$/).optional(),
+    deliveryMode: z.enum(["pickup", "door"]).optional(),
 
     deliveryMethodId:
       z.string()

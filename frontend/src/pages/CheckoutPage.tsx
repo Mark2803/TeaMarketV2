@@ -65,7 +65,8 @@ import {
   getDeliveryQuote,
   getDeliveryMethods,
   getPricingQuote,
-  getYandexPickupQuote
+  getYandexPickupQuote,
+  getYandexDoorQuote
 } from "../shared/api/checkout";
 
 import type {
@@ -151,6 +152,7 @@ function CheckoutForm() {
   const [testPickupSelected, setTestPickupSelected] = useState("");
   const [pickupModalOpen, setPickupModalOpen] = useState(false);
   const [pickupConfirmed, setPickupConfirmed] = useState<PickupPoint | null>(null);
+  const [yandexMode, setYandexMode] = useState<"pickup"|"door">("pickup");
   const [yandexQuote, setYandexQuote] = useState<{price:number;deliveryDays:number|null}|null>(null);
   const [yandexError, setYandexError] = useState<string|null>(null);
   const [yandexLoading, setYandexLoading] = useState(false);
@@ -252,8 +254,8 @@ function CheckoutForm() {
     [deliveryState.locations]
   );
 
-  const pickupMode = Boolean(deliveryMethods.find(m=>m.id===selectedDeliveryMethodId && /яндекс|yandex/i.test(m.name)));
-  const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0;
+  const pickupMode = yandexMode === "pickup" && Boolean(deliveryMethods.find(m=>m.id===selectedDeliveryMethodId && /яндекс|yandex/i.test(m.name)));
+  const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0 || yandexMode === "door";
   const selectedLocation = pickupMode && pickupConfirmed ? {
     id: "yandex-pickup", type:"courier" as const, label:pickupConfirmed.name,
     region:"", city:"Москва", street:pickupConfirmed.address, house:"ПВЗ", apartment:"",
@@ -281,8 +283,10 @@ function CheckoutForm() {
     ) ?? null;
 
   const isYandex = Boolean(selectedDeliveryMethod && /яндекс|yandex/i.test(selectedDeliveryMethod.name));
-  const deliveryDestination = isYandex ? pickupConfirmed?.id ?? null : null;
-  const yandexReady = !isYandex || (Boolean(deliveryDestination) && Boolean(yandexQuote) && !yandexError && !yandexLoading);
+  const deliveryDestination = isYandex && yandexMode === "pickup" ? pickupConfirmed?.id ?? null : null;
+  const doorAddress = [guestAddress.city,guestAddress.street,guestAddress.house].map(v => v.trim()).filter(Boolean).join(", ").trim();
+  const doorAddressComplete = Boolean(guestAddress.city.trim() && guestAddress.street.trim() && guestAddress.house.trim());
+  const yandexReady = !isYandex || ((yandexMode === "door" ? doorAddressComplete : Boolean(deliveryDestination)) && Boolean(yandexQuote) && !yandexError && !yandexLoading);
   const deliveryCost = deliveryQuote
     ? Number(deliveryQuote.cost)
     : 0;
@@ -334,14 +338,16 @@ function CheckoutForm() {
   useEffect(() => {
     let cancelled=false;
     setYandexQuote(null);setYandexError(null);
-    if (!isYandex || !deliveryDestination) {setYandexLoading(false);return;}
+    if (!isYandex || (yandexMode === "pickup" ? !deliveryDestination : !doorAddressComplete)) {setYandexLoading(false);return;}
     setYandexLoading(true);
-    void getYandexPickupQuote(deliveryDestination)
-      .then(r=>{if(!cancelled)setYandexQuote(r.data)})
-      .catch(e=>{if(!cancelled)setYandexError(e instanceof Error?e.message:"Доставка в этот ПВЗ недоступна")})
-      .finally(()=>{if(!cancelled)setYandexLoading(false)});
-    return ()=>{cancelled=true};
-  },[isYandex,deliveryDestination,totalAmount]);
+    const timer = window.setTimeout(() => {
+      void (yandexMode === "door" ? getYandexDoorQuote(doorAddress) : getYandexPickupQuote(deliveryDestination!))
+        .then(r=>{if(!cancelled)setYandexQuote(r.data)})
+        .catch(e=>{if(!cancelled)setYandexError(e instanceof Error?e.message:(yandexMode === "door" ? "Курьерская доставка недоступна" : "Доставка в этот ПВЗ недоступна"))})
+        .finally(()=>{if(!cancelled)setYandexLoading(false)});
+    }, yandexMode === "door" ? 700 : 100);
+    return ()=>{cancelled=true;window.clearTimeout(timer)};
+  },[isYandex,deliveryDestination,yandexMode,doorAddress,doorAddressComplete,totalAmount]);
 
   useEffect(() => {
     let cancelled = false;
@@ -452,12 +458,12 @@ function CheckoutForm() {
     if (!selectedDeliveryMethodId || (isYandex && !yandexQuote)) { setPricingQuote(null); return; }
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,destinationStationId:isYandex?deliveryDestination??undefined:undefined,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
+      void getPricingQuote({deliveryMethodId:selectedDeliveryMethodId,destinationStationId:isYandex && yandexMode === "pickup" ? deliveryDestination??undefined:undefined,deliveryMode:isYandex?yandexMode:undefined,destinationAddress:isYandex && yandexMode === "door"?doorAddress:undefined,promoCode:promoCode.trim()||undefined,referralCode:referralCode.trim()||undefined})
         .then(r=>{if(!cancelled)setPricingQuote(r.data)})
         .catch(()=>{if(!cancelled)setPricingQuote(null)});
     }, 250);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount, isYandex, deliveryDestination, yandexQuote?.price]);
+  }, [selectedDeliveryMethodId, promoCode, referralCode, totalAmount, isYandex, deliveryDestination, yandexMode, doorAddress, yandexQuote?.price]);
 
   if (orderResult) {
     return (
@@ -600,7 +606,8 @@ function CheckoutForm() {
       selectedPaymentMethodId
     });
 
-    if(isYandex && pickupConfirmed) delete errors.location;
+    if(isYandex && yandexMode === "pickup" && pickupConfirmed) delete errors.location;
+    if(isYandex && yandexMode === "door" && (!guestAddress.city.trim() || !guestAddress.street.trim() || !guestAddress.house.trim())) errors.location="Укажите город, улицу и дом";
     if(isYandex && (!yandexReady || !pricingQuote)) errors.delivery="Дождитесь подтверждения тарифа и итоговой суммы";
     setValidationErrors(errors);
 
@@ -644,7 +651,8 @@ function CheckoutForm() {
 
     const errors = validateCheckout({ user: contact, selectedLocation,
       selectedDeliveryMethodId, selectedPaymentMethodId });
-    if(isYandex && pickupConfirmed) delete errors.location;
+    if(isYandex && yandexMode === "pickup" && pickupConfirmed) delete errors.location;
+    if(isYandex && yandexMode === "door" && (!guestAddress.city.trim() || !guestAddress.street.trim() || !guestAddress.house.trim())) errors.location="Укажите город, улицу и дом";
     if(isYandex && (!yandexReady || !pricingQuote)) errors.delivery="Нет подтверждённой стоимости доставки";
     if (hasCheckoutErrors(errors)) {
       setValidationErrors(errors);
@@ -670,14 +678,15 @@ function CheckoutForm() {
             || undefined,
           deliveryMethodId:
             selectedDeliveryMethod.id,
-          destinationStationId: isYandex ? pickupConfirmed?.id : undefined,
+          destinationStationId: isYandex && yandexMode === "pickup" ? pickupConfirmed?.id : undefined,
+          deliveryMode: isYandex ? yandexMode : undefined,
           delivery: {
             recipientName:
               selectedLocation.recipient.name,
             phone:
               selectedLocation.recipient.phone,
             fullAddress:
-              isYandex && pickupConfirmed ? pickupConfirmed.address : formatAddress(selectedLocation),
+              isYandex && yandexMode === "pickup" && pickupConfirmed ? pickupConfirmed.address : isYandex && yandexMode === "door" ? doorAddress : formatAddress(selectedLocation),
             comment:
               selectedLocation.comment
               || undefined
@@ -949,7 +958,8 @@ function CheckoutForm() {
             )}
           </section>
 
-          {!isYandex && <section
+          {!isYandex && (
+          <div
             id="checkout-location"
             className={
               validationErrors.location
@@ -958,12 +968,12 @@ function CheckoutForm() {
             }
           >
             <div className="checkout-section__heading">
-              <span className="checkout-section__step">2</span>
+              
               <span className="checkout-section__icon">
                 <MapPin size={21} aria-hidden="true" />
               </span>
               <div>
-                <h2>Адрес доставки</h2>
+                <h3>Адрес доставки</h3>
                 <p>{useManualAddress ? "Укажите адрес получения заказа" : "Сохранённые адреса"}</p>
               </div>
             </div>
@@ -1039,7 +1049,8 @@ function CheckoutForm() {
                 {validationErrors.location}
               </p>
             )}
-          </section>}
+          </div>
+          )}
 
           <section
             id="checkout-delivery"
@@ -1050,7 +1061,7 @@ function CheckoutForm() {
             }
           >
             <div className="checkout-section__heading">
-              <span className="checkout-section__step">3</span>
+              <span className="checkout-section__step">2</span>
               <span className="checkout-section__icon">
                 <Truck size={21} aria-hidden="true" />
               </span>
@@ -1119,10 +1130,104 @@ function CheckoutForm() {
               </div>
             )}
 
-            <div className="checkout-delivery-option" aria-disabled="true" style={{opacity:0.65,marginTop:12,marginBottom:16}}>
-              <span className="checkout-delivery-option__content"><strong>Яндекс Доставка — до двери</strong><small>Появится после подключения расчёта курьерского тарифа по адресу получателя</small></span>
+            {isYandex && <div className="checkout-delivery-options" style={{marginTop:12,marginBottom:16}}>
+              <button type="button" className={"checkout-delivery-option"+(yandexMode === "pickup" ? " checkout-delivery-option--selected" : "")} onClick={()=>{setYandexMode("pickup");setPricingQuote(null)}}>В пункт выдачи</button>
+              <button type="button" className={"checkout-delivery-option"+(yandexMode === "door" ? " checkout-delivery-option--selected" : "")} onClick={()=>{setYandexMode("door");setPricingQuote(null)}}>Курьером до двери</button>
+            </div>}
+            {isYandex && yandexMode === "door" && (
+          <div
+            id="checkout-location"
+            className={
+              validationErrors.location
+                ? "checkout-section checkout-section--error"
+                : "checkout-section"
+            }
+          >
+            <div className="checkout-section__heading">
+              
+              <span className="checkout-section__icon">
+                <MapPin size={21} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>Адрес доставки</h3>
+                <p>{useManualAddress ? "Укажите адрес получения заказа" : "Сохранённые адреса"}</p>
+              </div>
             </div>
-            <div className="checkout-pickup-method">
+
+            {useManualAddress ? (
+              <div className="checkout-form-fields">
+                {([
+                  ["city", "Город"], ["street", "Улица"],
+                  ["house", "Дом / корпус"], ["apartment", "Квартира (необязательно)"]
+                ] as const).map(([field, label]) => (
+                  <label key={field}>
+                    <span>{label}</span>
+                    <input value={guestAddress[field]} maxLength={255}
+                      required={field !== "apartment"}
+                      onChange={(event) => {
+                        setGuestAddress((current) => ({ ...current, [field]: event.target.value }));
+                        clearValidationError("location");
+                      }} />
+                  </label>
+                ))}
+              </div>
+            ) : courierAddresses.length > 0 ? (
+              <div className="checkout-locations">
+                {courierAddresses.map(
+                  (location) => {
+                    const selected =
+                      location.id === selectedLocationId;
+
+                    return (
+                      <button
+                        key={location.id}
+                        type="button"
+                        className={
+                          selected
+                            ? "checkout-location checkout-location--selected"
+                            : "checkout-location"
+                        }
+                        onClick={() => {
+                          setSelectedLocationId(location.id);
+                          clearValidationError("location");
+                        }}
+                      >
+                        <span className="checkout-location__marker">
+                          {selected ? (
+                            <Check size={17} aria-hidden="true" />
+                          ) : (
+                            <MapPin size={17} aria-hidden="true" />
+                          )}
+                        </span>
+
+                        <span className="checkout-location__content">
+                          <strong>{location.label}</strong>
+                          <span>{formatAddress(location)}</span>
+                          <small>
+                            {location.recipient.name}, {location.recipient.phone}
+                          </small>
+                        </span>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            ) : null}
+            {!isGuest && courierAddresses.length > 0 && (
+              <button type="button" onClick={() => {
+                setManualAddress((current) => !current);
+                clearValidationError("location");
+              }}>{manualAddress ? "Выбрать сохранённый адрес" : "Указать другой адрес"}</button>
+            )}
+
+            {validationErrors.location && (
+              <p className="checkout-field-error">
+                {validationErrors.location}
+              </p>
+            )}
+          </div>
+            )}
+            {isYandex && yandexMode === "pickup" && <div className="checkout-pickup-method">
               <div className="checkout-pickup-method__head">
                 <MapPin size={21} aria-hidden="true" />
                 <div>
@@ -1144,7 +1249,11 @@ function CheckoutForm() {
               {isYandex && yandexError && <p role="alert" style={{color:"#b43c34"}}>{yandexError}. Выберите другой ПВЗ: пока Яндекс не подтвердит тариф, продолжить оформление нельзя.</p>}
               {isYandex && yandexQuote && <strong>Доставка: {formatPrice(yandexQuote.price)} · {yandexQuote.deliveryDays ?? "?"} дн.</strong>}
               <small className="checkout-pickup-method__note">Тестовый контур Яндекса. Стоимость подтверждается повторно при создании заказа.</small>
-            </div>
+            </div>}
+            {isYandex && yandexMode === "pickup" && yandexLoading && <small>Рассчитываем тариф Яндекса…</small>}
+            {isYandex && yandexMode === "door" && yandexLoading && <small>Рассчитываем доставку до двери…</small>}
+            {isYandex && yandexMode === "door" && yandexError && <p role="alert" className="checkout-field-error">{yandexError}</p>}
+            {isYandex && yandexMode === "door" && yandexQuote && <strong>Доставка до двери: {formatPrice(yandexQuote.price)}</strong>}
             {validationErrors.delivery && (
               <p className="checkout-field-error">
                 {validationErrors.delivery}

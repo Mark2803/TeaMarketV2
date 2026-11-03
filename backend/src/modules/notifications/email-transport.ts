@@ -70,7 +70,7 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
   const user = required("SMTP_USER");
   const password = required("SMTP_PASSWORD");
   const from = required("MAIL_FROM");
-  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Мастер";
+  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Маркет";
   const recipient = to.trim();
   if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(recipient)) throw new Error("Некорректный email получателя");
   if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from)) throw new Error("Некорректный MAIL_FROM");
@@ -98,7 +98,7 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
     await cmd(secure, `RCPT TO:<${recipient}>`, [250, 251]);
     await cmd(secure, "DATA", [354]);
 
-    const html = `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto"><h2>Чайный Мастер</h2><div style="font-size:16px;line-height:1.6;white-space:pre-line">${escapeHtml(body)}</div></div>`;
+    const html = `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto"><h2>Чайный Маркет</h2><div style="font-size:16px;line-height:1.6;white-space:pre-line">${escapeHtml(body)}</div></div>`;
     const domain = from.split("@")[1];
     const messageId = `<${Date.now()}.${randomBytes(12).toString("hex")}@${domain}>`;
     const message = [

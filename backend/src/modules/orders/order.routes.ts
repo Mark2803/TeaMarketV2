@@ -15,7 +15,10 @@ import {
 
 import { getAccessibleOrder, payAccessibleOrder } from "./order-access.controller.js";
 
+import { lookupTracking } from "./tracking.controller.js";
+
 const router = Router();
+router.get("/tracking", lookupTracking);
 router.get("/access/:orderId", authMiddleware, getAccessibleOrder);
 router.post("/access/:orderId/pay", authMiddleware, payAccessibleOrder);
 

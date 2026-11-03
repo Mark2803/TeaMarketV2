@@ -1,3 +1,5 @@
+import FinanceChart from "../../features/admin/FinanceChart";
+import { downloadFinanceReport } from "../../features/admin/financeReport";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest } from "../../shared/api/client";
@@ -112,8 +114,17 @@ export default function AdminDashboardPage() {
 
   const salesToday = data.todayAnalytics?.overview.revenue;
   const averageToday = data.todayAnalytics?.overview.averageCheck;
-  const week = data.weekAnalytics?.dynamics ?? [];
-  const max = Math.max(1, ...week.map((item) => item.revenue));
+  const [period, setPeriod] = useState<7 | 14 | 30>(7);
+  const [finance, setFinance] = useState<AdminAnalyticsData | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(false);
+  const [financeError, setFinanceError] = useState("");
+  useEffect(() => {
+    let active = true; const to = new Date(), from = new Date(); from.setDate(to.getDate() - period + 1);
+    setFinanceLoading(true); setFinanceError("");
+    getAdminAnalytics(iso(from), iso(to)).then(r => { if (active) setFinance(r.data); }).catch(() => { if (active) { setFinance(null); setFinanceError("Не удалось загрузить финансовые данные."); } }).finally(() => { if (active) setFinanceLoading(false); });
+    return () => { active = false; };
+  }, [period]);
+  const week = finance?.dynamics ?? [];
   const enabled = cfg.filter((item) => item.enabled);
 
   const render = (id: DashboardWidgetId) => {
@@ -163,20 +174,17 @@ export default function AdminDashboardPage() {
       case "sales_week":
         return (
           <div className="admin-section-card admin-dashboard-wide">
-            <div className="admin-dashboard-section-title">
-              <h2>Продажи за 7 дней</h2>
-              <Link to="/admin/analytics">Аналитика</Link>
+            <div className="admin-dashboard-section-title finance-header">
+              <div><h2>Выручка по дням</h2><p className="finance-subtitle">{finance ? `${finance.period.from} — ${finance.period.to}` : "Выберите период"} · Заказы без отменённых</p></div>
+              <div className="finance-actions">
+                <div className="finance-period" aria-label="Период отчёта">{([7, 14, 30] as const).map(p => <button key={p} type="button" className={period === p ? "is-active" : ""} onClick={() => setPeriod(p)}>{p} дней</button>)}</div>
+                <button type="button" className="finance-download" disabled={!finance || financeLoading} onClick={() => finance && downloadFinanceReport(finance)}>Скачать Excel</button>
+                <Link to="/admin/analytics">Подробнее</Link>
+              </div>
             </div>
-            <div className="admin-mini-chart">
-              {week.map((item) => (
-                <div className="admin-mini-chart-col" key={item.date}>
-                  <span>{item.revenue ? money(item.revenue) : "0"}</span>
-                  <i style={{ height: `${Math.max(4, (item.revenue / max) * 100)}%` }} />
-                  <small>{item.date.slice(5)}</small>
-                </div>
-              ))}
-              {!week.length && <p>За период данных пока нет.</p>}
-            </div>
+            <div className="finance-summary"><span>Выручка за период <strong>{finance ? money(finance.overview.revenue) : "—"}</strong></span><span>Заказы <strong>{finance?.overview.orders ?? "—"}</strong></span><span>Средний чек <strong>{finance ? money(finance.overview.averageCheck) : "—"}</strong></span></div>
+            {financeError && <p role="alert" className="admin-analytics-warning">{financeError}</p>}
+            {financeLoading ? <p>Загрузка отчёта…</p> : <FinanceChart data={week} />}
           </div>
         );
       case "recent_orders":

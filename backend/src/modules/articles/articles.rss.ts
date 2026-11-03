@@ -33,7 +33,7 @@ ${enclosure}
   }).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-<channel><title>Чайный Мастер — статьи о чае</title><link>${SITE_URL}/articles</link><language>ru</language><description>Статьи о китайском, тайваньском и вьетнамском чае</description>
+<channel><title>Чайный Маркет — статьи о чае</title><link>${SITE_URL}/articles</link><language>ru</language><description>Статьи о китайском, тайваньском и вьетнамском чае</description>
 ${body}
 </channel></rss>`;
 }

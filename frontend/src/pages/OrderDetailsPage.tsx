@@ -59,6 +59,9 @@ Record<string, string> = {
   pending: "Ожидает обработки",
   preparing: "Готовится к отправке",
   shipped: "Передана в доставку",
+  handed_over: "Передана перевозчику",
+  in_transit: "В пути",
+  returned: "Возвращена",
   delivered: "Доставлена",
   cancelled: "Отменена"
 };

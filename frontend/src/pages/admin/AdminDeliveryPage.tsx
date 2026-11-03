@@ -6,7 +6,6 @@ import "./admin-delivery.css";
 import YandexPickupMap from "../../shared/widgets/YandexPickupMap";
 
 type YandexPoint = { id:string; name:string; address:string; city:string; availableForDropoff:boolean; operator?:string; latitude?:number|null; longitude?:number|null };
-type YandexQuote = { ok:boolean; message?:string; code?:string; upstreamStatus?:number|null; price?:string; deliveryDays?:number; parcelCount?:number; totalWeightG?:number };
 type Package = {
   id: string; code: string; inner_length_cm: string | number; inner_width_cm: string | number;
   inner_height_cm: string | number; tare_weight_g: string | number | null;
@@ -52,18 +51,36 @@ export default function AdminDeliveryPage() {
     catch(e) {setShipmentsError(e instanceof Error ? e.message : "Ошибка создания заявки");await loadShipments();}
     finally {setCreatingShipment(null);}
   };
-  const [items, setItems] = useState<Package[]>([]);
-  const [yandexCheck, setYandexCheck] = useState<{connected:boolean;offersAvailable?:boolean;upstreamStatus:number|null;code?:string|null;message:string}|null>(null);
-  const [yandexBusy, setYandexBusy] = useState(false);
-  const [yandexError, setYandexError] = useState("");
-  const checkYandex = async () => {
-    setYandexBusy(true); setYandexError(""); setYandexCheck(null);
+  type ReturnRow = { orderNumber: string; trackingNumber: string; requestId: string; reason: string | null; status: string; startedAt: string | null; completedAt: string | null; cost: number | null; costCurrency: string | null };
+  const [returns, setReturns] = useState<ReturnRow[]>([]);
+  const [returnsLoading, setReturnsLoading] = useState(false);
+  const [returnsError, setReturnsError] = useState("");
+  const [returnsPartial, setReturnsPartial] = useState(false);
+  const [returnQuery, setReturnQuery] = useState("");
+  const [returnStatus, setReturnStatus] = useState("active");
+  const [returnPeriod, setReturnPeriod] = useState("all");
+  const loadReturns = useCallback(async () => {
+    setReturnsLoading(true); setReturnsError("");
     try {
-      const result = await apiRequest<{data:{connected:boolean;offersAvailable?:boolean;upstreamStatus:number|null;code?:string|null;message:string}}>("/moderator/yandex-delivery-test/check", {method:"POST"});
-      setYandexCheck(result.data);
-    } catch(e) { setYandexError(e instanceof Error ? e.message : "Ошибка проверки API"); }
-    finally { setYandexBusy(false); }
-  };
+      const result = await apiRequest<{data:ReturnRow[];meta?:{partial:boolean}}>("/moderator/yandex-returns");
+      setReturns(result.data); setReturnsPartial(Boolean(result.meta?.partial));
+    } catch (e) { setReturnsError(e instanceof Error ? e.message : "Не удалось получить возвраты"); }
+    finally { setReturnsLoading(false); }
+  }, []);
+  const formatReturnDate = (v:string|null) => v ? new Date(v).toLocaleDateString("ru-RU") : "—";
+  const visibleReturns = returns.filter(r => {
+    const q = returnQuery.trim().toLowerCase();
+    if (q && !`${r.orderNumber} ${r.trackingNumber}`.toLowerCase().includes(q)) return false;
+    if (returnStatus === "active" && r.completedAt) return false;
+    if (returnStatus === "completed" && !r.completedAt) return false;
+    if (returnPeriod !== "all") {
+      const days = Number(returnPeriod);
+      if (!r.startedAt || new Date(r.startedAt).getTime() < Date.now() - days * 86400000) return false;
+    }
+    return true;
+  });
+  const [items, setItems] = useState<Package[]>([]);
+  // Диагностические проверки API отключены в рабочем интерфейсе.
   const [pointKind, setPointKind] = useState<"dropoff"|"destination">("dropoff");
   const [points, setPoints] = useState<YandexPoint[]>([]);
   const [pointsLoading, setPointsLoading] = useState(false);
@@ -98,13 +115,6 @@ export default function AdminDeliveryPage() {
     } catch (e) { setPrimaryError(e instanceof Error ? e.message : "Не удалось сбросить ПВЗ"); }
     finally { setPrimaryBusy(false); }
   };
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const [orderNumber, setOrderNumber] = useState("");
-  const [tariff, setTariff] = useState<"self_pickup"|"time_interval">("self_pickup");
-  const [doorAddress, setDoorAddress] = useState("Москва, Ленинградский проспект, 37к9");
-  const [quoteBusy, setQuoteBusy] = useState(false);
-  const [quote, setQuote] = useState<YandexQuote|null>(null);
-  const [quoteError, setQuoteError] = useState("");
   const loadPoints = async (kind: "dropoff"|"destination") => {
     setPointKind(kind); setPointsLoading(true); setPointsError(""); setPoints([]); setPointsTotal(null); setSelectedPoint("");
     try {
@@ -113,16 +123,6 @@ export default function AdminDeliveryPage() {
       setPoints(result.data.points || []); setPointsTotal(result.data.total ?? 0);
     } catch(e) { setPointsError(e instanceof Error ? e.message : "Ошибка получения пунктов"); }
     finally { setPointsLoading(false); }
-  };
-  const calculateQuote = async () => {
-    setQuoteBusy(true); setQuoteError(""); setQuote(null);
-    try {
-      const result = await apiRequest<{data:YandexQuote}>("/moderator/yandex-delivery-test/quote", {method:"POST", body:JSON.stringify({
-        orderNumber:orderNumber.trim(), tariff, destination:tariff === "self_pickup" ? selectedPoint : doorAddress.trim()
-      })});
-      setQuote(result.data);
-    } catch(e) { setQuoteError(e instanceof Error ? e.message : "Ошибка расчёта"); }
-    finally { setQuoteBusy(false); }
   };
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -139,6 +139,7 @@ export default function AdminDeliveryPage() {
   }, []);
   useEffect(() => { if (section === "packaging") void load(); }, [section, load]);
   useEffect(() => {if (section === "shipments") void loadShipments();},[section,loadShipments]);
+  useEffect(() => { if (section === "returns") void loadReturns(); }, [section,loadReturns]);
   useEffect(() => { if (section === "dropoff-points") void loadPrimary(); }, [section, loadPrimary]);
   useEffect(() => { if (section === "dropoff-points" && pointsTotal === null && !pointsLoading) void loadPoints("dropoff");
     // Fetch on first opening; explicit refresh remains available.
@@ -192,7 +193,21 @@ export default function AdminDeliveryPage() {
       <div className="admin-editor-section-heading"><div><h2>{current.label}</h2>{section === "packaging" && <p>Габариты коробок в сантиметрах. Вес коробки обязателен. Без указанного веса упаковку нельзя активировать.</p>}</div>
         {section === "packaging" && !showForm && <button type="button" className="admin-primary-button" onClick={() => {setEditing(null); setForm(blank); setShowForm(true); setError("");}}>Добавить упаковку</button>}
       </div>
-      {section === "shipments" ? <div>
+      {section === "returns" ? <div>
+        <div className="admin-delivery-actions admin-returns-filters">
+          <input aria-label="Поиск возврата" placeholder="Номер заказа или трек-номер" value={returnQuery} onChange={e => setReturnQuery(e.target.value)} />
+          <select aria-label="Статус возврата" value={returnStatus} onChange={e => setReturnStatus(e.target.value)}><option value="active">Незавершённые</option><option value="completed">Завершённые</option><option value="all">Все возвраты</option></select>
+          <select aria-label="Период возврата" value={returnPeriod} onChange={e => setReturnPeriod(e.target.value)}><option value="all">Всё время</option><option value="7">7 дней</option><option value="30">30 дней</option><option value="90">90 дней</option></select>
+          <button type="button" className="admin-secondary-button" disabled={returnsLoading} onClick={() => void loadReturns()}>{returnsLoading ? "Обновляем…" : "Обновить"}</button>
+        </div>
+        {returnsError && <p className="admin-editor-message is-error" role="alert">{returnsError}</p>}
+        {returnsPartial && <p className="admin-editor-message is-error" role="status">Не удалось получить сведения по части отправлений. Список может быть неполным.</p>}
+        <div className="admin-delivery-table-wrap"><table className="admin-delivery-table"><thead><tr><th>Заказ</th><th>Трек-номер</th><th>Причина</th><th>Статус Яндекса</th><th>Начало</th><th>Завершение</th><th>Расходы</th></tr></thead><tbody>
+          {visibleReturns.map(r => <tr key={r.requestId}><td><NavLink to={`/admin/orders/${encodeURIComponent(r.orderNumber)}`}>{r.orderNumber}</NavLink></td><td>{r.trackingNumber}</td><td>{r.reason ?? "Не указана"}</td><td>{r.status}</td><td>{formatReturnDate(r.startedAt)}</td><td>{formatReturnDate(r.completedAt)}</td><td>{r.cost === null ? "Нет данных" : `${r.cost.toLocaleString("ru-RU")} ${r.costCurrency ?? ""}`}</td></tr>)}
+          {!visibleReturns.length && <tr><td colSpan={7}>{returnsLoading ? "Загружаем возвраты…" : "Возвраты по выбранным условиям не найдены"}</td></tr>}
+        </tbody></table></div>
+        <p className="admin-returns-note">Сведения поступают из Яндекс Доставки. Отсутствующие причины, даты и расходы не подменяются расчётными значениями. Возврат денег через ЮKassa автоматически не выполняется.</p>
+      </div> : section === "shipments" ? <div>
         <div className="admin-delivery-actions"><button type="button" className="admin-secondary-button" disabled={shipmentsLoading} onClick={() => void loadShipments()}>{shipmentsLoading ? "Загрузка…" : "Обновить список"}</button></div>
         <p>После подтверждения оплаты система автоматически создаёт заявку в тестовом API Яндекса. При ошибке проверьте причину и повторите создание вручную. Не повторяйте заявки со статусом «Требует проверки».</p>
         {shipmentsError && <p className="admin-editor-message is-error" role="alert">{shipmentsError}</p>}
@@ -216,23 +231,7 @@ export default function AdminDeliveryPage() {
         {primaryError && <p className="admin-editor-message is-error" role="alert">{primaryError}</p>}
         {primaryNotice && <p className="admin-editor-message is-success" role="status">{primaryNotice}</p>}
         <p className="admin-pvz-note">Основной ПВЗ сохраняется в PostgreSQL. Отправления создаются вручную в разделе «Отправления» через тестовый API Яндекса.</p>
-        <details className="admin-pvz-diagnostics" open={showDiagnostics} onToggle={e => setShowDiagnostics(e.currentTarget.open)}><summary>Диагностика и пробный расчёт тарифа</summary><div className="admin-pvz-diagnostics-body">
-          <p>Тестовый сервер: b2b.taxi.tst.yandex.net. Для пробного расчёта используются габариты коробок; реальные отправления не создаются.</p>
-          <button type="button" className="admin-secondary-button" disabled={yandexBusy} onClick={() => void checkYandex()}>{yandexBusy ? "Проверяем…" : "Проверить тестовое API"}</button>
-          {yandexError && <p role="alert" className="admin-editor-message is-error">{yandexError}</p>}
-          {yandexCheck && <p role="status" className={yandexCheck.connected ? "admin-editor-message is-success" : "admin-editor-message is-error"}>{yandexCheck.message} · HTTP: {yandexCheck.upstreamStatus ?? "нет ответа"}</p>}
-          <div className="admin-delivery-actions"><button type="button" className="admin-secondary-button" disabled={pointsLoading} onClick={() => void loadPoints("destination")}>Загрузить тестовые ПВЗ назначения</button><button type="button" className="admin-secondary-button" disabled={pointsLoading} onClick={() => void loadPoints("dropoff")}>Вернуться к ПВЗ отгрузки</button></div>
-          {pointKind === "destination" && pointsTotal !== null && <YandexPickupMap points={points} selectedId={selectedPoint} onSelect={p => setSelectedPoint(p.id)} title="Тестовые ПВЗ назначения" />}
-          <h3>Пробный расчёт тарифа</h3><div className="admin-delivery-grid">
-            <label className="admin-field"><span>Номер заказа</span><input value={orderNumber} onChange={e => setOrderNumber(e.target.value)} placeholder="Номер существующего заказа" /></label>
-            <label className="admin-field"><span>Способ доставки</span><select value={tariff} onChange={e => setTariff(e.target.value as "self_pickup"|"time_interval")}><option value="self_pickup">До ПВЗ</option><option value="time_interval">Курьером покупателю</option></select></label>
-            {tariff === "time_interval" && <label className="admin-field"><span>Тестовый адрес получателя (Москва)</span><input value={doorAddress} onChange={e => setDoorAddress(e.target.value)} /></label>}
-          </div>
-          {tariff === "self_pickup" && <p>Для расчёта выберите ПВЗ назначения выше.</p>}
-          <button type="button" className="admin-primary-button" disabled={quoteBusy || !orderNumber.trim() || (tariff === "self_pickup" ? !selectedPoint || pointKind !== "destination" : !doorAddress.trim())} onClick={() => void calculateQuote()}>{quoteBusy ? "Рассчитываем…" : "Проверить тариф"}</button>
-          {quoteError && <p className="admin-editor-message is-error" role="alert">{quoteError}</p>}
-          {quote && <p role="status" className={quote.ok ? "admin-editor-message is-success" : "admin-editor-message is-error"}>{quote.ok ? `Тестовый тариф: ${quote.price ?? "нет цены"}. Срок: ${quote.deliveryDays ?? "не указан"} дн. Грузовых мест: ${quote.parcelCount}. Вес: ${quote.totalWeightG} г.` : `Ошибка расчёта: ${quote.message || "неизвестная"}`}</p>}
-        </div></details>
+        {/* Диагностика API и пробный расчёт тарифа отключены в рабочем интерфейсе. */}
       </div> : section !== "packaging" ? <p className="admin-delivery-empty">Раздел находится в разработке.</p> : <>
         {error && <p className="admin-editor-message is-error" role="alert">{error}</p>}
         {message && <p className="admin-editor-message is-success">{message}</p>}

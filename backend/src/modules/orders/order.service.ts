@@ -6,7 +6,7 @@ import {
 
 import { prisma } from "../../database/prisma.js";
 import { calculatePricing } from "../pricing/pricing.service.js";
-import { quoteYandexPickup,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
+import { quoteYandexPickup,quoteYandexDoor,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
 import { sendTemplateEmail } from "../notifications/notification.service.js";
 
 import type {
@@ -268,11 +268,12 @@ export async function createOrder(
         });
 
       const yandexMethod = /яндекс|yandex/i.test(deliveryMethod.name);
-      if (yandexMethod && !input.destinationStationId) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
+      if (yandexMethod && (input.deliveryMode === "door" ? !input.delivery.fullAddress : !input.destinationStationId)) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
       let carrierPrice = Number(deliveryMethod.base_cost);
       if (yandexMethod) {
         try {
-          const carrier = await quoteYandexPickup(freshItems.map(i=>({sku:i.product_variants.sku,quantity:i.quantity})), input.destinationStationId!);
+          const lines = freshItems.map(i=>({sku:i.product_variants.sku,quantity:i.quantity}));
+          const carrier = input.deliveryMode === "door" ? await quoteYandexDoor(lines,input.delivery.fullAddress) : await quoteYandexPickup(lines,input.destinationStationId!);
           carrierPrice = carrier.price;
         } catch (error) {
           if (error instanceof CarrierQuoteError) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
@@ -420,7 +421,7 @@ export async function createOrder(
                   input.delivery.phone,
 
                 full_address:
-                  yandexMethod ? `[ПВЗ Яндекс ${input.destinationStationId}] ${input.delivery.fullAddress}` : input.delivery
+                  yandexMethod && input.deliveryMode !== "door" ? `[ПВЗ Яндекс ${input.destinationStationId}] ${input.delivery.fullAddress}` : input.delivery
                     .fullAddress,
 
                 comment:

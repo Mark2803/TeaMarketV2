@@ -542,3 +542,17 @@ export type PackingParcel = {package_id:string;code:string;dimensions_cm:number[
 export type PackingPlan = {status:string;missing_skus:string[];parcels:PackingParcel[];total_weight_g:number|null;estimated:boolean;unpacked_skus?:string[];geometry_model?:string};
 export function getOrderPacking(orderNumber:string){return apiRequest<{data:PackingPlan;saved:{plan_json:PackingPlan;updated_at:string}|null}>(`/moderator/order-packing/${encodeURIComponent(orderNumber)}`);}
 export function saveOrderPacking(orderNumber:string,packageId?:string){return apiRequest<{data:PackingPlan}>(`/moderator/order-packing/${encodeURIComponent(orderNumber)}`,{method:"POST",body:JSON.stringify(packageId?{packageId}:{})});}
+
+export type AdminFinanceReport = {
+  period: { from: string; to: string };
+  definitions: Record<string, string>;
+  totals: { orders: number; cancelled: number; orderedAmount: number; deliveryCharged: number; discounts: number; paymentOperations: number; paidAmount: number };
+  orders: Array<{ number: string; date: string; status: string; paymentStatus: string; customer: string; grossItems: number | null; items: number | null; discount: number | null; loyalty: number | null; delivery: number | null; total: number | null; promoCode: string | null }>;
+  items: Array<{ orderNumber: string; product: string; sku: string; quantity: number; weightG: number | null; listPrice: number | null; unitPrice: number | null; discount: number | null; total: number | null }>;
+  payments: Array<{ orderNumber: string; operation: string | null; amount: number | null; status: string; createdAt: string; paidAt: string | null }>;
+  discounts: Array<{ orderNumber: string; source: string; code: string | null; name: string; amount: number | null; createdAt: string }>;
+  daily: Array<{ date: string; orders: number; amount: number; cancelled: number }>;
+};
+export function getAdminFinanceReport(from: string, to: string) {
+  return apiRequest<{ data: AdminFinanceReport }>("/moderator/analytics/finance-report", { query: { from, to } });
+}

@@ -2,6 +2,7 @@ import { apiRequest } from "./client";
 import { getAuthHeaders } from "../../features/auth/auth.storage";
 import { getSavedOrderAccess } from "../../features/checkout/order-access.storage";
 export interface AccessibleOrder {
+  order_deliveries: Array<{ status: string; tracking_number: string | null; delivery_service: string | null; delivery_methods: { name: string } | null }>;
   id: string; order_number: string; status: string; payment_status: string;
   total_amount: string; items_total: string; delivery_cost: string; ordered_at: string;
   order_items: Array<{ id: string; product_name: string; quantity: number; line_total: string; weight_g: number | null }>;

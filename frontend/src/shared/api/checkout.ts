@@ -70,6 +70,7 @@ export interface CreateOrderPayload {
   comment?: string;
   deliveryMethodId: string;
   destinationStationId?: string;
+  deliveryMode?: "pickup" | "door";
   delivery: {
     recipientName: string;
     phone: string;
@@ -105,6 +106,8 @@ export function getDeliveryQuote(
 export interface YandexPickupQuote {price:number;deliveryDays:number|null;destinationStationId:string;source:string;totalWeightG:number;parcels:Array<{code:string;dimensionsCm:number[];weightG:number}>}
 export function getYandexPickupQuote(destinationStationId:string){return apiRequest<{data:YandexPickupQuote}>("/delivery-methods/yandex-quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify({destinationStationId})})}
 
+export function getYandexDoorQuote(destinationAddress:string){return apiRequest<{data:YandexPickupQuote}>("/delivery-methods/yandex-quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify({deliveryMode:"door",destinationAddress})})}
+
 export function getPaymentMethods():
 Promise<PaymentMethodsResponse> {
   return apiRequest<PaymentMethodsResponse>(
@@ -132,4 +135,4 @@ export function createOrder(
 }
 
 export interface PricingQuoteApi { grossItemsTotal:number; itemsTotal:number; deliveryCost:number; discountTotal:number; totalAmount:number; loyaltySpent:number; discounts:Array<{sourceType:string;sourceId:string|null;code:string|null;name:string;amount:number}> }
-export function getPricingQuote(payload:{deliveryMethodId:string;destinationStationId?:string;promoCode?:string;referralCode?:string;loyaltyToSpend?:number}){return apiRequest<{data:PricingQuoteApi}>("/pricing/quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify(payload)})}
+export function getPricingQuote(payload:{deliveryMethodId:string;destinationStationId?:string;deliveryMode?:"pickup"|"door";destinationAddress?:string;promoCode?:string;referralCode?:string;loyaltyToSpend?:number}){return apiRequest<{data:PricingQuoteApi}>("/pricing/quote",{method:"POST",headers:{"x-guest-token":getGuestCartToken(),...getAuthHeaders()},body:JSON.stringify(payload)})}

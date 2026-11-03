@@ -41,7 +41,7 @@ async function sendSmtpMail(to: string, code: string): Promise<void> {
   const user = requiredEnv("SMTP_USER");
   const password = requiredEnv("SMTP_PASSWORD");
   const from = requiredEnv("MAIL_FROM");
-  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Мастер";
+  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Маркет";
 
   const plain = await new Promise<net.Socket>((resolve, reject) => {
     const socket = net.createConnection({ host, port }, () => resolve(socket));
@@ -62,8 +62,8 @@ async function sendSmtpMail(to: string, code: string): Promise<void> {
   await command(secure, `RCPT TO:<${to}>`, [250, 251]);
   await command(secure, "DATA", [354]);
 
-  const subject = "Код входа — Чайный Мастер";
-  const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto"><h2>Чайный Мастер</h2><p>Код для входа в личный кабинет:</p><p style="font-size:32px;font-weight:700;letter-spacing:6px">${code}</p><p>Код действует 5 минут. Если вы не запрашивали вход, просто проигнорируйте это письмо.</p></div>`;
+  const subject = "Код входа — Чайный Маркет";
+  const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto"><h2>Чайный Маркет</h2><p>Код для входа в личный кабинет:</p><p style="font-size:32px;font-weight:700;letter-spacing:6px">${code}</p><p>Код действует 5 минут. Если вы не запрашивали вход, просто проигнорируйте это письмо.</p></div>`;
   const message = [
     `From: ${fromName} <${from}>`, `To: <${to}>`, `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
     "MIME-Version: 1.0", "Content-Type: text/html; charset=UTF-8", "Content-Transfer-Encoding: 8bit", "", html, "."

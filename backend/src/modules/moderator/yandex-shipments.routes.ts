@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { trackingSimulationEnabled, setSimulatedTracking, getSimulatedTracking } from "../orders/tracking-simulation.js";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../../database/prisma.js";
 import { calculateOrderPacking } from "./order-packing.service.js";
@@ -281,7 +282,9 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
     const delivery = order.order_deliveries;
     if (!delivery || !(/яндекс|yandex/i.test(delivery.delivery_service ?? "") || /^\[ПВЗ Яндекс [a-zA-Z0-9-]{20,80}\]/.test(delivery.full_address ?? ""))) return fail(res,"NOT_YANDEX","Заказ не относится к Яндекс Доставке",409);
     const stationMatch = delivery.full_address.match(/\[\u041F\u0412\u0417\s+\u042F\u043D\u0434\u0435\u043A\u0441\s+([a-zA-Z0-9-]{20,80})\]/);
-    if (!stationMatch) return fail(res,"DESTINATION_MISSING","В заказе не сохранён идентификатор ПВЗ получателя",409);
+    const doorFullAddress = !stationMatch ? (delivery.full_address ?? "").trim() : "";
+    if (!stationMatch && (doorFullAddress.length < 12 || doorFullAddress.length > 300 || doorFullAddress.split(",").length < 3))
+      return fail(res,"DESTINATION_MISSING","Для курьерской доставки нужен полный адрес: город, улица, дом",409);
     const settings = await prisma.$queryRaw<Array<{primary_dropoff_id:string|null}>>`SELECT primary_dropoff_id FROM yandex_delivery_settings WHERE id=1`;
     const dropoffId = settings[0]?.primary_dropoff_id;
     if (!dropoffId) return fail(res,"SOURCE_MISSING","Выберите основной ПВЗ отгрузки",409);
@@ -341,12 +344,12 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
     const body = {
       info:{operator_request_id:order.order_number},
       source:{platform_station:{platform_id:source}},
-      destination:{type:"platform_station",platform_station:{platform_id:stationMatch[1]}},
+      destination:stationMatch ? {type:"platform_station",platform_station:{platform_id:stationMatch[1]}} : {type:"custom_location",custom_location:{details:{full_address:doorFullAddress}}},
       items:carrierItems,
       places:physicalDims.map((physical_dims,index)=>({barcode:parcelBarcodes[index]!,physical_dims})),
       billing_info:{payment_method:"already_paid",delivery_cost:0},
       recipient_info:{first_name:recipient[1] ?? recipient[0] ?? "Получатель",last_name:recipient.length>1 ? recipient[0] : "Получатель",phone:delivery.phone,email:order.email ?? undefined},
-      last_mile_policy:"self_pickup",particular_items_refuse:false,forbid_unboxing:false,
+      last_mile_policy:stationMatch ? "self_pickup" : "time_interval",particular_items_refuse:false,forbid_unboxing:false,
     };
     const attemptId = randomUUID();
     const requestUrl = "https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/create";
@@ -462,4 +465,28 @@ export async function createYandexShipmentAfterPayment(orderNumber: string): Pro
   };
   await submitYandexShipment(orderNumber, response);
 }
+// This router is already protected by moderator authentication at mount point.
+// Never allow simulation in production or without explicit local opt-in.
+router.get("/:orderNumber/tracking-simulation", async (req, res, next) => {
+  if (!trackingSimulationEnabled()) { res.status(404).json({error:{message:"Недоступно"}}); return; }
+  try {
+    const orderNumber=String(req.params.orderNumber);
+    const order=await prisma.orders.findUnique({where:{order_number:orderNumber},select:{id:true}});
+    if (!order) { res.status(404).json({error:{message:"Заказ не найден"}}); return; }
+    res.json({data:getSimulatedTracking(orderNumber)});
+  } catch(e) { next(e); }
+});
+router.post("/:orderNumber/tracking-simulation", async (req, res, next) => {
+  if (!trackingSimulationEnabled()) { res.status(404).json({error:{message:"Недоступно"}}); return; }
+  try {
+    const orderNumber=String(req.params.orderNumber);
+    const stage=req.body?.stage;
+    if (typeof stage !== "number" || !Number.isInteger(stage) || stage < -1 || stage > 5) {
+      res.status(400).json({error:{message:"Некорректный этап"}}); return;
+    }
+    const order=await prisma.orders.findUnique({where:{order_number:orderNumber},select:{id:true}});
+    if (!order) { res.status(404).json({error:{message:"Заказ не найден"}}); return; }
+    res.json({data:setSimulatedTracking(orderNumber,stage)});
+  } catch(e) { next(e); }
+});
 export default router;

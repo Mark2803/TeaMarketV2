@@ -1,3 +1,4 @@
+import TrackingSearch from "./TrackingSearch";
 import "../shared/styles/profile.css";
 
 import {
@@ -59,6 +60,8 @@ function GuestProfile() {
             Профиль создаётся в базе данных после подтверждения номера.
           </p>
         </div>
+
+        <TrackingSearch />
 
         <Link
           to="/profile/orders"
@@ -168,6 +171,8 @@ export default function ProfilePage() {
           {session.user.email ? "Email подтверждён" : "Номер подтверждён"}
         </span>
       </section>
+
+      <TrackingSearch />
 
       <section className="profile-menu">
         <h2 className="profile-menu__title">

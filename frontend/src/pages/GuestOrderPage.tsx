@@ -49,6 +49,15 @@ export default function GuestOrderPage() {
         <div style={{ display: "flex", justifyContent: "space-between" }}><span>Доставка</span><strong>{money(order.delivery_cost)}</strong></div>
         <div style={{ display: "flex", justifyContent: "space-between" }}><strong>Итого</strong><strong>{money(order.total_amount)}</strong></div>
       </div>
+      {order.order_deliveries?.length > 0 && <section aria-label="Отслеживание доставки" style={{ padding: "18px 20px", border: "1px solid #ded4c6", borderRadius: 12, margin: "20px 0" }}>
+        <h2 style={{ marginTop: 0, fontSize: "1.15rem" }}>Доставка</h2>
+        {order.order_deliveries.map((delivery, index) => <div key={index} style={{ display: "grid", gap: 8 }}>
+          <div><strong>Статус: </strong>{({pending:"Ожидает обработки",preparing:"Готовится к отправке",handed_over:"Передано перевозчику",shipped:"Передано перевозчику",in_transit:"В пути",delivered:"Доставлено",returned:"Возвращено",cancelled:"Отменено"} as Record<string,string>)[delivery.status] || delivery.status}</div>
+          <div><strong>Служба доставки: </strong>{delivery.delivery_service || delivery.delivery_methods?.name || "Не указана"}</div>
+          {delivery.tracking_number && <div><strong>Трек-номер: </strong><span style={{ userSelect: "all" }}>{delivery.tracking_number}</span></div>}
+          <small style={{ color: "#746b60" }}>Статус обновляется по данным магазина.</small>
+        </div>)}
+      </section>}
       {order.payment_status !== "paid" && order.status !== "cancelled" && <button type="button" disabled={paying} onClick={() => void pay()} style={{ padding: "14px 24px", cursor: "pointer" }}>{paying ? "Открываем ЮKassa…" : "Оплатить заказ"}</button>}
       {order.payment_status === "paid" && <p>Спасибо! Оплата подтверждена.</p>}
       {error && <p role="alert">{error}</p>}

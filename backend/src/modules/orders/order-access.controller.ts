@@ -27,7 +27,8 @@ export async function getAccessibleOrder(req: Request, res: Response) {
     where: { id: order.id },
     select: { id: true, order_number: true, status: true, payment_status: true,
       total_amount: true, items_total: true, delivery_cost: true, ordered_at: true,
-      order_items: { select: { id: true, product_name: true, quantity: true, line_total: true, weight_g: true } }
+      order_items: { select: { id: true, product_name: true, quantity: true, line_total: true, weight_g: true } },
+      order_deliveries: { select: { status: true, tracking_number: true, delivery_service: true, delivery_methods: { select: { name: true } } } }
     }
   });
   res.json({ data });

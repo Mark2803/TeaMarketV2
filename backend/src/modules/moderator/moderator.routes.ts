@@ -1,3 +1,4 @@
+import yandexReturnsRouter from "./yandex-returns.routes.js";
 import yandexShipmentsRouter from "./yandex-shipments.routes.js";
 import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
 import orderPackingRouter from "./order-packing.routes.js";
@@ -192,6 +193,7 @@ import {
 } from "./notifications/moderator-notifications.controller.js";
 
 import { getModeratorAnalyticsController } from "./analytics/moderator-analytics.controller.js";
+import { getModeratorFinanceReportController } from "./analytics/moderator-finance-report.controller.js";
 
 const router = Router();
 
@@ -210,7 +212,9 @@ router.use("/yandex-delivery-test", yandexDeliveryTestRouter);
 router.use("/shipping-packages", shippingPackagesRouter);
 router.use("/order-packing", orderPackingRouter);
 router.use("/yandex-shipments", yandexShipmentsRouter);
+router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
+router.get("/analytics/finance-report", getModeratorFinanceReportController);
 
 router.get("/notifications", getNotificationOverview);
 router.patch("/notifications/templates/:id", updateNotificationTemplate);
