@@ -12,6 +12,10 @@ export type CatalogCategory = {
   image_url: string | null;
   sort_order: number;
   is_visible: boolean;
+  is_indexed: boolean;
+  seo_title: string | null;
+  seo_description: string | null;
+  canonical_url: string | null;
   product_count: number;
   other_categories: CatalogCategory[];
 };
@@ -23,6 +27,10 @@ export type CatalogCollection = {
   description: string | null;
   image_url: string | null;
   collection_type: string;
+  is_indexed: boolean;
+  seo_title: string | null;
+  seo_description: string | null;
+  canonical_url: string | null;
   show_on_home: boolean;
   sort_order: number;
   product_count: number;
