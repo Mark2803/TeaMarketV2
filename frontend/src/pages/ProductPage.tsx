@@ -138,6 +138,10 @@ function ProductPageContent({
     }
   };
 
+  useEffect(() => {
+    setQuantity(value => Math.min(value, Math.max(1, selectedVariant?.stock ?? 1)));
+  }, [selectedVariant?.id, selectedVariant?.stock]);
+
   const addToCart = async () => {
     if (!selectedVariant) {
       return;
@@ -218,6 +222,8 @@ function ProductPageContent({
 
           <ProductPurchase
             quantity={quantity}
+            maxQuantity={Math.max(1, selectedVariant.stock)}
+            onQuantityChange={setQuantity}
             favorite={favorite}
             disabled={
               selectedVariant.status

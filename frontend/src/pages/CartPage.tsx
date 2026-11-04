@@ -1,3 +1,4 @@
+import "../shared/styles/ui-polish-20261104.css";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CartItemCard from "../features/cart/components/CartItemCard";
@@ -26,7 +27,7 @@ function formatMoney(value: string): string {
   return `${Number(value).toLocaleString("ru-RU")} ₽`;
 }
 
-function PendingOrders({ authenticated }: { authenticated: boolean }) {
+function PendingOrders({ authenticated, onPendingChange }: { authenticated: boolean; onPendingChange: (pending: boolean) => void }) {
   const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,13 +39,15 @@ function PendingOrders({ authenticated }: { authenticated: boolean }) {
     try {
       if (authenticated) {
         const response = await getCustomerOrders();
-        setOrders(response.data
+        const pendingOrders = response.data
           .filter((o: CustomerOrderListItemApi) => o.payment_status !== "paid" && o.payment_status !== "refunded" && o.payment_status !== "partially_refunded" && o.status !== "cancelled")
           .map((o: CustomerOrderListItemApi) => ({
             id: o.id, number: o.order_number, amount: o.total_amount, date: o.ordered_at,
             items: o.order_items.map(item => ({ name: item.product_name, quantity: item.quantity })),
             link: `/profile/orders/${encodeURIComponent(o.order_number)}`
-          })));
+          }));
+        setOrders(pendingOrders);
+        onPendingChange(pendingOrders.length > 0);
       } else {
         const saved = getSavedOrders();
         const results = await Promise.allSettled(saved.map(async (entry) => {
@@ -65,6 +68,7 @@ function PendingOrders({ authenticated }: { authenticated: boolean }) {
           });
         }
         setOrders(pending);
+        onPendingChange(pending.length > 0);
         if (failures) setError(`Не удалось проверить ${failures} заказ(ов). Попробуйте обновить список.`);
       }
     } catch (e) {
@@ -72,7 +76,7 @@ function PendingOrders({ authenticated }: { authenticated: boolean }) {
     } finally {
       setLoading(false);
     }
-  }, [authenticated]);
+  }, [authenticated, onPendingChange]);
 
   useEffect(() => {
     void load();
@@ -126,13 +130,16 @@ export default function CartPage() {
   const { items, totalQuantity, totalAmount, isLoading, isMutating, error, refresh, updateQuantity, changeVariant, removeItem, clear } = useCart();
   const { session } = useAuth();
   const [tab, setTab] = useState<"cart" | "pending">("cart");
+  const [hasPending, setHasPending] = useState(false);
+  const onPendingChange = useCallback((pending: boolean) => setHasPending(pending), []);
 
   return <div className="cart-page">
     <div className="cart-page__tabs" role="tablist" aria-label="Разделы корзины">
       <button type="button" role="tab" aria-selected={tab === "cart"} className={tab === "cart" ? "cart-page__tab--active" : ""} onClick={() => setTab("cart")}>Товары в корзине{!isLoading ? ` (${totalQuantity})` : ""}</button>
-      <button type="button" role="tab" aria-selected={tab === "pending"} className={tab === "pending" ? "cart-page__tab--active" : ""} onClick={() => setTab("pending")}>Ожидают оплаты</button>
+      <button type="button" role="tab" aria-selected={tab === "pending"} className={tab === "pending" ? "cart-page__tab--active" : ""} onClick={() => setTab("pending")}>Ожидают оплаты{hasPending && <span className="cart-pending-indicator" aria-label="Есть заказы, ожидающие оплаты" />}</button>
     </div>
-    {tab === "pending" ? <PendingOrders authenticated={session.isAuthenticated} /> : isLoading ? <section className="cart-page product-page-state" aria-busy="true"><h1>Загружаем корзину</h1></section> : error && items.length === 0 ? <section className="cart-page product-page-state"><h1>Не удалось загрузить корзину</h1><p>{error}</p><button type="button" onClick={() => void refresh()}>Повторить запрос</button></section> : items.length === 0 ? <EmptyCart /> : <>
+    <div hidden={tab !== "pending"}><PendingOrders authenticated={session.isAuthenticated} onPendingChange={onPendingChange} /></div>
+    {tab === "pending" ? null : isLoading ? <section className="cart-page product-page-state" aria-busy="true"><h1>Загружаем корзину</h1></section> : error && items.length === 0 ? <section className="cart-page product-page-state"><h1>Не удалось загрузить корзину</h1><p>{error}</p><button type="button" onClick={() => void refresh()}>Повторить запрос</button></section> : items.length === 0 ? <EmptyCart /> : <>
       <header className="cart-page__header"><div><p>Ваш выбор</p><h1>Корзина</h1><span>{totalQuantity} шт.</span></div><button type="button" disabled={isMutating} onClick={() => void clear()}>Очистить корзину</button></header>
       {error && <p role="alert">{error}</p>}
       <div className="cart-page__layout"><section className="cart-page__items">{items.map(item => <CartItemCard key={item.id} item={item} disabled={isMutating} onChangeVariant={changeVariant} onUpdateQuantity={updateQuantity} onRemove={removeItem} />)}<Link to="/catalog" className="cart-page__continue">Продолжить покупки</Link></section><CartSummary itemCount={totalQuantity} totalAmount={totalAmount} /></div>

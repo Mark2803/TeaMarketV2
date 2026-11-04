@@ -1,3 +1,4 @@
+import "../../shared/styles/ui-polish-20261104.css";
 import { useEffect, useMemo, useState } from "react";
 import { Edit3, FolderTree, Plus, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";

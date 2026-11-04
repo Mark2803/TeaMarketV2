@@ -127,3 +127,5 @@
   font-size: var(--font-size-xs);
   line-height: 1.5;
 }
+
+.contacts-legal-link a{color:#2e573f;text-decoration:underline;text-underline-offset:3px}

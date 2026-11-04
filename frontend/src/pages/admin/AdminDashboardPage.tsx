@@ -220,7 +220,10 @@ export default function AdminDashboardPage() {
           <h1>Главная</h1>
           <p>Управление магазином «Чайный Маркет»</p>
         </div>
+        <Link to="/admin/guide" className="admin-primary-button" style={{ alignSelf: "center", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Инструкция</Link>
       </div>
+
+
 
       {shipmentAlerts.length > 0 && <div className="admin-section-card" role="alert">
         <h2>Внимание: отправления Яндекс Доставки ({shipmentAlerts.length})</h2>

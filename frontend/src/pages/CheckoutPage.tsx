@@ -870,6 +870,7 @@ function CheckoutForm() {
               ? "Создаём заказ…"
               : "Оформить заказ"}
           </button>
+          <p className="checkout-legal-note">Нажимая «Оформить заказ», вы принимаете условия <Link to="/legal/offer" target="_blank" rel="noopener noreferrer">Публичной оферты</Link>.</p>
         </section>
       </div>
     );

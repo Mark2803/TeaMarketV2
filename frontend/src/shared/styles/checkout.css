@@ -938,3 +938,5 @@
 .checkout-form-fields label { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .checkout-form-fields input { box-sizing: border-box; width: 100%; padding: 12px 14px; border: 1px solid #d5dace; border-radius: 10px; background: #fff; color: #243426; font: inherit; }
 .checkout-form-fields input:focus { outline: 2px solid #5b7754; outline-offset: 2px; }
+
+.checkout-legal-note{font-size:12px;line-height:1.55;color:#6d756d;text-align:center;margin:12px 0 0}.checkout-legal-note a{color:#2e573f;text-decoration:underline;text-underline-offset:2px}

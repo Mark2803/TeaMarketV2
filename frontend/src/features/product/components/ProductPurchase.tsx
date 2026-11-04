@@ -1,3 +1,5 @@
+import "../../../shared/styles/ui-polish-20261104.css";
+import { useEffect, useState } from "react";
 import {
   Heart,
   LoaderCircle,
@@ -9,6 +11,8 @@ import {
 
 type ProductPurchaseProps = {
   quantity: number;
+  maxQuantity: number;
+  onQuantityChange: (quantity: number) => void;
   favorite: boolean;
   disabled: boolean;
   isAdding: boolean;
@@ -21,6 +25,15 @@ type ProductPurchaseProps = {
 };
 
 export default function ProductPurchase(props: ProductPurchaseProps) {
+  const [draft, setDraft] = useState(String(props.quantity));
+  useEffect(() => setDraft(String(props.quantity)), [props.quantity]);
+  const commitQuantity = () => {
+    const parsed = Number(draft);
+    const next = Number.isFinite(parsed) && parsed >= 1
+      ? Math.max(1, Math.min(props.maxQuantity, Math.trunc(parsed))) : 1;
+    props.onQuantityChange(next);
+    setDraft(String(next));
+  };
   return (
     <section className="product-purchase">
       <div className="product-purchase__quantity-row">
@@ -29,8 +42,17 @@ export default function ProductPurchase(props: ProductPurchaseProps) {
           <button type="button" onClick={props.onDecrease} disabled={props.quantity <= 1} aria-label="Уменьшить количество">
             <Minus size={17} />
           </button>
-          <strong>{props.quantity}</strong>
-          <button type="button" onClick={props.onIncrease} aria-label="Увеличить количество">
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            aria-label="Количество товара"
+            value={draft}
+            onChange={(event) => { if (/^\d*$/.test(event.target.value)) setDraft(event.target.value); }}
+            onBlur={commitQuantity}
+            onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
+          />
+          <button type="button" onClick={props.onIncrease} disabled={props.quantity >= props.maxQuantity} aria-label="Увеличить количество">
             <Plus size={17} />
           </button>
         </div>

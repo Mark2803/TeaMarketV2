@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Camera,
   Mail,
@@ -23,6 +24,8 @@ export default function ContactsPage() {
 
         <p>Производство и продажа чая</p>
       </header>
+
+      <p className="contacts-legal-link"><Link to="/legal/offer">Публичная оферта и условия возврата</Link></p>
 
       <section className="contacts-card" aria-label="Контактная информация">
         <a
@@ -69,27 +72,27 @@ export default function ContactsPage() {
           </span>
         </a>
 
-        <div className="contacts-item contacts-item--placeholder">
+        <a className="contacts-item" href="https://vk.ru/club241303868" target="_blank" rel="noopener noreferrer">
           <span className="contacts-item__icon">
             <MessageCircle size={21} strokeWidth={1.7} aria-hidden="true" />
           </span>
 
           <span className="contacts-item__content">
             <span className="contacts-item__label">VK</span>
-            <strong>Заглушка</strong>
+            <strong>Чайный Маркет</strong>
           </span>
-        </div>
+        </a>
 
-        <div className="contacts-item contacts-item--placeholder">
+        <a className="contacts-item" href="https://www.instagram.com/teamasterteam/" target="_blank" rel="noopener noreferrer">
           <span className="contacts-item__icon">
             <Camera size={21} strokeWidth={1.7} aria-hidden="true" />
           </span>
 
           <span className="contacts-item__content">
             <span className="contacts-item__label">Instagram</span>
-            <strong>Заглушка</strong>
+            <strong>@teamasterteam</strong>
           </span>
-        </div>
+        </a>
       </section>
 
       <div className="contacts-page__legal" aria-label="Реквизиты продавца">

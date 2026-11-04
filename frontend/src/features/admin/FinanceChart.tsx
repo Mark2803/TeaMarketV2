@@ -16,7 +16,7 @@ export default function FinanceChart({ data, metric = "revenue" }: { data: Point
       <div className="finance-chart-bars">
         {data.map((d, i) => <div key={d.date} className={`finance-chart-item${active === i ? " is-active" : ""}`} onMouseEnter={() => setActive(i)} onMouseLeave={() => setActive(null)} onFocus={() => setActive(i)} onBlur={() => setActive(null)} tabIndex={0} aria-label={`${dateLabel(d.date)}: ${formatter(d[metric])}`}>
           <div className="finance-chart-bar-area"><div className="finance-chart-bar" style={{ height: `${d[metric] ? Math.max(2, d[metric] / max * 100) : 0}%` }}/>{active === i && <div className="finance-chart-tooltip"><strong>{formatter(d[metric])}</strong><small>{dateLabel(d.date)}</small></div>}</div>
-          <span className="finance-chart-date">{d.date.slice(5).replace("-", ".")}</span>
+          <span className="finance-chart-date">{`${d.date.slice(8, 10)}.${d.date.slice(5, 7)}`}</span>
         </div>)}
       </div>
     </div>
