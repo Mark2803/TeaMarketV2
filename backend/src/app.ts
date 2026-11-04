@@ -6,6 +6,7 @@ import { pinoHttp } from "pino-http";
 
 import { errorHandler } from "./middleware/error-handler.js";
 import { notFoundHandler } from "./middleware/not-found.js";
+import { moderatorCsrfProtection, moderatorCsrfToken } from "./middleware/moderator-csrf.js";
 import apiRouter from "./routes/index.js";
 
 const app = express();
@@ -32,6 +33,10 @@ app.use(
 app.use(compression());
 app.use(express.json());
 app.use(pinoHttp());
+
+// Apply CSRF checks before any moderator route, including nested delivery routes.
+app.get("/api/moderator/csrf", moderatorCsrfToken);
+app.use("/api/moderator", moderatorCsrfProtection);
 
 app.use("/api", apiRouter);
 

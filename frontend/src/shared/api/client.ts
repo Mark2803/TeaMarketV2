@@ -34,68 +34,58 @@ function buildUrl(
       const [key, value]
       of Object.entries(query)
     ) {
-      if (
-        value === undefined
-        || value === null
-      ) {
-        continue;
-      }
-
-      url.searchParams.set(
-        key,
-        String(value)
-      );
+      if (value === undefined || value === null) continue;
+      url.searchParams.set(key, String(value));
     }
   }
 
   return url.toString();
 }
 
+const csrfExempt = new Set([
+  "/moderator/login",
+  "/moderator/password-reset/request",
+  "/moderator/password-reset/confirm"
+]);
+
+async function getCsrfToken(): Promise<string> {
+  const response = await fetch(buildUrl("/moderator/csrf"), {
+    credentials: "include",
+    cache: "no-store"
+  });
+  if (!response.ok) throw new Error("Не удалось подтвердить административную сессию");
+  const body = await response.json() as { token: string };
+  return body.token;
+}
+
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {}
 ): Promise<T> {
-  const {
-    query,
-    headers,
-    ...requestOptions
-  } = options;
-
-  const response =
-    await fetch(
-      buildUrl(
-        path,
-        query
-      ),
-      {
-        ...requestOptions,
-        credentials: requestOptions.credentials ?? "include",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-
-          ...headers
-        }
-      }
-    );
-
-  if (!response.ok) {
-    const errorBody =
-      await response
-        .json()
-        .catch(
-          () => null
-        );
-
-    const message =
-      errorBody?.error?.message
-      ?? `Ошибка API: ${response.status}`;
-
-    throw new Error(
-      message
-    );
+  const { query, headers, ...requestOptions } = options;
+  const method = (requestOptions.method || "GET").toUpperCase();
+  const requestHeaders = new Headers(headers);
+  if (!(requestOptions.body instanceof FormData) && !requestHeaders.has("Content-Type")) {
+    requestHeaders.set("Content-Type", "application/json");
+  }
+  if (
+    path.startsWith("/moderator/") &&
+    !["GET", "HEAD", "OPTIONS"].includes(method) &&
+    !csrfExempt.has(path)
+  ) {
+    requestHeaders.set("X-CSRF-Token", await getCsrfToken());
   }
 
+  const response = await fetch(buildUrl(path, query), {
+    ...requestOptions,
+    credentials: requestOptions.credentials ?? "include",
+    headers: requestHeaders
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    const message = errorBody?.error?.message ?? `Ошибка API: ${response.status}`;
+    throw new Error(message);
+  }
   return response.json() as Promise<T>;
 }
