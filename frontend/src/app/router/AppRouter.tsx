@@ -25,6 +25,7 @@ const DeliveryAddressesPage = lazy(() => import("../../pages/DeliveryAddressesPa
 const CheckoutPage = lazy(() => import("../../pages/CheckoutPage"));
 const CollectionPage = lazy(() => import("../../pages/CollectionPage"));
 const ContactsPage = lazy(() => import("../../pages/ContactsPage"));
+const LegalOfferPage = lazy(() => import("../../pages/LegalOfferPage"));
 const CollectionsPage = lazy(() => import("../../pages/CollectionsPage"));
 const FavoritesPage = lazy(() => import("../../pages/FavoritesPage"));
 const HomePage = lazy(() => import("../../pages/HomePage"));
@@ -77,6 +78,7 @@ export default function AppRouter() {
           <Route path="collections" element={<CollectionsPage />} />
           <Route path="collections/:collectionSlug" element={<CollectionPage />} />
           <Route path="contacts" element={<ContactsPage />} />
+          <Route path="legal/offer" element={<LegalOfferPage />} />
           <Route path="articles" element={<ArticlesPage />} />
           <Route path="articles/:articleSlug" element={<ArticlePage />} />
           <Route path="products/:slug" element={<ProductPage />} />
