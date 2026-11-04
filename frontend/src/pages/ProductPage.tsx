@@ -40,6 +40,7 @@ import type {
   ProductView
 } from "../features/product/product.types";
 import { trackAnalyticsEvent } from "../features/analytics/analytics";
+import { usePageSeo } from "../shared/hooks/usePageSeo";
 
 type ProductPageContentProps = {
   product: ProductView;
@@ -85,14 +86,13 @@ function ProductPageContent({
     trackAnalyticsEvent("product_view", { productId: product.id, path: window.location.pathname });
   }, [product.id]);
 
-  useEffect(() => {
-    document.title =
-      product.seoTitle;
-
-    return () => {
-      document.title = "Чайный Маркет";
-    };
-  }, [product.seoTitle]);
+  usePageSeo({
+    title: product.seoTitle,
+    description: product.seoDescription,
+    canonicalPath: `/products/${encodeURIComponent(product.slug)}`,
+    canonicalUrl: product.canonicalUrl,
+    indexed: product.isIndexed
+  });
 
   const selectedVariant = useMemo(
     () =>
