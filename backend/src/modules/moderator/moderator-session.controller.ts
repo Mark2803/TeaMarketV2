@@ -41,7 +41,7 @@ export async function loginModeratorController(req: Request, res: Response): Pro
     return;
   }
 
-  const token = createAdminSessionToken(username);
+  const token = createAdminSessionToken(username, dbValid ? dbAdmin!.password_hash : process.env.ADMIN_PASSWORD_HASH!.trim());
   if (!token) {
     res.status(503).json({
       error: { code: "ADMIN_AUTH_NOT_CONFIGURED", message: "Вход администратора не настроен" }
@@ -58,8 +58,8 @@ export function logoutModeratorController(_req: Request, res: Response): void {
   res.json({ authenticated: false });
 }
 
-export function getModeratorSessionController(req: Request, res: Response): void {
-  const session = readAdminSession(req);
+export async function getModeratorSessionController(req: Request, res: Response): Promise<void> {
+  const session = await readAdminSession(req);
   if (!session) {
     res.status(401).json({ authenticated: false });
     return;

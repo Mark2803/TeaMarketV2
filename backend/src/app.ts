@@ -12,6 +12,10 @@ const app = express();
 
 app.disable("x-powered-by");
 
+// Trust forwarded client addresses only when the immediate proxy is local.
+// Production Nginx must connect from loopback and overwrite X-Forwarded-For.
+app.set("trust proxy", "loopback");
+
 app.use(helmet());
 
 app.use(

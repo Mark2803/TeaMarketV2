@@ -2,12 +2,12 @@ import type { NextFunction, Request, Response } from "express";
 import { readAdminSession } from "./moderator-session.js";
 
 /** Защищает административные маршруты серверной сессией. */
-export function moderatorAuthMiddleware(
+export async function moderatorAuthMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
-  if (readAdminSession(req)) {
+): Promise<void> {
+  if (await readAdminSession(req)) {
     next();
     return;
   }

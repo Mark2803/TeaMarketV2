@@ -1,8 +1,10 @@
 import {
   createHmac,
+  createHash,
   timingSafeEqual
 } from "node:crypto";
 import type { Request, Response } from "express";
+import { prisma } from "../../database/prisma.js";
 import { verifyAdminPasswordHash } from "./moderator-password.js";
 
 const COOKIE_NAME = "tea_admin_session";
@@ -11,6 +13,7 @@ const SESSION_TTL_SECONDS = 60 * 60 * 12;
 type SessionPayload = {
   username: string;
   expiresAt: number;
+  credentialFingerprint: string;
 };
 
 function getSessionSecret(): string | null {
@@ -44,8 +47,13 @@ export function verifyAdminPassword(password: string): boolean {
   return configured ? verifyAdminPasswordHash(password, configured) : false;
 }
 
+function credentialFingerprint(passwordHash: string): string {
+  return createHash("sha256").update(passwordHash).digest("base64url");
+}
+
 export function createAdminSessionToken(
-  username: string
+  username: string,
+  passwordHash: string
 ): string | null {
   const secret = getSessionSecret();
 
@@ -55,6 +63,7 @@ export function createAdminSessionToken(
 
   const payload: SessionPayload = {
     username,
+    credentialFingerprint: credentialFingerprint(passwordHash),
     expiresAt:
       Math.floor(Date.now() / 1000)
       + SESSION_TTL_SECONDS
@@ -67,7 +76,7 @@ export function createAdminSessionToken(
   return `${encoded}.${sign(encoded, secret)}`;
 }
 
-export function readAdminSession(
+export function readAdminSessionToken(
   req: Request
 ): SessionPayload | null {
   const secret = getSessionSecret();
@@ -111,6 +120,8 @@ export function readAdminSession(
 
     if (
       !payload.username
+      || typeof payload.credentialFingerprint !== "string"
+      || !payload.credentialFingerprint
       || payload.expiresAt
         <= Math.floor(Date.now() / 1000)
     ) {
@@ -121,6 +132,36 @@ export function readAdminSession(
   } catch {
     return null;
   }
+}
+
+/**
+ * Validate the signed cookie against the current administrator record.
+ * Disabling an administrator or changing their password immediately
+ * invalidates previously issued cookies.
+ */
+export async function readAdminSession(req: Request): Promise<SessionPayload | null> {
+  const payload = readAdminSessionToken(req);
+  if (!payload) return null;
+
+  const admin = await prisma.admin_users.findUnique({
+    where: { username: payload.username },
+    select: { is_active: true, password_hash: true }
+  });
+
+  let currentHash: string | null = null;
+  if (admin) {
+    if (!admin.is_active) return null;
+    currentHash = admin.password_hash;
+  } else if (
+    isAdminAuthConfigured()
+    && payload.username === process.env.ADMIN_USERNAME?.trim()
+  ) {
+    currentHash = process.env.ADMIN_PASSWORD_HASH?.trim() || null;
+  }
+
+  if (!currentHash) return null;
+  const expected = credentialFingerprint(currentHash);
+  return safeEqual(expected, payload.credentialFingerprint) ? payload : null;
 }
 
 export function setAdminSessionCookie(

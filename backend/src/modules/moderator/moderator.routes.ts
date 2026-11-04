@@ -3,6 +3,7 @@ import yandexShipmentsRouter from "./yandex-shipments.routes.js";
 import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
 import orderPackingRouter from "./order-packing.routes.js";
 import { Router } from "express";
+import { securityRateLimit } from "../../middleware/security-rate-limit.js";
 import shippingPackagesRouter from "./shipping-packages.routes.js";
 
 import {
@@ -193,13 +194,27 @@ import {
 } from "./notifications/moderator-notifications.controller.js";
 
 import { getModeratorAnalyticsController } from "./analytics/moderator-analytics.controller.js";
-import { getModeratorFinanceReportController } from "./analytics/moderator-finance-report.controller.js";
 
 const router = Router();
 
-router.post("/login", loginModeratorController);
-router.post("/password-reset/request", requestAdminPasswordResetController);
-router.post("/password-reset/confirm", resetAdminPasswordController);
+// Rate limits apply before expensive password hash verification.
+const adminLoginByAccount = securityRateLimit({
+  name: "admin-login-account", max: 10, windowMs: 15 * 60_000,
+  identity: (req) => String(req.body?.username ?? "").trim().toLowerCase().slice(0, 160)
+});
+const adminLoginByIp = securityRateLimit({
+  name: "admin-login-ip", max: 80, windowMs: 15 * 60_000
+});
+const adminResetLimit = securityRateLimit({
+  name: "admin-reset-ip", max: 5, windowMs: 60 * 60_000
+});
+const adminResetConfirmLimit = securityRateLimit({
+  name: "admin-reset-confirm-ip", max: 15, windowMs: 60 * 60_000
+});
+
+router.post("/login", adminLoginByIp, adminLoginByAccount, loginModeratorController);
+router.post("/password-reset/request", adminResetLimit, requestAdminPasswordResetController);
+router.post("/password-reset/confirm", adminResetConfirmLimit, resetAdminPasswordController);
 router.post("/logout", logoutModeratorController);
 router.get("/session", getModeratorSessionController);
 
@@ -214,7 +229,6 @@ router.use("/order-packing", orderPackingRouter);
 router.use("/yandex-shipments", yandexShipmentsRouter);
 router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
-router.get("/analytics/finance-report", getModeratorFinanceReportController);
 
 router.get("/notifications", getNotificationOverview);
 router.patch("/notifications/templates/:id", updateNotificationTemplate);
