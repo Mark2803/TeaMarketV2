@@ -1,0 +1,71 @@
+/* Desktop: preserve the original horizontal layout. */
+.home-mobile-drum__slide { display: contents; }
+
+@media (max-width: 42rem) {
+  .home-page .home-mobile-drum {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    scroll-snap-type: none;
+    touch-action: pan-y;
+    isolation: isolate;
+  }
+
+  .home-page .home-mobile-drum.home-collections { height: 176px; }
+  .home-page .home-mobile-drum.home-categories { height: 156px; }
+  .home-page .home-mobile-drum.home-products { height: 344px; }
+
+  .home-page .home-mobile-drum__slide {
+    display: block;
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    width: 60%;
+    z-index: 1;
+    transform: translateX(calc(-50% + var(--drum-offset) * 34vw)) scale(var(--drum-scale));
+    transform-origin: center top;
+    transition: transform 300ms cubic-bezier(.2,.8,.2,1), opacity 300ms ease;
+    opacity: .66;
+    will-change: transform;
+  }
+
+  .home-page .home-mobile-drum__slide--active { opacity: 1; z-index: 10; }
+  .home-page .home-mobile-drum__slide:not(.home-mobile-drum__slide--active) { cursor: pointer; }
+  .home-page .home-mobile-drum__slide[aria-hidden="true"] { pointer-events: auto; }
+  .home-page .home-mobile-drum__slide > * { width: 100%; min-width: 0; max-width: none; margin: 0; }
+
+  .home-page .home-mobile-drum.home-collections .home-mobile-drum__slide { width: 55%; }
+  .home-page .home-mobile-drum.home-categories .home-mobile-drum__slide {
+    width: 40%;
+    transform: translateX(calc(-50% + var(--drum-offset) * 29vw)) scale(var(--drum-scale));
+  }
+  .home-page .home-mobile-drum.home-categories .home-category {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 9px;
+  }
+  .home-page .home-mobile-drum.home-categories .home-category__icon {
+    width: 88px;
+    height: 88px;
+  }
+  .home-page .home-mobile-drum.home-categories .home-category__icon svg {
+    width: 30px;
+    height: 30px;
+  }
+  .home-page .home-mobile-drum.home-categories .home-category > span:last-child {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .home-page .home-mobile-drum.home-products .home-mobile-drum__slide { width: 62%; }
+  .home-page .home-mobile-drum.home-products .home-product-card { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-page .home-mobile-drum__slide { transition: none; }
+  }
+}

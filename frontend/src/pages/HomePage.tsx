@@ -1,3 +1,4 @@
+import HomeMobileDrum from "../features/home/components/HomeMobileDrum";
 import "../shared/styles/home-favorites.css";
 import "../shared/styles/home-db-only.css";
 import "../shared/styles/home-hero-carousel.css";
@@ -177,7 +178,7 @@ export default function HomePage() {
             Загружаем подборки…
           </div>
         ) : homeCollections.length > 0 ? (
-          <div className="home-horizontal-scroll home-collections">
+          <HomeMobileDrum className="home-collections" label="Подборки">
             {homeCollections.map(
               (collection, index) => {
                 const collectionIcons = [
@@ -212,7 +213,7 @@ export default function HomePage() {
                 );
               }
             )}
-          </div>
+          </HomeMobileDrum>
         ) : (
           <div className="home-data-state">
             Активных подборок для Главной пока нет.
@@ -240,7 +241,7 @@ export default function HomePage() {
             Загружаем категории…
           </div>
         ) : homeCategories.length > 0 ? (
-          <div className="home-horizontal-scroll home-categories">
+          <HomeMobileDrum className="home-categories" label="Категории">
             {homeCategories.map(
               (category, index) => {
                 const categoryIcons = [
@@ -277,7 +278,7 @@ export default function HomePage() {
                 );
               }
             )}
-          </div>
+          </HomeMobileDrum>
         ) : (
           <div className="home-data-state">
             Категории в базе данных пока отсутствуют.
@@ -305,7 +306,7 @@ export default function HomePage() {
             Загружаем товары…
           </div>
         ) : products.length > 0 ? (
-          <div className="home-horizontal-scroll home-products">
+          <HomeMobileDrum className="home-products" label="Новинки">
             {products.map(
               (product) => {
                 const favorite =
@@ -388,7 +389,7 @@ export default function HomePage() {
                 );
               }
             )}
-          </div>
+          </HomeMobileDrum>
         ) : (
           <div className="home-data-state">
             Активных товаров с доступными вариантами пока нет.
