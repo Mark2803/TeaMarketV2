@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import healthRouter from "./health.js";
+import sitemapRouter from "../modules/seo/sitemap.routes.js";
 
 import productsRouter from "../modules/products/products.routes.js";
 import categoriesRouter from "../modules/categories/categories.routes.js";
@@ -29,6 +30,7 @@ import yandexTestPointsRouter from "./yandex-test-points.js";
 const router = Router();
 
 router.use("/health", healthRouter);
+router.use("/seo", sitemapRouter);
 
 router.use("/products", productsRouter);
 router.use("/categories", categoriesRouter);
