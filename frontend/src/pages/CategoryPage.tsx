@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import BackLink from "../shared/components/BackLink";
+import { usePageSeo } from "../shared/hooks/usePageSeo";
 import CatalogPanel from "../features/category/components/CatalogPanel";
 import CategoryIntro from "../features/category/components/CategoryIntro";
 import CategoryProductsSection from "../features/category/components/CategoryProductsSection";
@@ -46,6 +47,14 @@ export default function CategoryPage() {
 
   const categoryQuery =
     useCategory(categorySlug);
+  const seoCategory = categoryQuery.data?.data;
+  usePageSeo(seoCategory ? {
+    title: seoCategory.seo_title || seoCategory.name,
+    description: seoCategory.seo_description || seoCategory.description,
+    canonicalPath: `/catalog/${encodeURIComponent(seoCategory.slug)}`,
+    canonicalUrl: seoCategory.canonical_url,
+    indexed: seoCategory.is_indexed
+  } : null);
 
   const productsSlug =
     activeSubcategorySlug ?? categorySlug;
