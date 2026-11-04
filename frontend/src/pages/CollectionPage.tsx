@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import BackLink from "../shared/components/BackLink";
+import { usePageSeo } from "../shared/hooks/usePageSeo";
 import CatalogPanel from "../features/category/components/CatalogPanel";
 import CategoryIntro from "../features/category/components/CategoryIntro";
 import CategoryProductsSection from "../features/category/components/CategoryProductsSection";
@@ -40,6 +41,14 @@ export default function CollectionPage() {
 
   const collectionQuery =
     useCollection(collectionSlug);
+  const seoCollection = collectionQuery.data?.data;
+  usePageSeo(seoCollection ? {
+    title: seoCollection.seo_title || seoCollection.name,
+    description: seoCollection.seo_description || seoCollection.description,
+    canonicalPath: `/collections/${encodeURIComponent(seoCollection.slug)}`,
+    canonicalUrl: seoCollection.canonical_url,
+    indexed: seoCollection.is_indexed
+  } : null);
   const productsQuery =
     useCollectionProducts(
       collectionSlug,
