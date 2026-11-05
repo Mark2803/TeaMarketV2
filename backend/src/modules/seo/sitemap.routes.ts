@@ -10,9 +10,9 @@ router.get("/sitemap.xml", async (_req, res, next) => {
   try {
     const now = new Date();
     const [products, categories, collections, articles] = await Promise.all([
-      prisma.products.findMany({ where: { is_active: true, is_indexed: true }, select: { slug: true, updated_at: true } }),
-      prisma.categories.findMany({ where: { is_visible: true, is_indexed: true }, select: { slug: true, updated_at: true } }),
-      prisma.collections.findMany({ where: { is_active: true, is_indexed: true, AND: [{ OR: [{ starts_at: null }, { starts_at: { lte: now } }] }, { OR: [{ ends_at: null }, { ends_at: { gte: now } }] }] }, select: { slug: true, updated_at: true } }),
+      prisma.products.findMany({ where: { is_active: true }, select: { slug: true, updated_at: true } }),
+      prisma.categories.findMany({ where: { is_visible: true }, select: { slug: true, updated_at: true } }),
+      prisma.collections.findMany({ where: { is_active: true, AND: [{ OR: [{ starts_at: null }, { starts_at: { lte: now } }] }, { OR: [{ ends_at: null }, { ends_at: { gte: now } }] }] }, select: { slug: true, updated_at: true } }),
       prisma.articles.findMany({ where: { status: "published", OR: [{ published_at: null }, { published_at: { lte: now } }] }, select: { slug: true, updated_at: true } })
     ]);
     const urls: Array<{ path: string; lastmod?: Date }> = [
