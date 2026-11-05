@@ -98,4 +98,8 @@
     border-radius: 18px 18px 0 0;
     overflow: hidden;
   }
+  /* Article cards keep their existing colors, layout, typography and corners. */
+  .home-page .home-mobile-drum.home-articles .home-mobile-drum__slide > .home-article-card {
+    display: flex;
+  }
 }
