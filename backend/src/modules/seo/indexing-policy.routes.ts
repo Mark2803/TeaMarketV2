@@ -32,22 +32,22 @@ router.get("/indexing-policy", async (req, res, next) => {
     if (match[1] === "products") {
       const item = await prisma.products.findUnique({
         where: { slug },
-        select: { is_indexed: true, is_active: true }
+        select: { is_active: true }
       });
-      indexed = Boolean(item?.is_indexed && item.is_active);
+      indexed = Boolean(item?.is_active);
     } else if (match[1] === "catalog") {
       const item = await prisma.categories.findUnique({
         where: { slug },
-        select: { is_indexed: true, is_visible: true }
+        select: { is_visible: true }
       });
-      indexed = Boolean(item?.is_indexed && item.is_visible);
+      indexed = Boolean(item?.is_visible);
     } else {
       const item = await prisma.collections.findUnique({
         where: { slug },
-        select: { is_indexed: true, is_active: true, starts_at: true, ends_at: true }
+        select: { is_active: true, starts_at: true, ends_at: true }
       });
       const now = new Date();
-      indexed = Boolean(item?.is_indexed && item.is_active
+      indexed = Boolean(item?.is_active
         && (!item.starts_at || item.starts_at <= now)
         && (!item.ends_at || item.ends_at >= now));
     }
