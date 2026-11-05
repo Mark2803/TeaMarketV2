@@ -64,3 +64,66 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 }
+
+/* Desktop: compact full-bleed header, independent of the content width. */
+@media (min-width: 64rem) {
+  .client-layout > .app-header {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-height: 72px;
+    height: 72px;
+    margin: 0;
+    padding: 6px clamp(20px, 2.5vw, 48px);
+    border-radius: 0;
+  }
+  .client-layout > .app-header img {
+    max-height: 52px;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
+/* Desktop catalog: moderately larger category tiles, same two-column layout. */
+@media (min-width: 64rem) {
+  .client-layout .catalog-page {
+    box-sizing: border-box;
+    width: min(100%, 1080px);
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .client-layout .catalog-category-list {
+    width: 100%;
+    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .client-layout .catalog-category-item {
+    box-sizing: border-box;
+    min-height: 100px;
+    padding: 14px 16px;
+    gap: 16px;
+  }
+  .client-layout .catalog-category-item__image {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    min-height: 68px;
+  }
+  .client-layout .catalog-category-item__content strong {
+    font-size: 17px;
+  }
+}
+
+/* Keep category titles comfortably separated from the larger thumbnails. */
+@media (min-width: 64rem) {
+  .client-layout .catalog-category-item__image {
+    flex: 0 0 68px;
+    margin-right: 12px;
+  }
+  .client-layout .catalog-category-item__content {
+    min-width: 0;
+    margin-left: 4px;
+  }
+}
