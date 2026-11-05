@@ -7,6 +7,7 @@ import { pinoHttp } from "pino-http";
 import { errorHandler } from "./middleware/error-handler.js";
 import { notFoundHandler } from "./middleware/not-found.js";
 import { moderatorCsrfProtection, moderatorCsrfToken } from "./middleware/moderator-csrf.js";
+import indexingPolicyRouter from "./modules/seo/indexing-policy.routes.js";
 import apiRouter from "./routes/index.js";
 
 const app = express();
@@ -38,6 +39,7 @@ app.use(pinoHttp());
 app.get("/api/moderator/csrf", moderatorCsrfToken);
 app.use("/api/moderator", moderatorCsrfProtection);
 
+app.use("/api/seo", indexingPolicyRouter);
 app.use("/api", apiRouter);
 
 app.use(notFoundHandler);
