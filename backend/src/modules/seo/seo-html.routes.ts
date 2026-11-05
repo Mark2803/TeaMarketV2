@@ -5,6 +5,7 @@ import { prisma } from "../../database/prisma.js";
 
 const router = Router();
 const SITE = "https://tea-master-team.ru";
+const normalizeBrand = (value: string): string => value.replace(/Tea Market Demo/gi, "Чайный Маркет");
 
 const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, (char) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -108,6 +109,8 @@ router.get("/html", async (req, res, next) => {
     }
 
     if (!found) { res.set("X-Robots-Tag", "noindex, follow"); res.sendStatus(404); return; }
+    title = normalizeBrand(title);
+    description = normalizeBrand(description);
     const canonical = canonicalUrl(customCanonical, pathname.replace(/\/$/, ""));
     const meta = [
       `<title>${escapeHtml(title)}</title>`,
