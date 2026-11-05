@@ -61,31 +61,31 @@ router.get("/html", async (req, res, next) => {
     if (kind === "products") {
       const item = await prisma.products.findUnique({ where: { slug }, select: {
         name: true, short_description: true, seo_title: true, seo_description: true,
-        canonical_url: true, is_indexed: true, is_active: true
+        canonical_url: true, is_active: true
       } });
       if (item) {
         found = true;
         title = item.seo_title?.trim() || item.name;
         description = item.seo_description?.trim() || item.short_description?.trim() || title;
         customCanonical = item.canonical_url;
-        indexed = item.is_indexed && item.is_active;
+        indexed = item.is_active;
       }
     } else if (kind === "catalog") {
       const item = await prisma.categories.findUnique({ where: { slug }, select: {
         name: true, description: true, seo_title: true, seo_description: true,
-        canonical_url: true, is_indexed: true, is_visible: true
+        canonical_url: true, is_visible: true
       } });
       if (item) {
         found = true;
         title = item.seo_title?.trim() || item.name;
         description = item.seo_description?.trim() || item.description?.trim() || title;
         customCanonical = item.canonical_url;
-        indexed = item.is_indexed && item.is_visible;
+        indexed = item.is_visible;
       }
     } else if (kind === "collections") {
       const item = await prisma.collections.findUnique({ where: { slug }, select: {
         name: true, description: true, seo_title: true, seo_description: true,
-        canonical_url: true, is_indexed: true, is_active: true, starts_at: true, ends_at: true
+        canonical_url: true, is_active: true, starts_at: true, ends_at: true
       } });
       if (item) {
         found = true;
@@ -93,7 +93,7 @@ router.get("/html", async (req, res, next) => {
         description = item.seo_description?.trim() || item.description?.trim() || title;
         customCanonical = item.canonical_url;
         const now = new Date();
-        indexed = item.is_indexed && item.is_active && (!item.starts_at || item.starts_at <= now) && (!item.ends_at || item.ends_at >= now);
+        indexed = item.is_active && (!item.starts_at || item.starts_at <= now) && (!item.ends_at || item.ends_at >= now);
       }
     } else {
       const item = await prisma.articles.findUnique({ where: { slug }, select: {
