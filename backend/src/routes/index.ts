@@ -25,6 +25,7 @@ import favoritesRouter from "../modules/favorites/favorites.routes.js";
 import customerAddressesRouter from "../modules/customer-addresses/customer-addresses.routes.js";
 
 import moderatorRouter from "../modules/moderator/moderator.routes.js";
+import { publicMessengerRouter } from "../modules/messengers/messenger.routes.js";
 import yandexTestPointsRouter from "./yandex-test-points.js";
 
 const router = Router();
@@ -62,6 +63,7 @@ router.use("/cart", cartRouter);
 router.use("/favorites", favoritesRouter);
 router.use("/customer-addresses", customerAddressesRouter);
 
+router.use("/messengers", publicMessengerRouter);
 router.use("/moderator", moderatorRouter);
 
 export default router;
