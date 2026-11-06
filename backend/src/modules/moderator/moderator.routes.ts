@@ -3,6 +3,7 @@ import yandexShipmentsRouter from "./yandex-shipments.routes.js";
 import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
 import orderPackingRouter from "./order-packing.routes.js";
 import { Router } from "express";
+import { adminMessengerRouter } from "../messengers/messenger.routes.js";
 import { securityRateLimit } from "../../middleware/security-rate-limit.js";
 import shippingPackagesRouter from "./shipping-packages.routes.js";
 
@@ -230,6 +231,7 @@ router.use("/yandex-shipments", yandexShipmentsRouter);
 router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
 
+router.use("/notifications/storefront-messengers", adminMessengerRouter);
 router.get("/notifications", getNotificationOverview);
 router.patch("/notifications/templates/:id", updateNotificationTemplate);
 router.post("/notifications/campaigns", createNotificationCampaign);
