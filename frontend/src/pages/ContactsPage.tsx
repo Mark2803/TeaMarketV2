@@ -99,6 +99,7 @@ export default function ContactsPage() {
         <span>ИНН 780632012138</span>
         <span>ОГРНИП 325784700260989</span>
       </div>
+      <div className="contacts-page__developer"><a href="https://t.me/Chen_MT" target="_blank" rel="noopener noreferrer">Разработка сайтов и автоматизация бизнес-процессов</a></div>
     </div>
   );
 }
