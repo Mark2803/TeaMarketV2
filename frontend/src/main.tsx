@@ -20,6 +20,19 @@ import "./shared/styles/home-desktop-horizontal-sections.css";
 import "./shared/styles/viewport-shell-fix.css";
 import "./shared/styles/desktop-trackpad-scroll-fix.css";
 
+// Some Android in-app browsers report a CSS dvh larger than the visible viewport.
+// Keep the storefront shell aligned with the actual visible area.
+const syncVisibleViewportHeight = () => {
+  const visibleHeight = window.visualViewport?.height ?? window.innerHeight;
+  const height = Math.min(window.innerHeight, visibleHeight);
+  if (height > 0) {
+    document.documentElement.style.setProperty("--visible-viewport-height", `${height}px`);
+  }
+};
+syncVisibleViewportHeight();
+window.addEventListener("resize", syncVisibleViewportHeight);
+window.visualViewport?.addEventListener("resize", syncVisibleViewportHeight);
+
 ReactDOM.createRoot(
   document.getElementById("root")!
 ).render(
