@@ -304,7 +304,9 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
     const dropoffId = settings[0]?.primary_dropoff_id;
     if (!dropoffId) return fail(res,"SOURCE_MISSING","Выберите основной ПВЗ отгрузки",409);
     // Registered sender station and preferred physical drop-off point are different entities.
-    const source = process.env.YANDEX_DELIVERY_TEST_STATION_ID || "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924";
+    const source = stationMatch
+      ? (process.env.YANDEX_DELIVERY_TEST_STATION_ID || "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924")
+      : (process.env.YANDEX_DELIVERY_TEST_DOOR_SOURCE_STATION_ID || "e1139f6d-e34f-47a9-a55f-31f032a861a6");
     const plan = await calculateOrderPacking(orderNumber);
     if (plan.status !== "calculated" || !plan.parcels.length) return fail(res,"PACKING_UNAVAILABLE","Не удалось подобрать коробку; проверьте размеры и вес товаров",409);
     const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;

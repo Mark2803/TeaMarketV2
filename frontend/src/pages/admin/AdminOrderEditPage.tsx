@@ -89,9 +89,18 @@ export default function AdminOrderEditPage(){
   };
 
   const cancelOrder=()=>{
-    setOrderStatus("cancelled");
-    setError("");
-    document.getElementById("admin-cancellation-reason")?.focus();
+    if (!o || busy || o.status === "cancelled") return;
+    if (!cancellationReason.trim()) {
+      setOrderStatus("cancelled");
+      setError("Укажите причину отмены, затем нажмите «Подтвердить отмену».");
+      requestAnimationFrame(() => document.getElementById("admin-cancellation-reason")?.focus());
+      return;
+    }
+    void run(
+      "order",
+      () => updateAdminOrderStatus(o.order_number, "cancelled", cancellationReason.trim()),
+      "Заказ отменён. Остатки восстановлены."
+    );
   };
 
   if(loading)return <div className="admin-products-state">Загрузка заказа…</div>;
@@ -172,8 +181,8 @@ export default function AdminOrderEditPage(){
           <h2>Статус заказа</h2>
           <select value={orderStatus} onChange={e=>setOrderStatus(e.target.value as AdminOrderStatus)}>{Object.entries(orderLabels).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select>
           {orderStatus==="cancelled"&&<label><span>Причина отмены *</span><textarea id="admin-cancellation-reason" rows={4} value={cancellationReason} onChange={e=>setCancellationReason(e.target.value)} placeholder="Например: покупатель отказался от заказа"/></label>}
-          <button className="admin-primary-button" disabled={!!busy} onClick={saveOrderStatus}><Save size={16}/>{busy==="order"?"Сохранение…":"Сохранить статус"}</button>
-          {o.status!=="cancelled"&&<button className="admin-danger-outline-button" disabled={!!busy} onClick={cancelOrder}><Ban size={16}/>Отменить заказ</button>}
+          {orderStatus!=="cancelled"&&<button className="admin-primary-button" disabled={!!busy||orderStatus===o.status} onClick={saveOrderStatus}><Save size={16}/>{busy==="order"?"Сохранение…":"Сохранить статус"}</button>}
+          {o.status!=="cancelled"&&<button className="admin-danger-outline-button" disabled={!!busy} onClick={cancelOrder}><Ban size={16}/>{busy==="order"?"Отмена…":orderStatus==="cancelled"?"Подтвердить отмену":"Отменить заказ"}</button>}
         </section>
 
         <section className="admin-editor-card admin-order-control">

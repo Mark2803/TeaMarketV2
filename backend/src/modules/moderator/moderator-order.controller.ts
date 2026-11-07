@@ -1,7 +1,4 @@
-import type {
-  Request,
-  Response
-} from "express";
+import type { Request, Response } from "express";
 
 import {
   moderatorOrderParamsSchema,
@@ -20,151 +17,99 @@ export async function updateModeratorOrderStatusController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const paramsResult =
-    moderatorOrderParamsSchema.safeParse(
-      req.params
-    );
-
+  const paramsResult = moderatorOrderParamsSchema.safeParse(req.params);
   if (!paramsResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_ORDER_NUMBER",
-
-        message:
-          "Некорректный номер заказа",
-
-        details:
-          paramsResult.error.flatten()
-      }
-    });
-
+    res.status(400).json({ error: {
+      code: "INVALID_ORDER_NUMBER",
+      message: "Некорректный номер заказа",
+      details: paramsResult.error.flatten()
+    }});
     return;
   }
 
-  const bodyResult =
-    updateOrderStatusSchema.safeParse(
-      req.body
-    );
-
+  const bodyResult = updateOrderStatusSchema.safeParse(req.body);
   if (!bodyResult.success) {
-    res.status(400).json({
-      error: {
-        code:
-          "INVALID_ORDER_STATUS",
-
-        message:
-          "Некорректный статус заказа",
-
-        details:
-          bodyResult.error.flatten()
-      }
-    });
-
+    res.status(400).json({ error: {
+      code: "INVALID_ORDER_STATUS",
+      message: "Некорректный статус заказа",
+      details: bodyResult.error.flatten()
+    }});
     return;
   }
 
-  // Manual status changes are restricted to explicit cancellation.
   if (
     bodyResult.data.status !== "cancelled" ||
     !bodyResult.data.cancellationReason?.trim()
   ) {
-    res.status(400).json({
-      error: {
-        code: "MANUAL_STATUS_CHANGE_NOT_ALLOWED",
-        message: "Вручную разрешена только отмена заказа с указанием причины"
-      }
-    });
+    res.status(400).json({ error: {
+      code: "MANUAL_STATUS_CHANGE_NOT_ALLOWED",
+      message: "Вручную разрешена только отмена заказа с указанием причины"
+    }});
     return;
   }
 
-  const result =
-    await updateModeratorOrderStatus(
-      paramsResult.data.orderNumber,
-      bodyResult.data.status,
-      bodyResult.data.cancellationReason
-    );
+  const result = await updateModeratorOrderStatus(
+    paramsResult.data.orderNumber,
+    bodyResult.data.status,
+    bodyResult.data.cancellationReason
+  );
 
   if (!result.success) {
-    res.status(404).json({
-      error: {
-        code:
-          "ORDER_NOT_FOUND",
-
-        message:
-          "Заказ не найден"
-      }
-    });
-
+    const errors = {
+      ORDER_NOT_FOUND: { status: 404, message: "Заказ не найден" },
+      INVALID_STATUS_TRANSITION: { status: 409, message: "Отмена заказа в текущем статусе невозможна" },
+      PAID_ORDER_CANCELLATION_REQUIRES_REFUND: { status: 409, message: "Оплаченный заказ нельзя отменить без оформления возврата платежа" },
+      ORDER_ITEM_VARIANT_NOT_FOUND: { status: 409, message: "Не удалось сопоставить позиции заказа с товарными остатками" }
+    } as const;
+    const error = errors[result.error];
+    res.status(error.status).json({ error: { code: result.error, message: error.message } });
     return;
   }
 
-  try {
-    await sendOrderStatusEmail(result.order.orderNumber, result.order.status);
-  } catch (error) {
-    console.error("[NOTIFICATIONS] Не удалось отправить письмо о статусе заказа", error);
+  // A repeated cancellation is idempotent and must not send another notification.
+  if (result.order.previousStatus !== result.order.status) {
+    try {
+      await sendOrderStatusEmail(result.order.orderNumber, result.order.status);
+    } catch (error) {
+      console.error("[NOTIFICATIONS] Не удалось отправить письмо о статусе заказа", error);
+    }
   }
 
-  res.json({
-    data:
-      result.order
-  });
+  res.json({ data: result.order });
 }
 
 export async function updateModeratorOrderArchiveController(
   req: Request,
   res: Response
 ): Promise<void> {
-  const paramsResult =
-    moderatorOrderParamsSchema.safeParse(
-      req.params
-    );
-
+  const paramsResult = moderatorOrderParamsSchema.safeParse(req.params);
   if (!paramsResult.success) {
-    res.status(400).json({
-      error: {
-        code: "INVALID_ORDER_NUMBER",
-        message: "Некорректный номер заказа",
-        details: paramsResult.error.flatten()
-      }
-    });
+    res.status(400).json({ error: {
+      code: "INVALID_ORDER_NUMBER",
+      message: "Некорректный номер заказа",
+      details: paramsResult.error.flatten()
+    }});
     return;
   }
 
-  const bodyResult =
-    updateOrderArchiveSchema.safeParse(
-      req.body
-    );
-
+  const bodyResult = updateOrderArchiveSchema.safeParse(req.body);
   if (!bodyResult.success) {
-    res.status(400).json({
-      error: {
-        code: "INVALID_ARCHIVE_STATE",
-        message: "Некорректное состояние архива",
-        details: bodyResult.error.flatten()
-      }
-    });
+    res.status(400).json({ error: {
+      code: "INVALID_ARCHIVE_STATE",
+      message: "Некорректное состояние архива",
+      details: bodyResult.error.flatten()
+    }});
     return;
   }
 
-  const result =
-    await updateModeratorOrderArchive(
-      paramsResult.data.orderNumber,
-      bodyResult.data.archived
-    );
-
+  const result = await updateModeratorOrderArchive(
+    paramsResult.data.orderNumber,
+    bodyResult.data.archived
+  );
   if (!result.success) {
-    res.status(404).json({
-      error: {
-        code: "ORDER_NOT_FOUND",
-        message: "Заказ не найден"
-      }
-    });
+    res.status(404).json({ error: { code: "ORDER_NOT_FOUND", message: "Заказ не найден" } });
     return;
   }
 
-  res.json({
-    data:
-      result.order
-  });
+  res.json({ data: result.order });
 }
