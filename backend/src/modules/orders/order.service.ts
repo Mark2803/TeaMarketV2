@@ -183,11 +183,19 @@ export async function createOrder(
         };
       }
 
-      // Only online payment methods are allowed; never fall back to cash on delivery.
+      // Only supported online payment methods are allowed, including explicit IDs.
+      const onlinePaymentPattern = /юкас|yookassa|онлайн|online|банковск|карт|сбп/i;
       const paymentMethod = input.paymentMethodId
-        ? await transaction.payment_methods.findFirst({where:{id:input.paymentMethodId,is_active:true}})
-        : (await transaction.payment_methods.findMany({where:{is_active:true}}))
-            .find(method=>/юкас|yookassa|онлайн|online|банковск|карт/i.test(method.name)) ?? null;
+        ? await transaction.payment_methods.findFirst({
+            where: { id: input.paymentMethodId, is_active: true }
+          })
+        : (await transaction.payment_methods.findMany({
+            where: { is_active: true }
+          })).find(method => onlinePaymentPattern.test(method.name)) ?? null;
+
+      if (paymentMethod && !onlinePaymentPattern.test(paymentMethod.name)) {
+        return { success: false, error: "PAYMENT_METHOD_NOT_FOUND" };
+      }
 
       if (!paymentMethod) {
         return {

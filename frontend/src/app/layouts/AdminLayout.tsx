@@ -82,7 +82,6 @@ export default function AdminLayout() {
         <header className="admin-topbar">
           <div>
             <strong>Администратор</strong>
-            <span>{username}</span>
           </div>
         </header>
 

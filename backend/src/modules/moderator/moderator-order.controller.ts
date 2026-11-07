@@ -64,6 +64,20 @@ export async function updateModeratorOrderStatusController(
     return;
   }
 
+  // Manual status changes are restricted to explicit cancellation.
+  if (
+    bodyResult.data.status !== "cancelled" ||
+    !bodyResult.data.cancellationReason?.trim()
+  ) {
+    res.status(400).json({
+      error: {
+        code: "MANUAL_STATUS_CHANGE_NOT_ALLOWED",
+        message: "Вручную разрешена только отмена заказа с указанием причины"
+      }
+    });
+    return;
+  }
+
   const result =
     await updateModeratorOrderStatus(
       paramsResult.data.orderNumber,

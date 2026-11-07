@@ -1,3 +1,4 @@
+import { handleYooKassaWebhook } from "./yookassa-webhook.controller.js";
 import { Router } from "express";
 
 import {
@@ -18,6 +19,8 @@ import { getAccessibleOrder, payAccessibleOrder } from "./order-access.controlle
 import { lookupTracking } from "./tracking.controller.js";
 
 const router = Router();
+router.post("/yookassa/webhook", handleYooKassaWebhook);
+
 router.get("/tracking", lookupTracking);
 router.get("/access/:orderId", authMiddleware, getAccessibleOrder);
 router.post("/access/:orderId/pay", authMiddleware, payAccessibleOrder);

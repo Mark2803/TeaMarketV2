@@ -7,8 +7,6 @@ import {
   getOrderPacking,
   saveOrderPacking,
   updateAdminOrderArchive,
-  updateAdminOrderDelivery,
-  updateAdminOrderPayment,
   updateAdminOrderStatus,
 } from "../../shared/api/admin";
 import type {
@@ -35,11 +33,6 @@ export default function AdminOrderEditPage(){
   const[busy,setBusy]=useState("");
   const[orderStatus,setOrderStatus]=useState<AdminOrderStatus>("new");
   const[cancellationReason,setCancellationReason]=useState("");
-  const[deliveryStatus,setDeliveryStatus]=useState<AdminDeliveryStatus>("pending");
-  const[service,setService]=useState("");
-  const[tracking,setTracking]=useState("");
-  const[paymentStatus,setPaymentStatus]=useState<AdminPaymentOperationStatus>("pending");
-  const[operation,setOperation]=useState("");
   const [hasYandexShipment,setHasYandexShipment]=useState(false);
   const [labelBusy,setLabelBusy]=useState(false);
   const[packing,setPacking]=useState<PackingPlan|null>(null);
@@ -58,14 +51,9 @@ export default function AdminOrderEditPage(){
       setOrderStatus(r.data.status);
       setCancellationReason(r.data.cancellation_reason??"");
       if(r.data.order_deliveries){
-        setDeliveryStatus(r.data.order_deliveries.status);
-        setService(r.data.order_deliveries.delivery_service??"");
-        setTracking(r.data.order_deliveries.tracking_number??"");
       }
       const p=r.data.order_payments.at(-1);
       if(p){
-        setPaymentStatus(p.status);
-        setOperation(p.operation_number??"");
       }
     }catch{
       setError("Не удалось загрузить заказ.");
@@ -199,12 +187,22 @@ export default function AdminOrderEditPage(){
 
         <section className="admin-editor-card admin-order-control">
           <h2>Доставка</h2>
-          {d?<><label><span>Статус</span><select value={deliveryStatus} onChange={e=>setDeliveryStatus(e.target.value as AdminDeliveryStatus)}>{Object.entries(deliveryLabels).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><label><span>Служба доставки</span><input value={service} onChange={e=>setService(e.target.value)}/></label><label><span>Трек-номер</span><input value={tracking} onChange={e=>setTracking(e.target.value)}/></label><button className="admin-primary-button" disabled={!!busy} onClick={()=>run("delivery",()=>updateAdminOrderDelivery(o.order_number,{status:deliveryStatus,deliveryService:service||null,trackingNumber:tracking||null}))}><Save size={16}/>{busy==="delivery"?"Сохранение…":"Сохранить доставку"}</button></>:<p>Нет данных доставки.</p>}
+          {d?<div className="admin-order-info-grid">
+            <div><span>Статус</span><strong>{deliveryLabels[d.status]}</strong></div>
+            <div><span>Служба доставки</span><strong>{d.delivery_service||"—"}</strong></div>
+            <div><span>Трек-номер</span><strong>{d.tracking_number||"—"}</strong></div>
+          </div>:<p>Нет данных доставки.</p>}
         </section>
 
         <section className="admin-editor-card admin-order-control">
           <h2>Оплата</h2>
-          {p?<><div className="admin-order-payment-method">{p.payment_methods.name} · {money(p.amount)}<small>Оплачено: {date(p.paid_at)}</small></div><label><span>Статус операции</span><select value={paymentStatus} onChange={e=>setPaymentStatus(e.target.value as AdminPaymentOperationStatus)}>{Object.entries(paymentLabels).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><label><span>Номер операции</span><input value={operation} onChange={e=>setOperation(e.target.value)}/></label><button className="admin-primary-button" disabled={!!busy} onClick={()=>run("payment",()=>updateAdminOrderPayment(o.order_number,{status:paymentStatus,operationNumber:operation||null,paidAt:paymentStatus==="succeeded"?(p.paid_at??new Date().toISOString()):p.paid_at}))}><Save size={16}/>{busy==="payment"?"Сохранение…":"Сохранить оплату"}</button></>:<p>Платёж для заказа не найден.</p>}
+          {p?<div className="admin-order-info-grid">
+            <div><span>Способ оплаты</span><strong>{p.payment_methods.name}</strong></div>
+            <div><span>Сумма</span><strong>{money(p.amount)}</strong></div>
+            <div><span>Статус операции</span><strong>{paymentLabels[p.status]}</strong></div>
+            <div><span>Номер операции</span><strong>{p.operation_number||"—"}</strong></div>
+            <div><span>Оплачено</span><strong>{date(p.paid_at)}</strong></div>
+          </div>:<p>Платёж для заказа не найден.</p>}
         </section>
       </aside>
     </div>

@@ -281,15 +281,7 @@ router.patch(
   updateModeratorOrderArchiveController
 );
 
-router.patch(
-  "/orders/:orderNumber/delivery",
-  updateModeratorDeliveryController
-);
 
-router.patch(
-  "/orders/:orderNumber/payment",
-  updateModeratorPaymentController
-);
 
 
 router.get("/content/home-banners", listHomeBannersAdmin);

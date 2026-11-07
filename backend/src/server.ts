@@ -1,6 +1,9 @@
 import app from "./app.js";
 import { env } from "./config/env.js";
 import { disconnectDatabase } from "./database/prisma.js";
+import { startYandexDeliverySync } from "./modules/orders/yandex-delivery-sync.js";
+
+startYandexDeliverySync();
 
 const server = app.listen(env.PORT, () => {
   console.log(

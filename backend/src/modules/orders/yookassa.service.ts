@@ -1,3 +1,4 @@
+import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
 import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
 
@@ -103,6 +104,13 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
       });
     });
+    // Confirm the order only after YooKassa has verified the payment.
+    try {
+      await advanceOrderStatus(record.order_id, "confirmed");
+    } catch (error) {
+      console.error("AUTO_ORDER_CONFIRM_ERROR", record.order_id, error);
+    }
+
     // Provider-verified payment only. The carrier request has an atomic DB guard,
     // so repeated YooKassa webhooks cannot create duplicate shipments.
     try {

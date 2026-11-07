@@ -5,7 +5,7 @@ import "../shared/styles/tracking-search.css";
 
 const labels: Record<string,string> = {
   HANDED_OVER:"Передано в ПВЗ Яндекса",IN_TRANSIT:"В пути",AT_PICKUP_POINT:"Прибыло в ПВЗ назначения",DELIVERED:"Получено покупателем",
-  CREATED:"Отправление оформлено", ACCEPTED:"Принято Яндексом", SORTING:"Сортировка",
+  CREATED:"Отправление оформлено", ACCEPTED:"Принято Яндексом", SORTING:"Сортировка", SORTING_CENTER_LOADED:"Отправление загружено в сортировочном центре",
   DELIVERY_IN_PROGRESS:"В пути", DELIVERY_DELIVERED:"Доставлено", CANCELLED:"Отменено",
   pending:"Ожидает оформления",preparing:"Подготавливается",handed_over:"Передано службе доставки",
   in_transit:"В пути",delivered:"Доставлено",returned:"Возвращено",cancelled:"Отменено"
@@ -33,7 +33,7 @@ export default function TrackingSearch() {
       {result.updatedAt&&<p>Обновлено: {new Date(result.updatedAt).toLocaleString("ru-RU")}</p>}
       {result.simulated&&<p role="status" style={{fontWeight:700,color:"#94612a"}}>ТЕСТОВАЯ СИМУЛЯЦИЯ · события не получены от Яндекса</p>}
       <h3>История перемещения</h3>
-      {result.events.length? <ol>{result.events.map((event,i)=><li key={i}><strong>{labels[event.status]??event.status.replaceAll("_", " ")}</strong><span>{new Date(event.timestamp).toLocaleString("ru-RU")}{event.location?` · ${event.location}`:""}</span></li>)}</ol> : <p>Подробные события маршрута пока не получены от службы доставки. Текущий статус показан выше.</p>}
+      {result.events.length? <ol>{[...result.events].reverse().map((event,i)=><li key={i}><strong>{labels[event.status]??event.status.replaceAll("_", " ")}</strong><span>{new Date(event.timestamp).toLocaleString("ru-RU")}{event.location?` · ${event.location}`:""}</span></li>)}</ol> : <p>Подробные события маршрута пока не получены от службы доставки. Текущий статус показан выше.</p>}
     </div>}
   </section>;
 }

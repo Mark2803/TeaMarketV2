@@ -28,10 +28,20 @@ export type UpdateModeratorOrderStatusResult =
 export async function updateModeratorOrderStatus(
   orderNumber: string,
   status: OrderStatus,
-  cancellationReason?: string | null
+  cancellationReason?: string | null,
+  automatic = false
 ): Promise<UpdateModeratorOrderStatusResult> {
   return prisma.$transaction(
     async (transaction) => {
+      if (automatic) {
+        await transaction.$queryRaw`
+          SELECT id
+          FROM orders
+          WHERE order_number = ${orderNumber}
+          FOR UPDATE
+        `;
+      }
+
       const order =
         await transaction.orders.findUnique({
           where: {
@@ -78,6 +88,36 @@ export async function updateModeratorOrderStatus(
               new Date()
           }
         };
+      }
+
+      if (automatic) {
+        const rank: Record<string, number> = {
+          new: 0,
+          confirmed: 1,
+          processing: 2,
+          shipped: 3,
+          completed: 4
+        };
+
+        const currentRank = rank[order.status];
+        const nextRank = rank[status];
+
+        if (
+          currentRank === undefined ||
+          nextRank === undefined ||
+          nextRank <= currentRank
+        ) {
+          return {
+            success: true,
+            order: {
+              id: order.id,
+              orderNumber: order.order_number,
+              previousStatus: order.status,
+              status: order.status,
+              updatedAt: new Date()
+            }
+          };
+        }
       }
 
       const updatedOrder =
