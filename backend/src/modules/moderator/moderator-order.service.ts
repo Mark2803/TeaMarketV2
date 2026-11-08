@@ -87,6 +87,16 @@ export async function updateModeratorOrderStatus(
         return { success: false, error: "PAID_ORDER_CANCELLATION_REQUIRES_REFUND" };
       }
 
+      // Do not release reserved stock while a YooKassa payment can still succeed.
+      const activePayment = await transaction.order_payments.findFirst({
+        where: { order_id: order.id, operation_number: { not: null },
+          status: { not: "canceled" } },
+        select: { id: true }
+      });
+      if (activePayment) {
+        return { success: false, error: "INVALID_STATUS_TRANSITION" };
+      }
+
       const items = await transaction.order_items.findMany({
         where: { order_id: order.id },
         select: { sku: true, quantity: true }
