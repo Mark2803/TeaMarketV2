@@ -7,7 +7,6 @@ import {
 import { prisma } from "../../database/prisma.js";
 import { calculatePricing } from "../pricing/pricing.service.js";
 import { quoteYandexPickup,quoteYandexDoor,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
-import { sendTemplateEmail } from "../notifications/notification.service.js";
 
 import type {
   CreateOrderInput
