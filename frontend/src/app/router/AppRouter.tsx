@@ -59,6 +59,7 @@ const AdminCustomerEditPage = lazy(() => import("../../pages/admin/AdminCustomer
 const AdminPromotionsPage = lazy(() => import("../../pages/admin/AdminPromotionsPage"));
 const AdminNotificationsPage = lazy(() => import("../../pages/admin/AdminNotificationsPage"));
 const AdminAnalyticsPage = lazy(() => import("../../pages/admin/AdminAnalyticsPage"));
+const AdminToolsPage = lazy(() => import("../../pages/admin/AdminToolsPage"));
 const AdminSettingsPage = lazy(() => import("../../pages/admin/AdminSettingsPage"));
 const AdminDeliveryPage = lazy(() => import("../../pages/admin/AdminDeliveryPage"));
 
@@ -129,6 +130,7 @@ export default function AppRouter() {
           <Route path="notifications" element={<AdminNotificationsPage />} />
           <Route path="analytics" element={<AdminAnalyticsPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
+          <Route path="tools" element={<AdminToolsPage />} />
         </Route>
 
         <Route path="/404" element={<NotFoundPage />} />
