@@ -3,11 +3,11 @@ import { prisma } from "../../../database/prisma.js";
 import ExcelJS from "exceljs";
 import nodemailer from "nodemailer";
 
-const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function period(req: Request) {
   const from = String(req.query.from ?? req.body?.from ?? "");
   const to = String(req.query.to ?? req.body?.to ?? "");
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(from) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(to)) throw new Error("Укажите даты в формате ГГГГ-ММ-ДД");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) throw new Error("Укажите даты в формате ГГГГ-ММ-ДД");
   const start = new Date(from + "T00:00:00.000Z");
   const end = new Date(to + "T23:59:59.999Z");
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start.toISOString().slice(0,10) !== from || end.toISOString().slice(0,10) !== to || start > end || end.getTime()-start.getTime()>366*86400000) throw new Error("Некорректный период (максимум 366 дней)");
@@ -74,7 +74,7 @@ export async function sendAccountantReport(req:Request,res:Response) {
     const port=Number(process.env.SMTP_PORT||587);
     const transport=nodemailer.createTransport({host,port,secure:port===465,requireTLS:port!==465,auth:{user,pass}});
     await transport.sendMail({from,to:recipient,subject:"Отчёт TeaMarketV2 "+data.range.from+" — "+data.range.to,
-      text:"Отчёт во вложении.\\n"+data.warnings.join("\\n"),
+      text:"Отчёт во вложении.\n"+data.warnings.join("\n"),
       attachments:[{filename:"accountant-"+data.range.from+"-"+data.range.to+".xlsx",content:file}]});
     res.json({data:{sent:true,email:recipient}});
   }catch(e){fail(res,e)}
