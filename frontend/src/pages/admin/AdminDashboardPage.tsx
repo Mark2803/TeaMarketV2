@@ -218,9 +218,7 @@ export default function AdminDashboardPage() {
       <div className="admin-page-heading">
         <div>
           <h1>Главная</h1>
-          <p>Управление магазином «Чайный Маркет»</p>
         </div>
-        <Link to="/admin/guide" className="admin-primary-button" style={{ alignSelf: "center", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Инструкция</Link>
       </div>
 
 
