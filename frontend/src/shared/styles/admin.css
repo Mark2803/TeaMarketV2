@@ -646,3 +646,38 @@
 @media(max-width:420px) {
  .admin-analytics-kpis,.admin-funnel { grid-template-columns:minmax(0,1fr); }
 }
+
+/* Compact mobile admin header: brand + logout in one row, horizontal navigation below. */
+.admin-logout-mobile { display: none; }
+@media (max-width: 760px) {
+  .admin-sidebar {
+    position: relative;
+    padding: .55rem .75rem .45rem;
+    max-height: none;
+    overflow: visible;
+  }
+  .admin-brand {
+    padding: 0 5.8rem .45rem 0;
+    min-height: 2.35rem;
+    display: flex;
+    align-items: center;
+  }
+  .admin-brand-row { min-width: 0; }
+  .admin-brand-row strong { font-size: 1.05rem; line-height: 1.1; }
+  .admin-brand-logo { width: 2rem; height: 2rem; flex-basis: 2rem; }
+  .admin-logout-mobile {
+    display: inline-flex;
+    position: absolute;
+    top: .5rem;
+    right: .75rem;
+    margin: 0;
+    padding: .4rem .45rem;
+    gap: .3rem;
+    min-height: 2.35rem;
+    align-items: center;
+    font-size: .85rem;
+  }
+  .admin-logout-desktop { display: none; }
+  .admin-nav { margin: 0; padding-bottom: .15rem; }
+  .admin-nav a { padding: .45rem .65rem; }
+}
