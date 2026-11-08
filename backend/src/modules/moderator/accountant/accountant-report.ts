@@ -3,6 +3,7 @@ import { prisma } from "../../../database/prisma.js";
 import ExcelJS from "exceljs";
 import nodemailer from "nodemailer";
 
+const moscowDate = (iso: string) => iso ? new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date(iso)) : "";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function period(req: Request) {
   const from = String(req.query.from ?? req.body?.from ?? "");
@@ -30,7 +31,8 @@ async function load(req: Request) {
   const warnings=[
     "Возвраты не включены: в текущей модели нет подтверждённого реестра операций возврата.",
     "Комиссии и перечисления ЮKassa не рассчитаны: необходим реестр провайдера.",
-    "Даты операций указаны в UTC. При сверке учитывайте часовой пояс.",
+    "Даты операций указаны по московскому времени (МСК).",
+    "Тестовые заказы и товары DEMO не исключены автоматически: перед передачей бухгалтеру необходимо отделить тестовые операции от реальных.",
     "Это финансовая ведомость, а не КУДиР или банковская выписка."
   ];
   return {range,rows,summary:{count:rows.length,paid:Math.round(rows.reduce((s,r)=>s+r.amount,0)*100)/100},warnings};
@@ -41,14 +43,14 @@ async function workbook(data:Report) {
   const summary=book.addWorksheet("Сводка");
   summary.addRows([["Отчёт для бухгалтера"],["Период",data.range.from+" — "+data.range.to],["Оплаченных операций",data.summary.count],["Сумма оплат, ₽",data.summary.paid],[],["Ограничения данных"],...data.warnings.map(w=>[w])]);
   const ops=book.addWorksheet("Операции");
-  ops.addRow(["Дата оплаты UTC","Номер заказа","ID платежа","Покупатель","Оплата, ₽","Доставка, ₽","Скидки, ₽","Бонусы, ₽","Промокод","Статус"]);
-  data.rows.forEach(r=>ops.addRow([r.date,r.number,r.paymentId,r.customer,r.amount,r.delivery,r.discount,r.loyalty,r.promo,r.status]));
+  ops.addRow(["Дата оплаты (МСК)","Номер заказа","ID платежа","Покупатель","Оплата, ₽","Доставка, ₽","Скидки, ₽","Бонусы, ₽","Промокод","Статус"]);
+  data.rows.forEach(r=>ops.addRow([moscowDate(r.date),r.number,r.paymentId,r.customer,r.amount,r.delivery,r.discount,r.loyalty,r.promo,r.status]));
   const items=book.addWorksheet("Расшифровка заказов");
   items.addRow(["Номер заказа","Товар","Артикул","Количество","Цена, ₽","Сумма, ₽"]);
   data.rows.forEach(r=>r.items.forEach(i=>items.addRow([r.number,i.name,i.sku,i.qty,i.price,i.total])));
   const reconciliation=book.addWorksheet("Сверка ЮKassa");
-  reconciliation.addRow(["Номер заказа","ID платежа","Дата UTC","Сумма оплаты, ₽","Комиссия ЮKassa","Перечислено","Примечание"]);
-  data.rows.forEach(r=>reconciliation.addRow([r.number,r.paymentId,r.date,r.amount,"Нет данных","Нет данных","Необходим реестр ЮKassa"]));
+  reconciliation.addRow(["Номер заказа","ID платежа","Дата оплаты (МСК)","Сумма оплаты, ₽","Комиссия ЮKassa","Перечислено","Примечание"]);
+  data.rows.forEach(r=>reconciliation.addRow([r.number,r.paymentId,moscowDate(r.date),r.amount,"Нет данных","Нет данных","Необходим реестр ЮKassa"]));
   for (const sheet of book.worksheets) {sheet.getRow(1).font={bold:true};sheet.views=[{state:"frozen",ySplit:1}];sheet.columns.forEach(c=>{c.width=24});}
   return Buffer.from(await book.xlsx.writeBuffer());
 }
