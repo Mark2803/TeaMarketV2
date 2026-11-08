@@ -53,8 +53,17 @@ export default function AdminLayout() {
             <img className="admin-brand-logo" src="/brand-logo.svg" alt="" />
             <strong>Чайный Маркет</strong>
           </div>
-          <span>Панель управления</span>
         </div>
+
+        <button
+          className="admin-logout admin-logout-mobile"
+          type="button"
+          onClick={() => void logout()}
+          aria-label="Выйти из панели управления"
+        >
+          <LogOut size={19} />
+          <span>Выйти</span>
+        </button>
 
         <nav className="admin-nav">
           {items.map(([to, label, Icon]) => (
@@ -71,7 +80,7 @@ export default function AdminLayout() {
         </nav>
 
         <button
-          className="admin-logout"
+          className="admin-logout admin-logout-desktop"
           type="button"
           onClick={() => void logout()}
         >
@@ -81,12 +90,6 @@ export default function AdminLayout() {
       </aside>
 
       <main className="admin-main">
-        <header className="admin-topbar">
-          <div>
-            <strong>Администратор</strong>
-          </div>
-        </header>
-
         <div className="admin-content">
           <Outlet />
         </div>
