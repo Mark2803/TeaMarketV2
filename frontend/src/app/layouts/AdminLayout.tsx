@@ -12,6 +12,7 @@ import {
   Users,
   FileText,
   Truck,
+  Wrench,
 } from "lucide-react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 
@@ -29,6 +30,7 @@ const items = [
   ["/admin/content", "Контент", FileText],
   ["/admin/notifications", "Уведомления", Bell],
   ["/admin/analytics", "Аналитика", BarChart3],
+  ["/admin/tools", "Инструменты", Wrench],
   ["/admin/settings", "Настройки", Settings],
 ] as const;
 
