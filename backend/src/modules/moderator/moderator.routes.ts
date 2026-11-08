@@ -2,6 +2,7 @@ import { previewAccountantReport, downloadAccountantReport, sendAccountantReport
 import adminOrderAlertsRouter from "./notifications/admin-order-alerts.routes.js";
 import yandexReturnsRouter from "./yandex-returns.routes.js";
 import yandexShipmentsRouter from "./yandex-shipments.routes.js";
+import yandexAlertsRouter from "./yandex-alerts.routes.js";
 import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
 import orderPackingRouter from "./order-packing.routes.js";
 import { Router } from "express";
@@ -230,6 +231,7 @@ router.use("/yandex-delivery-test", yandexDeliveryTestRouter);
 router.use("/shipping-packages", shippingPackagesRouter);
 router.use("/order-packing", orderPackingRouter);
 router.use("/yandex-shipments", yandexShipmentsRouter);
+router.use("/yandex-alerts", yandexAlertsRouter);
 router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
 router.get("/accountant-report", previewAccountantReport);
