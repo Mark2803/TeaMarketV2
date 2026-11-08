@@ -1,3 +1,4 @@
+import adminOrderAlertsRouter from "./notifications/admin-order-alerts.routes.js";
 import yandexReturnsRouter from "./yandex-returns.routes.js";
 import yandexShipmentsRouter from "./yandex-shipments.routes.js";
 import yandexDeliveryTestRouter from "./yandex-delivery-test.routes.js";
@@ -232,6 +233,7 @@ router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
 
 router.use("/notifications/storefront-messengers", adminMessengerRouter);
+router.use("/notifications/admin-order-alerts", adminOrderAlertsRouter);
 router.get("/notifications", getNotificationOverview);
 router.patch("/notifications/templates/:id", updateNotificationTemplate);
 router.post("/notifications/campaigns", createNotificationCampaign);
