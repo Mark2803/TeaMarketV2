@@ -1,3 +1,4 @@
+import { previewAccountantReport, downloadAccountantReport, sendAccountantReport } from "./accountant/accountant-report.js";
 import adminOrderAlertsRouter from "./notifications/admin-order-alerts.routes.js";
 import yandexReturnsRouter from "./yandex-returns.routes.js";
 import yandexShipmentsRouter from "./yandex-shipments.routes.js";
@@ -231,6 +232,9 @@ router.use("/order-packing", orderPackingRouter);
 router.use("/yandex-shipments", yandexShipmentsRouter);
 router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
+router.get("/accountant-report", previewAccountantReport);
+router.get("/accountant-report/download", downloadAccountantReport);
+router.post("/accountant-report/send", sendAccountantReport);
 
 router.use("/notifications/storefront-messengers", adminMessengerRouter);
 router.use("/notifications/admin-order-alerts", adminOrderAlertsRouter);
