@@ -1,3 +1,5 @@
+import { notifyAdminAboutOrder } from "../notifications/admin-order-alerts.service.js";
+import { sendTemplateEmail } from "../notifications/notification.service.js";
 import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
 import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
@@ -104,6 +106,29 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
       });
     });
+    // Notifications are sent only after a provider-verified successful payment.
+    // The admin delivery log prevents duplicate Telegram/email alerts.
+    try {
+      const paidOrder = await prisma.orders.findUnique({
+        where: { id: record.order_id },
+        select: { id: true, order_number: true, total_amount: true, email: true, customer_id: true, payment_status: true }
+      });
+      if (paidOrder?.payment_status === "paid") {
+        await notifyAdminAboutOrder(paidOrder);
+        if (paidOrder.email) {
+          // Send customer confirmation only on the first successful transition.
+          const newlyPaid = record.status !== "succeeded";
+          if (newlyPaid) {
+            await sendTemplateEmail("order_created", paidOrder.email, {
+              order_number: paidOrder.order_number,
+              total: Number(paidOrder.total_amount).toFixed(2)
+            }, paidOrder.customer_id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("PAID_ORDER_NOTIFICATION_ERROR", record.order_id, error);
+    }
     // Confirm the order only after YooKassa has verified the payment.
     try {
       await advanceOrderStatus(record.order_id, "confirmed");
