@@ -102,9 +102,38 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         where: { id: record.id, status: { not: "succeeded" } },
         data: { status: "succeeded", paid_at: new Date(), updated_at: new Date() }
       });
-      if (changed.count) await tx.orders.update({
-        where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
-      });
+      if (changed.count) {
+        // Serialize settlement of order-side benefits with payment confirmation.
+        await tx.orders.update({
+          where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
+        });
+        const order = await tx.orders.findUniqueOrThrow({
+          where: { id: record.order_id },
+          select: { customer_id: true, loyalty_spent: true }
+        });
+        const promo = await tx.order_discounts.findFirst({
+          where: { order_id: record.order_id, source_type: "promo_code", source_id: { not: null } },
+          select: { source_id: true }
+        });
+        if (promo?.source_id) {
+          await tx.promo_codes.update({
+            where: { id: promo.source_id }, data: { used_count: { increment: 1 } }
+          });
+        }
+        const spent = Number(order.loyalty_spent);
+        if (order.customer_id && spent > 0) {
+          const debit = await tx.loyalty_accounts.updateMany({
+            where: { customer_id: order.customer_id, balance: { gte: spent } },
+            data: { balance: { decrement: spent } }
+          });
+          if (debit.count !== 1) throw new Error("INSUFFICIENT_LOYALTY_BALANCE_AT_PAYMENT");
+          await tx.loyalty_transactions.create({
+            data: { customer_id: order.customer_id, order_id: record.order_id,
+              type: "spend", amount: (-spent).toFixed(2),
+              comment: "Списание после подтверждения оплаты" }
+          });
+        }
+      }
     });
     // Notifications are sent only after a provider-verified successful payment.
     // The admin delivery log prevents duplicate Telegram/email alerts.
