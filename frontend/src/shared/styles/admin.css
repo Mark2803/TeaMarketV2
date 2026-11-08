@@ -681,3 +681,20 @@
   .admin-nav { margin: 0; padding-bottom: .15rem; }
   .admin-nav a { padding: .45rem .65rem; }
 }
+
+/* Collapsible delivery errors on the admin dashboard. */
+.admin-delivery-alerts { margin-bottom: 1rem; padding: 0 !important; overflow: hidden; }
+.admin-delivery-alerts-toggle {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  width: 100%; padding: 1rem 1.2rem; border: 0; background: transparent;
+  color: var(--color-text); font: inherit; text-align: left; cursor: pointer;
+}
+.admin-delivery-alerts-title { display: inline-flex; align-items: center; gap: .6rem; }
+.admin-delivery-alerts-dot { width: .65rem; height: .65rem; border-radius: 50%; background: #d03434; flex: 0 0 auto; }
+.admin-delivery-alerts-count { border-radius: 999px; background: #f9e0e0; color: #9c2020; font-size: .85rem; padding: .15rem .55rem; font-weight: 700; }
+.admin-delivery-alerts-body { padding: 0 1.2rem 1.2rem; }
+.admin-delivery-alerts-body ul { padding-left: 1.2rem; }
+.admin-delivery-alerts-item { margin: .7rem 0; overflow-wrap: anywhere; }
+.admin-delivery-alerts-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+.admin-delivery-alerts-actions button { padding: .4rem .65rem; border: 1px solid var(--color-border); border-radius: .5rem; background: var(--color-surface); color: var(--color-text); cursor: pointer; }
+.admin-delivery-alerts-actions button:disabled { opacity: .5; cursor: wait; }
