@@ -1,3 +1,4 @@
+import {notifyAdminAboutOrder} from "../notifications/admin-order-alerts.service.js";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -570,5 +571,9 @@ export async function createOrder(
     }
   }
 
+  if(result.success){
+    try{await notifyAdminAboutOrder(result.order)}
+    catch(error){console.error("[ADMIN_ALERT] Не удалось обработать уведомления о заказе",error)}
+  }
   return result;
 }
