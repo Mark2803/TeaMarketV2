@@ -11,6 +11,7 @@ import {
   Tags,
   Users,
   FileText,
+  BookOpen,
   Truck,
   Wrench,
 } from "lucide-react";
@@ -31,6 +32,7 @@ const items = [
   ["/admin/notifications", "Уведомления", Bell],
   ["/admin/analytics", "Аналитика", BarChart3],
   ["/admin/tools", "Инструменты", Wrench],
+  ["/admin/guide", "Инструкция", BookOpen],
   ["/admin/settings", "Настройки", Settings],
 ] as const;
 
