@@ -97,7 +97,7 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
   if (!record || payment.metadata?.order_id !== record.order_id) return;
   if (Number(payment.amount.value).toFixed(2) !== Number(record.amount).toFixed(2)) return;
   if (payment.status === "succeeded" && payment.paid === true) {
-    await prisma.$transaction(async (tx) => {
+    const firstConfirmation = await prisma.$transaction(async (tx) => {
       const changed = await tx.order_payments.updateMany({
         where: { id: record.id, status: { not: "succeeded" } },
         data: { status: "succeeded", paid_at: new Date(), updated_at: new Date() }
@@ -126,14 +126,16 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
             where: { customer_id: order.customer_id, balance: { gte: spent } },
             data: { balance: { decrement: spent } }
           });
-          if (debit.count !== 1) throw new Error("INSUFFICIENT_LOYALTY_BALANCE_AT_PAYMENT");
-          await tx.loyalty_transactions.create({
+          if (debit.count !== 1) {
+            console.error("LOYALTY_DEBIT_UNAVAILABLE_AFTER_PAYMENT", record.order_id);
+          } else await tx.loyalty_transactions.create({
             data: { customer_id: order.customer_id, order_id: record.order_id,
               type: "spend", amount: (-spent).toFixed(2),
               comment: "Списание после подтверждения оплаты" }
           });
         }
       }
+      return changed.count > 0;
     });
     // Notifications are sent only after a provider-verified successful payment.
     // The admin delivery log prevents duplicate Telegram/email alerts.
@@ -146,7 +148,7 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         await notifyAdminAboutOrder(paidOrder);
         if (paidOrder.email) {
           // Send customer confirmation only on the first successful transition.
-          const newlyPaid = record.status !== "succeeded";
+          const newlyPaid = firstConfirmation;
           if (newlyPaid) {
             await sendTemplateEmail("order_created", paidOrder.email, {
               order_number: paidOrder.order_number,
