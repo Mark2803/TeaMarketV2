@@ -7,3 +7,13 @@
 .storefront-messenger-title label{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:400}
 .storefront-messenger-row>input{width:100%;box-sizing:border-box;border:1px solid #d7cfc2;border-radius:10px;padding:11px 12px;background:#fff;font:inherit}
 .storefront-messenger-row small{color:#777}
+
+
+/* Notification panels share the available admin content width. */
+.notifications-page { width:100%; max-width:100%; min-width:0; }
+.notifications-page .storefront-messengers { width:100%; max-width:none; min-width:0; }
+.notifications-page .campaign-layout { grid-template-columns:minmax(0,9fr) minmax(0,11fr); }
+.notifications-page .campaign-layout > *, .notifications-page .notification-panel { min-width:0; }
+@media(max-width:1100px) {
+ .notifications-page .campaign-layout { grid-template-columns:minmax(0,1fr); }
+}
