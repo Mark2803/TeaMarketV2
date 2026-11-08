@@ -5,7 +5,7 @@ type Report={range:{from:string;to:string};rows:Array<{date:string;number:string
 const iso=(d:Date)=>d.toISOString().slice(0,10);
 const money=(n:number)=>new Intl.NumberFormat("ru-RU",{style:"currency",currency:"RUB"}).format(n);
 const apiBase=import.meta.env.VITE_API_BASE_URL as string;
-function url(path:string,from:string,to:string){const u=new URL(apiBase.replace(/\\/$/,"")+path,window.location.origin);u.searchParams.set("from",from);u.searchParams.set("to",to);return u.toString()}
+function url(path:string,from:string,to:string){const u=new URL(apiBase.replace(/\/$/,"")+path,window.location.origin);u.searchParams.set("from",from);u.searchParams.set("to",to);return u.toString()}
 export default function AdminAccountantReport(){
  const [from,setFrom]=useState(()=>{const d=new Date();d.setDate(d.getDate()-29);return iso(d)});
  const [to,setTo]=useState(()=>iso(new Date()));
