@@ -12,7 +12,7 @@ const COMPLETE_STATUS = /(?:RETURNED|RETURN_DELIVERED|RETURN_COMPLETED|RETURN_FI
 const FINISHED_STATUS = /(?:^|[_-])(?:FINISHED|COMPLETED|DELIVERED)(?:$|[_-])/i;
 
 async function getReturn(row: Row, token: string): Promise<ReturnRow | null> {
-  const url = new URL("https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/info");
+  const url = new URL("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/info");
   url.searchParams.set("request_id", row.yandex_request_id);
   const response = await fetch(url, { headers: { Authorization: `Bearer ${token}`, "Accept-Language": "ru" }, signal: AbortSignal.timeout(12000) });
   if (!response.ok) throw new Error(`YANDEX_HTTP_${response.status}`);
@@ -44,7 +44,7 @@ async function getReturn(row: Row, token: string): Promise<ReturnRow | null> {
 
 router.get("/", async (_req, res, next) => {
   try {
-    const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+    const token = process.env.YANDEX_DELIVERY_TOKEN;
     if (!token) { res.status(503).json({ error: { code: "YANDEX_NOT_CONFIGURED", message: "Не настроено подключение к Яндекс Доставке" } }); return; }
     const rows = await prisma.$queryRaw<Row[]>`
       SELECT o.order_number, s.yandex_request_id, s.created_at, d.tracking_number
