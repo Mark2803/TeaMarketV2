@@ -105,7 +105,21 @@ async function synchronize(): Promise<void> {
       const nextStatus = mapStatus(latest.status);
       if (!nextStatus) continue;
 
-      // Reconcile order status even when delivery status is already current.
+      // Never advance an order when the stored delivery has reached a terminal state.
+      if (TERMINAL.has(shipment.delivery_status)) continue;
+
+      const rank: Record<string, number> = {
+        pending: 0,
+        preparing: 1,
+        handed_over: 2,
+        in_transit: 3,
+        delivered: 4
+      };
+      const nextRank = rank[nextStatus];
+      const currentRank = rank[shipment.delivery_status];
+      if (nextRank !== undefined && currentRank !== undefined && nextRank < currentRank) continue;
+
+      // Reconcile the order even if the delivery already has the latest status.
       if (nextStatus === "in_transit" || nextStatus === "delivered") {
         try {
           await advanceOrderStatus(
@@ -118,25 +132,6 @@ async function synchronize(): Promise<void> {
       }
 
       if (nextStatus === shipment.delivery_status) continue;
-
-      if (TERMINAL.has(shipment.delivery_status)) continue;
-
-      const rank: Record<string, number> = {
-        pending: 0,
-        preparing: 1,
-        handed_over: 2,
-        in_transit: 3,
-        delivered: 4
-      };
-
-      const nextRank = rank[nextStatus];
-      const currentRank = rank[shipment.delivery_status];
-
-      if (
-        nextRank !== undefined &&
-        currentRank !== undefined &&
-        nextRank <= currentRank
-      ) continue;
 
       await prisma.order_deliveries.updateMany({
         where: {
