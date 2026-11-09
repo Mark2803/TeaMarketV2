@@ -8,7 +8,7 @@ import ts from "typescript";
 const require = createRequire(import.meta.url);
 const filename = new URL("../src/modules/delivery-methods/yandex-carrier-quote.service.ts", import.meta.url);
 const source = readFileSync(filename, "utf8");
-const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+const js = ts.transpileModule(source, { compilerOptions: { module: "commonjs", target: "es2022" } }).outputText;
 const packing = { status: "calculated", parcels: [{ code: "S", dimensions_cm: [20, 15, 10], weight_g: 350 }] };
 
 function harness({ token = "fake-token", station = "fake-source-station", packingResult = packing, reply = { ok: true, status: 200, body: { pricing_total: "181.78 RUB" } }, networkError = false } = {}) {
