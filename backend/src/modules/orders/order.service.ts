@@ -7,6 +7,7 @@ import {
 import { prisma } from "../../database/prisma.js";
 import { calculatePricing } from "../pricing/pricing.service.js";
 import { quoteYandexPickup,quoteYandexDoor,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
+import { sendTemplateEmail } from "../notifications/notification.service.js";
 
 import type {
   CreateOrderInput
@@ -478,8 +479,15 @@ export async function createOrder(
         });
       }
 
-      // Promotional usage and loyalty spend are finalized only after payment.
-      // Stock is reserved here to prevent simultaneous checkout overselling.
+      const promoDiscount = pricing.discounts.find((x) => x.sourceType === "promo_code");
+      if (promoDiscount?.sourceId) {
+        await transaction.promo_codes.update({where:{id:promoDiscount.sourceId},data:{used_count:{increment:1}}});
+      }
+
+      if (pricing.loyaltySpent > 0 && customerId) {
+        await transaction.loyalty_accounts.upsert({where:{customer_id:customerId},create:{customer_id:customerId,balance:0},update:{balance:{decrement:pricing.loyaltySpent}}});
+        await transaction.loyalty_transactions.create({data:{customer_id:customerId,order_id:order.id,type:"spend",amount:(-pricing.loyaltySpent).toFixed(2),comment:"Списание при оформлении заказа"}});
+      }
 
       /*
        * Уменьшение остатка выполняется условным updateMany,
@@ -545,6 +553,22 @@ export async function createOrder(
       };
     }
   );
+
+  if (result.success && result.order.email) {
+    try {
+      await sendTemplateEmail(
+        "order_created",
+        result.order.email,
+        {
+          order_number: result.order.order_number,
+          total: Number(result.order.total_amount).toFixed(2)
+        },
+        result.order.customer_id
+      );
+    } catch (error) {
+      console.error("[NOTIFICATIONS] Не удалось отправить письмо о новом заказе", error);
+    }
+  }
 
   return result;
 }

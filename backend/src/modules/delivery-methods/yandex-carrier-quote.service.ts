@@ -16,8 +16,8 @@ export async function quoteYandexDoor(lines: ReadonlyArray<{sku:string;quantity:
 async function quoteYandexCarrier(lines: ReadonlyArray<{sku:string;quantity:number}>, destination:{stationId:string}|{address:string}) {
   const destinationStationId = "stationId" in destination ? destination.stationId : null;
   if (destinationStationId !== null && !/^[a-zA-Z0-9-]{20,80}$/.test(destinationStationId)) throw new CarrierQuoteError("INVALID_DESTINATION", "Некорректный идентификатор ПВЗ");
-  const token = process.env.YANDEX_DELIVERY_TOKEN;
-  if (!token) throw new CarrierQuoteError("YANDEX_NOT_CONFIGURED", "Боевой API Яндекса не настроен");
+  const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+  if (!token) throw new CarrierQuoteError("YANDEX_NOT_CONFIGURED", "Тестовый API Яндекса не настроен");
   const packing = await calculateItemsPacking(lines);
   if (packing.status !== "calculated" || !packing.parcels.length) throw new CarrierQuoteError("PACKING_UNAVAILABLE", `Не удалось подобрать упаковку: ${packing.status}`);
   const places = packing.parcels.map(parcel => {
@@ -29,14 +29,20 @@ async function quoteYandexCarrier(lines: ReadonlyArray<{sku:string;quantity:numb
     }};
   });
   const totalWeight = places.reduce((sum,p)=>sum+p.physical_dims.weight_gross,0);
-  const source = process.env.YANDEX_DELIVERY_SOURCE_STATION_ID?.trim();
-  if (!source) throw new CarrierQuoteError("SOURCE_MISSING", "Настройте станцию отправителя Яндекс Доставки");
+  // Sandbox station for seller drop-off (Moscow, Leningradsky prospect 27).
+  // Keep the existing source for PVZ quotes; door delivery can use its own station.
+  const source = destinationStationId === null
+    ? (process.env.YANDEX_DELIVERY_TEST_DOOR_SOURCE_STATION_ID || "e1139f6d-e34f-47a9-a55f-31f032a861a6")
+    : (process.env.YANDEX_DELIVERY_TEST_STATION_ID || "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924");
+  // Do not reject door addresses locally by a string prefix: the full address
+  // may include a country or region before the city. The Yandex sandbox API
+  // decides whether the complete address is serviceable.
   const requestBody = {source:{platform_station_id:source},destination:destinationStationId !== null ? {platform_station_id:destinationStationId} : {address:(destination as {address:string}).address},tariff:destinationStationId !== null ? "self_pickup" : "time_interval",total_weight:totalWeight,total_assessed_price:0,client_price:0,payment_method:"already_paid",places};
   const diagnosticId = `quote-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
   console.info("[YANDEX_QUOTE_REQUEST]", JSON.stringify({diagnosticId,body:requestBody}));
   let response:Response;
   const startedAt = Date.now();
-  try {response=await fetch("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/pricing-calculator",{
+  try {response=await fetch("https://b2b.taxi.tst.yandex.net/api/b2b/platform/pricing-calculator",{
     method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json","Accept-Language":"ru"},
     body:JSON.stringify(requestBody),
     signal:AbortSignal.timeout(15000)
@@ -67,5 +73,5 @@ if (match?.[1] !== undefined) {
     console.error("[YANDEX_QUOTE_INVALID_PRICE]", JSON.stringify({diagnosticId,pricing_total:total}));
     throw new CarrierQuoteError("YANDEX_PRICE_INVALID", "Яндекс вернул некорректную стоимость доставки");
   }
-  return {price:Math.round(amount*100)/100,deliveryDays:result.delivery_days??null,parcels:packing.parcels.map(p=>({code:p.code,dimensionsCm:p.dimensions_cm,weightG:p.weight_g})),totalWeightG:totalWeight,destinationStationId,deliveryMode:destinationStationId !== null ? "pickup" as const : "door" as const,source:"yandex_live" as const};
+  return {price:Math.round(amount*100)/100,deliveryDays:result.delivery_days??null,parcels:packing.parcels.map(p=>({code:p.code,dimensionsCm:p.dimensions_cm,weightG:p.weight_g})),totalWeightG:totalWeight,destinationStationId,deliveryMode:destinationStationId !== null ? "pickup" as const : "door" as const,source:"yandex_sandbox" as const};
 }

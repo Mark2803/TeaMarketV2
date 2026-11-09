@@ -1,6 +1,3 @@
-import { notifyAdminAboutOrder } from "../notifications/admin-order-alerts.service.js";
-import { sendTemplateEmail } from "../notifications/notification.service.js";
-import { updateModeratorOrderStatus } from "../moderator/moderator-order.service.js";
 import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
 import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
@@ -98,75 +95,15 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
   if (!record || payment.metadata?.order_id !== record.order_id) return;
   if (Number(payment.amount.value).toFixed(2) !== Number(record.amount).toFixed(2)) return;
   if (payment.status === "succeeded" && payment.paid === true) {
-    const firstConfirmation = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM orders WHERE id = ${record.order_id}::uuid FOR UPDATE`;
-      const lockedOrder = await tx.orders.findUniqueOrThrow({ where: { id: record.order_id }, select: { status: true } });
-      if (lockedOrder.status === "cancelled") {
-        console.error("PAID_AFTER_CANCELLATION_REQUIRES_REFUND", record.order_id);
-        return false;
-      }
+    await prisma.$transaction(async (tx) => {
       const changed = await tx.order_payments.updateMany({
         where: { id: record.id, status: { not: "succeeded" } },
         data: { status: "succeeded", paid_at: new Date(), updated_at: new Date() }
       });
-      if (changed.count) {
-        // Serialize settlement of order-side benefits with payment confirmation.
-        await tx.orders.update({
-          where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
-        });
-        const order = await tx.orders.findUniqueOrThrow({
-          where: { id: record.order_id },
-          select: { customer_id: true, loyalty_spent: true }
-        });
-        const promo = await tx.order_discounts.findFirst({
-          where: { order_id: record.order_id, source_type: "promo_code", source_id: { not: null } },
-          select: { source_id: true }
-        });
-        if (promo?.source_id) {
-          await tx.promo_codes.update({
-            where: { id: promo.source_id }, data: { used_count: { increment: 1 } }
-          });
-        }
-        const spent = Number(order.loyalty_spent);
-        if (order.customer_id && spent > 0) {
-          const debit = await tx.loyalty_accounts.updateMany({
-            where: { customer_id: order.customer_id, balance: { gte: spent } },
-            data: { balance: { decrement: spent } }
-          });
-          if (debit.count !== 1) {
-            console.error("LOYALTY_DEBIT_UNAVAILABLE_AFTER_PAYMENT", record.order_id);
-          } else await tx.loyalty_transactions.create({
-            data: { customer_id: order.customer_id, order_id: record.order_id,
-              type: "spend", amount: (-spent).toFixed(2),
-              comment: "Списание после подтверждения оплаты" }
-          });
-        }
-      }
-      return changed.count > 0;
-    });
-    // Notifications are sent only after a provider-verified successful payment.
-    // The admin delivery log prevents duplicate Telegram/email alerts.
-    try {
-      const paidOrder = await prisma.orders.findUnique({
-        where: { id: record.order_id },
-        select: { id: true, order_number: true, total_amount: true, email: true, customer_id: true, payment_status: true }
+      if (changed.count) await tx.orders.update({
+        where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
       });
-      if (paidOrder?.payment_status === "paid") {
-        await notifyAdminAboutOrder(paidOrder);
-        if (paidOrder.email) {
-          // Send customer confirmation only on the first successful transition.
-          const newlyPaid = firstConfirmation;
-          if (newlyPaid) {
-            await sendTemplateEmail("order_created", paidOrder.email, {
-              order_number: paidOrder.order_number,
-              total: Number(paidOrder.total_amount).toFixed(2)
-            }, paidOrder.customer_id);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("PAID_ORDER_NOTIFICATION_ERROR", record.order_id, error);
-    }
+    });
     // Confirm the order only after YooKassa has verified the payment.
     try {
       await advanceOrderStatus(record.order_id, "confirmed");
@@ -196,49 +133,5 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
       where: { id: record.id, status: { not: "succeeded" } },
       data: { status: "canceled", updated_at: new Date() }
     });
-  }
-}
-
-/**
- * Release stock reservations after 60 minutes, but only after the payment
- * provider confirms cancellation. Never release stock for a live payment.
- */
-export async function expireUnpaidOrders(): Promise<void> {
-  if (!credentials()) return;
-  const cutoff = new Date(Date.now() - 60 * 60 * 1000);
-  const candidates = await prisma.orders.findMany({
-    where: { payment_status: "unpaid", status: "new", ordered_at: { lt: cutoff } },
-    select: { id: true, order_number: true,
-      order_payments: { orderBy: { created_at: "desc" }, take: 1,
-        select: { operation_number: true } } },
-    take: 30, orderBy: { ordered_at: "asc" }
-  });
-  for (const order of candidates) {
-    try {
-      const paymentId = order.order_payments[0]?.operation_number;
-      if (paymentId) {
-        const current = await providerRequest(`${API}/${encodeURIComponent(paymentId)}`);
-        if (current.status === "succeeded") {
-          await synchronizeYooKassaPayment(paymentId);
-          continue;
-        }
-        if (current.status !== "canceled") {
-          if (current.status !== "pending" && current.status !== "waiting_for_capture") continue;
-          await providerRequest(`${API}/${encodeURIComponent(paymentId)}/cancel`, {
-            method: "POST", headers: { "Idempotence-Key": `expire-${order.id}` },
-            body: "{}"
-          });
-          const afterCancel = await providerRequest(`${API}/${encodeURIComponent(paymentId)}`);
-          if (afterCancel.status !== "canceled") continue;
-        }
-        await synchronizeYooKassaPayment(paymentId);
-      }
-      const outcome = await updateModeratorOrderStatus(
-        order.order_number, "cancelled", "Время ожидания оплаты истекло"
-      );
-      if (!outcome.success) console.error("UNPAID_ORDER_EXPIRY_SKIPPED", order.order_number, outcome.error);
-    } catch (error) {
-      console.error("UNPAID_ORDER_EXPIRY_ERROR", order.order_number, error);
-    }
   }
 }

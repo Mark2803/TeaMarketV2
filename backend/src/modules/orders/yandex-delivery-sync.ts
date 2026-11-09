@@ -35,7 +35,7 @@ function mapStatus(status: string): string | null {
 }
 
 async function synchronize(): Promise<void> {
-  const token = process.env.YANDEX_DELIVERY_TOKEN;
+  const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
   if (!token) return;
 
   const shipments = await prisma.$queryRaw<Shipment[]>`
@@ -55,7 +55,7 @@ async function synchronize(): Promise<void> {
   for (const shipment of shipments) {
     try {
       const url = new URL(
-        "https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/history"
+        "https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/history"
       );
       url.searchParams.set("request_id", shipment.request_id);
 
@@ -168,7 +168,7 @@ async function synchronize(): Promise<void> {
 let running = false;
 
 export function startYandexDeliverySync(): void {
-  if (!process.env.YANDEX_DELIVERY_TOKEN) return;
+  if (!process.env.YANDEX_DELIVERY_TEST_TOKEN) return;
 
   async function run(): Promise<void> {
     if (running) return;

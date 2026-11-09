@@ -55,10 +55,10 @@ export async function lookupTracking(req: Request, res: Response) {
     const events: Event[] = [];
     let historyAvailable = false;
     // Never expose the Yandex token or request_id to the browser.
-    const token = process.env.YANDEX_DELIVERY_TOKEN;
+    const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
     if (item.yandex_request_id && token) {
       try {
-        const url = new URL("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/history");
+        const url = new URL("https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/history");
         url.searchParams.set("request_id", item.yandex_request_id);
         const response = await fetch(url, {
           headers: { Authorization: `Bearer ${token}`, "Accept-Language": "ru" },
