@@ -4,11 +4,11 @@ import { Router } from "express";
 const router = Router();
 let cache: { expires: number; points: unknown[] } | null = null;
 router.get("/points", async (_req, res) => {
-  const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+  const token = process.env.YANDEX_DELIVERY_TOKEN;
   if (!token) { res.status(503).json({ error: { message: "Тестовый токен Яндекс Доставки не настроен" } }); return; }
   try {
-    if (cache && Date.now() < cache.expires) { res.json({ data: { points: cache.points, mode: "test" } }); return; }
-    const response = await fetch("https://b2b.taxi.tst.yandex.net/api/b2b/platform/pickup-points/list", {
+    if (cache && Date.now() < cache.expires) { res.json({ data: { points: cache.points, mode: "live" } }); return; }
+    const response = await fetch("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/pickup-points/list", {
       method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ type: "pickup_point", payment_method: "already_paid" }), signal: AbortSignal.timeout(12000),
     });
@@ -20,9 +20,9 @@ router.get("/points", async (_req, res) => {
       const address = p.address && typeof p.address === "object" ? p.address as Record<string, unknown> : {};
       const position = p.position && typeof p.position === "object" ? p.position as Record<string, unknown> : {};
       return { id: p.id, name: p.name, address: address.full_address ?? "", city: address.locality ?? "", latitude: position.latitude ?? null, longitude: position.longitude ?? null };
-    }).filter(p => typeof p.id === "string" && typeof p.name === "string" && (p.city === "Москва" || String(p.address).includes("Москва"))).slice(0, 1000);
+    }).filter(p => typeof p.id === "string" && typeof p.name === "string" ).slice(0, 1000);
     cache = { expires: Date.now() + 300000, points };
-    res.json({ data: { points, mode: "test" } });
+    res.json({ data: { points, mode: "live" } });
   } catch { res.status(502).json({ error: { message: "Не удалось получить тестовые ПВЗ" } }); }
 });
 export default router;

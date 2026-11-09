@@ -92,7 +92,7 @@ router.delete("/primary-dropoff", async (_req, res) => {
   catch (error) { console.error("[Yandex primary dropoff DELETE]", error); failure(res, "SETTINGS_ERROR", "Не удалось сбросить основной ПВЗ", 500); }
 });
 
-router.get("/config", (_req, res) => res.json({ data: { mode: "test", host: HOST, stationId: STATION, realShipmentsEnabled: false, geography: "Москва" } }));
+router.get("/config", (_req, res) => res.json({ data: { mode: "live", host: LIVE_HOST, stationId: STATION, realShipmentsEnabled: true, geography: "Россия" } }));
 
 router.post("/check", async (_req, res) => {
   const url = new URL("/api/b2b/platform/offers/info", HOST);
@@ -135,8 +135,8 @@ router.get("/points", async (req, res) => {
         longitude: isRecord(p.position) ? p.position.longitude : null };
     }).filter(p => typeof p.id === "string");
     const filtered = query ? points.filter(p => `${p.name} ${p.address}`.toLowerCase().includes(query)) : points;
-    res.json({ data: { ok: true, kind, total: filtered.length, points: filtered.slice(0, 1000), truncated: filtered.length > 1000,
-      note: "Боевой контур: список ограничен 1000 записями." } });
+    res.json({ data: { ok: true, kind, total: filtered.length, points: filtered, truncated: false,
+      note: "Полный список доступных пунктов Яндекс Доставки." } });
   } catch (error) { caught(res, error); }
 });
 
