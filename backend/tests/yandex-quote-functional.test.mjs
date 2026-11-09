@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
-import ts from "typescript";
+import { transformSync } from "esbuild";
 
 const require = createRequire(import.meta.url);
 const filename = new URL("../src/modules/delivery-methods/yandex-carrier-quote.service.ts", import.meta.url);
 const source = readFileSync(filename, "utf8");
-const js = ts.transpileModule(source, { compilerOptions: { module: "commonjs", target: "es2022" } }).outputText;
+const js = transformSync(source, { loader: "ts", format: "cjs", target: "es2022" }).code;
 const packing = { status: "calculated", parcels: [{ code: "S", dimensions_cm: [20, 15, 10], weight_g: 350 }] };
 
 function harness({ token = "fake-token", station = "fake-source-station", packingResult = packing, reply = { ok: true, status: 200, body: { pricing_total: "181.78 RUB" } }, networkError = false } = {}) {
