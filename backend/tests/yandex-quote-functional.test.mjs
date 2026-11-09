@@ -15,7 +15,9 @@ function harness({ token = "fake-token", station = "fake-source-station", packin
   const calls = [];
   const env = { YANDEX_DELIVERY_TOKEN: token, YANDEX_DELIVERY_SOURCE_STATION_ID: station };
   const exports = {};
+  const module = { exports };
   const context = {
+    module,
     exports,
     require: (id) => {
       assert.match(id, /order-packing\.service/);
@@ -32,7 +34,7 @@ function harness({ token = "fake-token", station = "fake-source-station", packin
     }
   };
   vm.runInNewContext(js, context, { filename: "yandex-carrier-quote.service.cjs" });
-  return { quotePickup: exports.quoteYandexPickup, quoteDoor: exports.quoteYandexDoor, calls };
+  return { quotePickup: module.exports.quoteYandexPickup, quoteDoor: module.exports.quoteYandexDoor, calls };
 }
 const items = [{ sku: "TEA-1", quantity: 1 }];
 const destinationId = "12345678-1234-1234-1234-123456789abc";
