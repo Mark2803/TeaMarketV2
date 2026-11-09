@@ -81,10 +81,10 @@ async function lookupCarrierShipment(orderNumber: string): Promise<
   | { kind: "not_found" }
   | { kind: "unavailable"; code: string }
 > {
-  const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+  const token = process.env.YANDEX_DELIVERY_TOKEN;
   if (!token) return { kind: "unavailable", code: "YANDEX_NOT_CONFIGURED" };
   try {
-    const url = new URL("https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/info");
+    const url = new URL("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/info");
     url.searchParams.set("request_code", orderNumber);
     const response = await fetch(url, {
       method: "GET",
@@ -167,7 +167,7 @@ async function reconcilePendingShipments(): Promise<void> {
 
 // The timer is unref'd so it does not keep a stopped backend process alive.
 // Scan once shortly after boot and then every 60 seconds.
-if (process.env.YANDEX_DELIVERY_TEST_TOKEN) {
+if (process.env.YANDEX_DELIVERY_TOKEN) {
   const startup = setTimeout(() => { void reconcilePendingShipments(); }, 5000);
   startup.unref();
   const interval = setInterval(() => { void reconcilePendingShipments(); }, 60000);
@@ -207,7 +207,7 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
   const allowedSizes = ["210x297", "100x150", "75x120", "58x60", "58x40"];
   if (!allowedSizes.includes(size)) return fail(res, "INVALID_LABEL_SIZE", "Недопустимый размер этикетки");
   if (layout !== "one" && layout !== "many") return fail(res, "INVALID_LABEL_LAYOUT", "Недопустимая компоновка");
-  const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+  const token = process.env.YANDEX_DELIVERY_TOKEN;
   if (!token) return fail(res, "YANDEX_NOT_CONFIGURED", "Не задан токен Яндекс Доставки", 503);
   const placeholders = orderNumbers.map((_, index) => `$${index + 1}`).join(", ");
   const rows = await prisma.$queryRawUnsafe<Array<{order_number:string;yandex_request_id:string|null}>>(
@@ -221,7 +221,7 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
   const requestIds = [...new Set(orderNumbers.map(n => found.get(n)!))];
   let response: globalThis.Response;
   try {
-    response = await fetch("https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/generate-labels", {
+    response = await fetch("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/generate-labels", {
       method: "POST", headers: {Authorization: `Bearer ${token}`, "Content-Type":"application/json", Accept:"application/pdf"},
       body: JSON.stringify({request_ids: requestIds, generate_type: layout, label_size_mm:size, language:"ru"}),
       signal: AbortSignal.timeout(25000),
@@ -304,13 +304,12 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
     const dropoffId = settings[0]?.primary_dropoff_id;
     if (!dropoffId) return fail(res,"SOURCE_MISSING","Выберите основной ПВЗ отгрузки",409);
     // Registered sender station and preferred physical drop-off point are different entities.
-    const source = stationMatch
-      ? (process.env.YANDEX_DELIVERY_TEST_STATION_ID || "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924")
-      : (process.env.YANDEX_DELIVERY_TEST_DOOR_SOURCE_STATION_ID || "e1139f6d-e34f-47a9-a55f-31f032a861a6");
+    const source = process.env.YANDEX_DELIVERY_SOURCE_STATION_ID?.trim();
+    if (!source) return fail(res,"SOURCE_MISSING","Укажите станцию отправителя Яндекс Доставки",409);
     const plan = await calculateOrderPacking(orderNumber);
     if (plan.status !== "calculated" || !plan.parcels.length) return fail(res,"PACKING_UNAVAILABLE","Не удалось подобрать коробку; проверьте размеры и вес товаров",409);
-    const token = process.env.YANDEX_DELIVERY_TEST_TOKEN;
-    if (!token) return fail(res,"YANDEX_NOT_CONFIGURED","Тестовый токен Яндекс Доставки не задан",503);
+    const token = process.env.YANDEX_DELIVERY_TOKEN;
+    if (!token) return fail(res,"YANDEX_NOT_CONFIGURED","Боевой токен Яндекс Доставки не задан",503);
     // Atomic DB reservation: concurrent clicks cannot send duplicate requests.
     // A confirmed 4xx rejection cannot have created a remote shipment.
     // Reuse the same operator_request_id and atomically claim the rejected row.
@@ -369,7 +368,7 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
       last_mile_policy:stationMatch ? "self_pickup" : "time_interval",particular_items_refuse:false,forbid_unboxing:false,
     };
     const attemptId = randomUUID();
-    const requestUrl = "https://b2b.taxi.tst.yandex.net/api/b2b/platform/request/create";
+    const requestUrl = "https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/create";
     const requestBody = JSON.stringify(body);
     const requestStartedAt = Date.now();
     logYandexDiagnostic("YANDEX_CREATE_REQUEST", {
