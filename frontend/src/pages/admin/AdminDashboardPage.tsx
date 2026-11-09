@@ -2,6 +2,7 @@ import FinanceChart from "../../features/admin/FinanceChart";
 import { downloadFinanceReport } from "../../features/admin/financeReport";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { apiRequest } from "../../shared/api/client";
 import {
   getAdminAnalytics,
@@ -45,19 +46,38 @@ const status: Record<string, string> = {
 
 export default function AdminDashboardPage() {
   const [cfg, setCfg] = useState(loadDashboardWidgets);
-  const [shipmentAlerts, setShipmentAlerts] = useState<{order_number:string;shipment_status:string|null;error_code:string|null}[]>([]);
+  const [shipmentAlerts, setShipmentAlerts] = useState<Array<{order_number:string;shipment_status:string|null;error_code:string|null}>>([]);
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
+  const [alertsError, setAlertsError] = useState("");
+  const [resolving, setResolving] = useState("");
+  const loadShipmentAlerts = async () => {
+    try {
+      const result = await apiRequest<{data:Array<{order_number:string;shipment_status:string|null;error_code:string|null}>}>("/moderator/yandex-alerts");
+      setShipmentAlerts(result.data);
+      setAlertsError("");
+    } catch {
+      setAlertsError("Не удалось загрузить ошибки доставки.");
+    }
+  };
   useEffect(() => {
-    let active = true;
-    const load = async () => {
-      try {
-        const result = await apiRequest<{data:Array<{order_number:string;payment_status:string;shipment_status:string|null;error_code:string|null}>}>("/moderator/yandex-shipments");
-        if (active) setShipmentAlerts(result.data.filter(row => row.payment_status === "paid" && (row.shipment_status === "rejected" || row.shipment_status === "uncertain" || !row.shipment_status)));
-      } catch (error) { console.error("Failed to load Yandex shipment alerts", error); }
-    };
-    void load();
-    const interval = window.setInterval(() => void load(), 60000);
-    return () => { active = false; window.clearInterval(interval); };
+    void loadShipmentAlerts();
+    const interval = window.setInterval(() => void loadShipmentAlerts(), 60000);
+    return () => window.clearInterval(interval);
   }, []);
+  const resolveShipmentAlert = async (orderNumber: string, reason: string) => {
+    setResolving(orderNumber);
+    setAlertsError("");
+    try {
+      await apiRequest(`/moderator/yandex-alerts/${encodeURIComponent(orderNumber)}/resolve`, {
+        method: "POST", body: JSON.stringify({ reason })
+      });
+      await loadShipmentAlerts();
+    } catch (error) {
+      setAlertsError(error instanceof Error ? error.message : "Не удалось закрыть ошибку.");
+    } finally {
+      setResolving("");
+    }
+  };
   const [data, setData] = useState<Data>({
     products: null,
     newOrders: null,
@@ -218,21 +238,40 @@ export default function AdminDashboardPage() {
       <div className="admin-page-heading">
         <div>
           <h1>Главная</h1>
-          <p>Управление магазином «Чайный Маркет»</p>
         </div>
-        <Link to="/admin/guide" className="admin-primary-button" style={{ alignSelf: "center", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Инструкция</Link>
       </div>
 
 
 
-      {shipmentAlerts.length > 0 && <div className="admin-section-card" role="alert">
-        <h2>Внимание: отправления Яндекс Доставки ({shipmentAlerts.length})</h2>
-        <p>Оплаченные заказы с ошибкой оформления или без подтверждённой заявки:</p>
-        <ul>{shipmentAlerts.slice(0, 10).map(row => <li key={row.order_number}>
-          {row.order_number} — {row.shipment_status === "uncertain" ? "результат неизвестен, не повторяйте до проверки" : row.shipment_status === "rejected" ? `отклонено (${row.error_code ?? "ошибка"})` : "заявка не создана"}
-        </li>)}</ul>
-        <Link to="/admin/delivery/shipments">Открыть отправления</Link>
-      </div>}
+      <section className="admin-section-card admin-delivery-alerts">
+        <button type="button" className="admin-delivery-alerts-toggle"
+          aria-expanded={alertsExpanded} onClick={() => setAlertsExpanded(value => !value)}>
+          <span className="admin-delivery-alerts-title">
+            {shipmentAlerts.length > 0 && <span className="admin-delivery-alerts-dot" aria-label="Есть незакрытые ошибки" />}
+            <strong>Ошибки</strong>
+            {shipmentAlerts.length > 0 && <span className="admin-delivery-alerts-count">{shipmentAlerts.length}</span>}
+          </span>
+          {alertsExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+        </button>
+        {alertsExpanded && <div className="admin-delivery-alerts-body">
+          {alertsError && <p role="alert">{alertsError}</p>}
+          {shipmentAlerts.length === 0 ? <p>Незакрытых ошибок доставки нет.</p> :
+            <>
+              <p>Оплаченные заказы с проблемами оформления Яндекс Доставки:</p>
+              <ul>{shipmentAlerts.map(row => <li key={row.order_number} className="admin-delivery-alerts-item">
+                <div><Link to={`/admin/orders/${encodeURIComponent(row.order_number)}`}>{row.order_number}</Link> — {row.shipment_status === "uncertain" ? "результат неизвестен, проверьте перед повторной отправкой" : row.shipment_status === "rejected" ? `заявка отклонена (${row.error_code ?? "ошибка"})` : "заявка не создана"}</div>
+                <div className="admin-delivery-alerts-actions">
+                  <button type="button" disabled={Boolean(resolving)}
+                    onClick={() => void resolveShipmentAlert(row.order_number, "test_order")}>Тестовый заказ</button>
+                  <button type="button" disabled={Boolean(resolving)}
+                    onClick={() => void resolveShipmentAlert(row.order_number, "manual_delivery")}>Оформлено вручную</button>
+                </div>
+              </li>)}</ul>
+              <Link to="/admin/delivery/shipments">Открыть отправления</Link>
+            </>
+          }
+        </div>}
+      </section>
       <div className="admin-dashboard-grid">
         {enabled.map((item) => (
           <div
