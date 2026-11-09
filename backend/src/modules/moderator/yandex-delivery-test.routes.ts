@@ -5,18 +5,22 @@ import { prisma } from "../../database/prisma.js";
 /** Sandbox-only diagnostics. No offer confirmation or shipment creation. */
 const router = Router();
 const HOST = "https://b2b.taxi.tst.yandex.net";
+const LIVE_HOST = "https://b2b-authproxy.taxi.yandex.net";
 const TOKEN = process.env.YANDEX_DELIVERY_TEST_TOKEN || "";
 const STATION = process.env.YANDEX_DELIVERY_TEST_STATION_ID || "fbed3aa1-2cc6-4370-ab4d-59c5cc9bb924";
 const headers = { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json", "Accept-Language": "ru" };
+const liveToken = () => process.env.YANDEX_DELIVERY_TOKEN?.trim();
 
 type JsonRecord = Record<string, unknown>;
 const isRecord = (v: unknown): v is JsonRecord => typeof v === "object" && v !== null && !Array.isArray(v);
 const stringField = (v: unknown, max = 250) => typeof v === "string" && v.length > 0 && v.length <= max ? v : null;
 const failure = (res: any, code: string, message: string, status = 400) => res.status(status).json({ error: { code, message } });
 
-async function request(path: string, body: JsonRecord) {
-  const response = await fetch(`${HOST}${path}`, {
-    method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(15000),
+async function request(path: string, body: JsonRecord, live = false) {
+  const token = live ? liveToken() : TOKEN;
+  if (!token) throw new Error(live ? "Боевой токен Яндекс Доставки не настроен" : "Тестовый токен Яндекс Доставки не настроен");
+  const response = await fetch(`${live ? LIVE_HOST : HOST}${path}`, {
+    method: "POST", headers: { ...headers, Authorization: `Bearer ${token}` }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000),
   });
   const raw = await response.text();
   let data: unknown;
@@ -64,8 +68,8 @@ router.put("/primary-dropoff", async (req, res) => {
   const city = typeof body.city === "string" ? body.city.slice(0, 150) : "";
   if (!id || !name || !address) return failure(res, "INVALID_POINT", "Выберите корректный ПВЗ");
   try {
-    // Validate against the live sandbox list; do not trust client-supplied station metadata.
-    const result = await request("/api/b2b/platform/pickup-points/list", { type: "pickup_point", payment_method: "already_paid", available_for_dropoff: true });
+    // Validate sender drop-off point against the production pickup-point list.
+    const result = await request("/api/b2b/platform/pickup-points/list", { type: "pickup_point", payment_method: "already_paid", available_for_dropoff: true }, true);
     if (!result.ok) return upstreamError(res, result);
     const rows = isRecord(result.data) && Array.isArray(result.data.points) ? result.data.points : [];
     const point = rows.filter(isRecord).find(p => p.id === id && p.available_for_dropoff === true);
@@ -120,7 +124,7 @@ router.get("/points", async (req, res) => {
   try {
     const body: JsonRecord = { type: "pickup_point", payment_method: "already_paid" };
     if (kind === "dropoff") body.available_for_dropoff = true;
-    const result = await request("/api/b2b/platform/pickup-points/list", body);
+    const result = await request("/api/b2b/platform/pickup-points/list", body, true);
     if (!result.ok) return upstreamError(res, result);
     const rows = isRecord(result.data) && Array.isArray(result.data.points) ? result.data.points : [];
     const points = rows.filter(isRecord).filter(p => kind !== "dropoff" || p.available_for_dropoff === true).map(p => {
@@ -129,10 +133,10 @@ router.get("/points", async (req, res) => {
         address: address.full_address || [address.locality, address.street, address.house].filter(Boolean).join(", "),
         city: address.locality || "", latitude: isRecord(p.position) ? p.position.latitude : null,
         longitude: isRecord(p.position) ? p.position.longitude : null };
-    }).filter(p => typeof p.id === "string" && (p.city === "Москва" || String(p.address).includes("Москва")));
+    }).filter(p => typeof p.id === "string");
     const filtered = query ? points.filter(p => `${p.name} ${p.address}`.toLowerCase().includes(query)) : points;
     res.json({ data: { ok: true, kind, total: filtered.length, points: filtered.slice(0, 1000), truncated: filtered.length > 1000,
-      note: "Тестовый контур: пункты Москвы. Список ограничен 1000 записями." } });
+      note: "Боевой контур: список ограничен 1000 записями." } });
   } catch (error) { caught(res, error); }
 });
 
