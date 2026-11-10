@@ -20,7 +20,7 @@ router.get("/points", async (_req, res) => {
       const address = p.address && typeof p.address === "object" ? p.address as Record<string, unknown> : {};
       const position = p.position && typeof p.position === "object" ? p.position as Record<string, unknown> : {};
       return { id: p.id, name: p.name, address: address.full_address ?? "", city: address.locality ?? "", latitude: position.latitude ?? null, longitude: position.longitude ?? null };
-    }).filter(p => typeof p.id === "string" && typeof p.name === "string" ).slice(0, 1000);
+    }).filter(p => typeof p.id === "string" && typeof p.name === "string" );
     cache = { expires: Date.now() + 300000, points };
     res.json({ data: { points, mode: "live" } });
   } catch { res.status(502).json({ error: { message: "Не удалось получить пункты выдачи Яндекс Доставки" } }); }
