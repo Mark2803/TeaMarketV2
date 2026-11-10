@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-/** Read-only test points for previewing the checkout map; no shipments are created. */
+/** Live Yandex pickup points for customer checkout; no shipments are created. */
 const router = Router();
 let cache: { expires: number; points: unknown[] } | null = null;
 router.get("/points", async (_req, res) => {
   const token = process.env.YANDEX_DELIVERY_TOKEN;
-  if (!token) { res.status(503).json({ error: { message: "Тестовый токен Яндекс Доставки не настроен" } }); return; }
+  if (!token) { res.status(503).json({ error: { message: "Токен Яндекс Доставки не настроен" } }); return; }
   try {
     if (cache && Date.now() < cache.expires) { res.json({ data: { points: cache.points, mode: "live" } }); return; }
     const response = await fetch("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/pickup-points/list", {
@@ -23,6 +23,6 @@ router.get("/points", async (_req, res) => {
     }).filter(p => typeof p.id === "string" && typeof p.name === "string" ).slice(0, 1000);
     cache = { expires: Date.now() + 300000, points };
     res.json({ data: { points, mode: "live" } });
-  } catch { res.status(502).json({ error: { message: "Не удалось получить тестовые ПВЗ" } }); }
+  } catch { res.status(502).json({ error: { message: "Не удалось получить пункты выдачи Яндекс Доставки" } }); }
 });
 export default router;
