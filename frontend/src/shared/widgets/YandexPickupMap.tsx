@@ -55,7 +55,6 @@ function loadMaps(key: string): Promise<void> {
 }
 
 const SPB_CENTER = [59.9386, 30.3141];
-const MAX_MARKERS = 1200;
 
 function coordinates(p: PickupPoint): number[] | null {
   const lat = Number(p.latitude);
@@ -83,6 +82,7 @@ export default function YandexPickupMap({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
+  const [listLimit, setListLimit] = useState(100);
 
   onSelectRef.current = onSelect;
   pointsRef.current = points;
@@ -98,6 +98,8 @@ export default function YandexPickupMap({
         )
       : points;
   }, [points, filter]);
+
+  useEffect(() => { setListLimit(100); }, [filter, points]);
 
   const visibleRef = useRef(visible);
   visibleRef.current = visible;
@@ -155,7 +157,7 @@ export default function YandexPickupMap({
             c[1] <= bounds[1][1] + 0.2;
         });
 
-        const limited = matches.slice(0, MAX_MARKERS);
+        const limited = matches;
         const selectedPoint = visibleRef.current.find(p => p.id === selected);
 
         if (selectedPoint && !limited.some(p => p.id === selectedPoint.id)) {
@@ -256,7 +258,7 @@ export default function YandexPickupMap({
         role="listbox"
         aria-label="Пункты выдачи"
       >
-        {visible.slice(0, 100).map(p => (
+        {visible.slice(0, listLimit).map(p => (
           <button
             type="button"
             role="option"
@@ -270,6 +272,11 @@ export default function YandexPickupMap({
           </button>
         ))}
 
+        {visible.length > listLimit && (
+          <button type="button" onClick={() => setListLimit(current => current + 100)}>
+            Показать ещё 100 пунктов (всего {visible.length})
+          </button>
+        )}
         {!visible.length && <p>Подходящих пунктов нет.</p>}
       </div>
 
