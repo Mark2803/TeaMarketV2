@@ -146,10 +146,10 @@ function CheckoutForm() {
   const [manualAddress, setManualAddress] = useState(false);
   const submittingRef = useRef(false);
 
-  const [testPickupPoints, setTestPickupPoints] = useState<PickupPoint[]>([]);
-  const [testPickupError, setTestPickupError] = useState("");
-  const [testPickupLoading, setTestPickupLoading] = useState(false);
-  const [testPickupSelected, setTestPickupSelected] = useState("");
+  const [pickupPoints, setPickupPoints] = useState<PickupPoint[]>([]);
+  const [pickupError, setPickupError] = useState("");
+  const [pickupLoading, setPickupLoading] = useState(false);
+  const [pickupSelected, setPickupSelected] = useState("");
   const [pickupModalOpen, setPickupModalOpen] = useState(false);
   const [pickupConfirmed, setPickupConfirmed] = useState<PickupPoint | null>(null);
   const [yandexMode, setYandexMode] = useState<"pickup"|"door">("pickup");
@@ -158,7 +158,7 @@ function CheckoutForm() {
   const [yandexLoading, setYandexLoading] = useState(false);
   const openPickupModal = () => {
     setPickupModalOpen(true);
-    if (!testPickupPoints.length && !testPickupLoading) void loadTestPickupPoints();
+    if (!pickupPoints.length && !pickupLoading) void loadPickupPoints();
   };
   useEffect(() => {
     if (!pickupModalOpen) return;
@@ -168,26 +168,14 @@ function CheckoutForm() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [pickupModalOpen]);
-  const loadTestPickupPoints = async () => {
-    setTestPickupLoading(true); setTestPickupError("");
+  const loadPickupPoints = async () => {
+    setPickupLoading(true); setPickupError("");
     try {
-      const response = await apiRequest<{data:{points:PickupPoint[]}}>("/yandex-test/points");
-      // Sandbox reference destination: verified with Yandex pricing-calculator.
-      // Do not use this fallback in production or substitute it for the customer's selection.
-      const referencePoint: PickupPoint = {
-        id: "01946f4f013c7337874ec2fb848a58a4",
-        name: "Контрольный ПВЗ Яндекса (тестовый)",
-        address: "г. Москва, Ленинградский проспект, 37к9",
-        city: "Москва",
-      };
-      const points = response.data.points;
-      setTestPickupPoints(
-        points.some(point => point.id === referencePoint.id)
-          ? points
-          : [referencePoint, ...points]
-      );
-    } catch (error) { setTestPickupError(error instanceof Error ? error.message : "Ошибка загрузки ПВЗ"); }
-    finally { setTestPickupLoading(false); }
+      const response = await apiRequest<{data:{points:PickupPoint[]}}>("/delivery-methods/yandex-points");
+      setPickupPoints(response.data.points);
+
+    } catch (error) { setPickupError(error instanceof Error ? error.message : "Ошибка загрузки ПВЗ"); }
+    finally { setPickupLoading(false); }
   };
   const [deliveryMethods, setDeliveryMethods] =
     useState<DeliveryMethodApi[]>([]);
@@ -258,7 +246,7 @@ function CheckoutForm() {
   const useManualAddress = isGuest || manualAddress || courierAddresses.length === 0 || yandexMode === "door";
   const selectedLocation = pickupMode && pickupConfirmed ? {
     id: "yandex-pickup", type:"courier" as const, label:pickupConfirmed.name,
-    region:"", city:"Москва", street:pickupConfirmed.address, house:"ПВЗ", apartment:"",
+    region:"", city:pickupConfirmed.city ?? "", street:pickupConfirmed.address, house:"ПВЗ", apartment:"",
     postalCode:"", comment:"", isDefault:false,
     recipient:{name:contact?.name??"",phone:contact?.phone??""}
   } : useManualAddress ? {
@@ -1249,7 +1237,7 @@ function CheckoutForm() {
               {isYandex && yandexLoading && <small>Рассчитываем тариф Яндекса…</small>}
               {isYandex && yandexError && <p role="alert" style={{color:"#b43c34"}}>{yandexError}. Выберите другой ПВЗ: пока Яндекс не подтвердит тариф, продолжить оформление нельзя.</p>}
               {isYandex && yandexQuote && <strong>Доставка: {formatPrice(yandexQuote.price)} · {yandexQuote.deliveryDays ?? "?"} дн.</strong>}
-              <small className="checkout-pickup-method__note">Тестовый контур Яндекса. Стоимость подтверждается повторно при создании заказа.</small>
+              <small className="checkout-pickup-method__note">Стоимость доставки подтверждается при оформлении заказа.</small>
             </div>}
             {isYandex && yandexMode === "pickup" && yandexLoading && <small>Рассчитываем тариф Яндекса…</small>}
             {isYandex && yandexMode === "door" && yandexLoading && <small>Рассчитываем доставку до двери…</small>}
@@ -1376,28 +1364,16 @@ function CheckoutForm() {
               <button type="button" aria-label="Закрыть карту" className="checkout-pickup-dialog__close" onClick={() => setPickupModalOpen(false)}><X size={22}/></button>
             </header>
             <div className="checkout-pickup-dialog__body">
-              {testPickupLoading && <p>Загружаем пункты выдачи…</p>}
-              {testPickupError && <p role="alert">{testPickupError} <button type="button" onClick={() => void loadTestPickupPoints()}>Повторить</button></p>}
-              <div style={{border:"1px solid #9ba99c",borderRadius:12,padding:14,marginBottom:14,background:"#f1f4ee"}}>
-                <strong>Контрольный пункт Яндекса — тестовый маршрут</strong>
-                <p style={{margin:"6px 0 12px"}}>Москва, Ленинградский проспект, 37к9. Для этого ПВЗ тестовый калькулятор ранее подтвердил доставку. Цена рассчитывается заново для текущей корзины.</p>
-                <button type="button" className="checkout-pickup-method__button" onClick={() => {
-                  const point: PickupPoint = {id:"01946f4f013c7337874ec2fb848a58a4",name:"Контрольный ПВЗ Яндекса (тестовый)",address:"г. Москва, Ленинградский проспект, 37к9",city:"Москва"};
-                  setTestPickupSelected(point.id);
-                  setPickupConfirmed(point);
-                  const yandex = deliveryMethods.find(m => /яндекс|yandex/i.test(m.name) && !/курьер|до двери|door|courier/i.test(m.name));
-                  if (yandex) setSelectedDeliveryMethodId(yandex.id);
-                  setPickupModalOpen(false);
-                }}>Выбрать контрольный ПВЗ</button>
-              </div>
-              {testPickupPoints.length > 0 && (
-                <YandexPickupMap points={testPickupPoints} selectedId={testPickupSelected} onSelect={p => setTestPickupSelected(p.id)} title="Поиск по адресу или названию" />
+              {pickupLoading && <p>Загружаем пункты выдачи…</p>}
+              {pickupError && <p role="alert">{pickupError} <button type="button" onClick={() => void loadPickupPoints()}>Повторить</button></p>}
+              {pickupPoints.length > 0 && (
+                <YandexPickupMap points={pickupPoints} selectedId={pickupSelected} onSelect={p => setPickupSelected(p.id)} title="Поиск по адресу или названию" />
               )}
             </div>
             <footer className="checkout-pickup-dialog__footer">
-              <span>{testPickupSelected ? testPickupPoints.find(p => p.id === testPickupSelected)?.address : "Выберите пункт на карте"}</span>
-              <button type="button" disabled={!testPickupSelected} onClick={() => {
-                const point = testPickupPoints.find(p => p.id === testPickupSelected);
+              <span>{pickupSelected ? pickupPoints.find(p => p.id === pickupSelected)?.address : "Выберите пункт на карте"}</span>
+              <button type="button" disabled={!pickupSelected} onClick={() => {
+                const point = pickupPoints.find(p => p.id === pickupSelected);
                 if (point) {
                   setPickupConfirmed(point);
                   const yandex = deliveryMethods.find(m=>/яндекс|yandex/i.test(m.name));
@@ -1406,7 +1382,7 @@ function CheckoutForm() {
                 setPickupModalOpen(false);
               }}>Подтвердить пункт</button>
             </footer>
-            <p className="checkout-pickup-dialog__disclaimer">Тестовый контур Яндекса. Недоступные маршруты не допускаются к оформлению.</p>
+            <p className="checkout-pickup-dialog__disclaimer">Доступность доставки проверяется для выбранного пункта выдачи.</p>
           </section>
         </div>
       )}
