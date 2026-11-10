@@ -282,8 +282,8 @@ export function replaceAdminProductImage(
   if (sortOrder !== undefined) body.append("sortOrder", String(sortOrder));
 
   return apiRequest<AdminProductImageResponse>(
-    `/moderator/products/${productId}/images/${imageId}/replace`,
-    { method: "POST", body },
+    `/moderator/products/${productId}/images/${imageId}/file`,
+    { method: "PUT", body },
   );
 }
 

@@ -204,3 +204,31 @@
     bottom: 24px;
   }
 }
+
+/* FIX: ????????? ????????? ??? ??????? ??????? ???????????? */
+@media (max-width: 63.999rem) {
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .client-layout {
+    height: var(--visible-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .client-layout > .client-layout__content {
+    min-height: 0;
+    padding-bottom: var(--space-4);
+  }
+
+  .client-layout > .bottom-navigation {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+}

@@ -1,0 +1,8 @@
+.tea-crop-overlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px}
+.tea-crop-dialog{width:min(96vw,700px);max-height:94dvh;overflow:auto;padding:20px;border-radius:14px;background:#fff;color:#222;box-shadow:0 20px 80px #0005}
+.tea-crop-dialog h2{margin:0 0 8px;font-size:22px}.tea-crop-dialog p{margin:0 0 14px;font-size:14px;color:#555}
+.tea-crop-stage{position:relative;width:fit-content;max-width:100%;max-height:65dvh;margin:auto;line-height:0;user-select:none}
+.tea-crop-stage>img{display:block;max-width:100%;max-height:65dvh;width:auto;height:auto;object-fit:contain}
+.tea-crop-box{position:absolute;border:2px solid white;box-shadow:0 0 0 9999px #0008,0 0 0 1px #0008;cursor:move;touch-action:none;box-sizing:border-box;display:grid;place-items:center}
+.tea-crop-crosshair{font:28px/1 sans-serif;color:#fff;text-shadow:0 1px 3px #0009;pointer-events:none}
+.tea-crop-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.tea-crop-actions button{padding:10px 18px;border-radius:8px;border:1px solid #bbb;background:white;cursor:pointer}.tea-crop-actions button:last-child{background:#234c37;color:#fff;border-color:#234c37}.tea-crop-actions button:disabled{opacity:.5;cursor:wait}.tea-crop-dialog .tea-crop-error{color:#b42318;margin-top:10px}

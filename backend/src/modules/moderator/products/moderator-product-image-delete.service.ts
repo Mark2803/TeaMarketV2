@@ -30,6 +30,11 @@ function getObjectKeyFromImageUrl(
         imageUrl
       );
 
+    if (!["http:", "https:"].includes(url.protocol) ||
+        !url.pathname.startsWith("/products/")) {
+      return null;
+    }
+
     const objectKey =
       decodeURIComponent(
         url.pathname.replace(

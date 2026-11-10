@@ -193,3 +193,29 @@
     transition: none;
   }
 }
+
+/* FIX: ?????????? ?????? ???? Hero-?????? */
+.home-hero-carousel__slide {
+  height: 25rem;
+  min-height: 0;
+  max-height: 25rem;
+  overflow: hidden;
+}
+
+.home-hero-carousel h1 {
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 42rem) {
+  .home-hero-carousel__slide {
+    height: 23rem;
+    min-height: 0;
+    max-height: 23rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .home-hero-carousel h1 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+}

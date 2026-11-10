@@ -1,5 +1,4 @@
 import {
-  ChevronDown,
   Flame,
   Leaf,
   Sparkles,
@@ -10,10 +9,6 @@ import {
 import type {
   LucideIcon
 } from "lucide-react";
-
-import {
-  useState
-} from "react";
 
 type ProductDescriptionProps = {
   aboutTea: string;
@@ -36,8 +31,6 @@ export default function ProductDescription({
   effect,
   beneficialProperties
 }: ProductDescriptionProps) {
-  const [openIndex, setOpenIndex] =
-    useState<number | null>(0);
 
   const allItems: DescriptionItem[] = [
     [Leaf, "О чае", aboutTea],
@@ -56,56 +49,29 @@ export default function ProductDescription({
     return null;
   }
 
+
   return (
     <section className="product-detail-section">
-      <h2>
-        Описание
-      </h2>
-
+      <h2>Описание</h2>
       <div className="product-accordion">
-        {items.map(
-          ([Icon, title, text], index) => (
+        {items.map(([Icon, title, text]) => (
+          <div key={title} className="product-accordion__item">
             <div
-              key={title}
-              className="product-accordion__item"
+              className="product-accordion__static-heading"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "14px 16px",
+                fontWeight: 500
+              }}
             >
-              <button
-                type="button"
-                onClick={() =>
-                  setOpenIndex(
-                    openIndex === index
-                      ? null
-                      : index
-                  )
-                }
-              >
-                <Icon
-                  size={18}
-                  strokeWidth={1.6}
-                />
-
-                <span>
-                  {title}
-                </span>
-
-                <ChevronDown
-                  size={18}
-                  className={
-                    openIndex === index
-                      ? "product-accordion__chevron--open"
-                      : ""
-                  }
-                />
-              </button>
-
-              {openIndex === index && (
-                <p>
-                  {text}
-                </p>
-              )}
+              <Icon size={18} strokeWidth={1.6} />
+              <span>{title}</span>
             </div>
-          )
-        )}
+            <p>{text}</p>
+          </div>
+        ))}
       </div>
     </section>
   );

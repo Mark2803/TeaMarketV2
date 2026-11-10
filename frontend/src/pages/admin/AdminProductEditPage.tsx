@@ -1,5 +1,5 @@
-﻿import { ArrowLeft, Save, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -10,6 +10,7 @@ import {
 } from "../../shared/api/admin";
 import type { AdminProductDetails } from "../../shared/api/admin";
 import AdminProductImagesEditor from "./AdminProductImagesEditor";
+import type { ProductImagesEditorHandle } from "./AdminProductImagesEditor";
 import AdminProductVariantsEditor from "./AdminProductVariantsEditor";
 
 type FormState = {
@@ -123,6 +124,7 @@ export default function AdminProductEditPage() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const imagesEditorRef = useRef<ProductImagesEditorHandle>(null);
 
   useEffect(() => {
     if (!productId) {
@@ -160,7 +162,6 @@ export default function AdminProductEditPage() {
 
     const response = await getAdminProduct(productId);
     setProduct(response.data);
-    setForm(toForm(response.data));
   };
 
   const setField = <K extends keyof FormState>(
@@ -208,7 +209,8 @@ export default function AdminProductEditPage() {
         isIndexed: form.isIndexed,
       });
 
-      setProduct(response.data);
+      await imagesEditorRef.current?.save();
+      await reloadProduct();
       setForm(toForm(response.data));
       setSuccess("Изменения сохранены.");
     } catch {
@@ -378,6 +380,7 @@ export default function AdminProductEditPage() {
 
         {product && productId ? (
           <AdminProductImagesEditor
+            ref={imagesEditorRef}
             productId={productId}
             images={product.product_images ?? []}
             productName={form.name}

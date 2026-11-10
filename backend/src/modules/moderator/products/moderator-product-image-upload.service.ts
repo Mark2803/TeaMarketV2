@@ -1,3 +1,4 @@
+import { optimizeProductImage } from "../../../lib/product-image-optimize.js";
 import {
   prisma
 } from "../../../database/prisma.js";
@@ -24,17 +25,6 @@ export type UploadModeratorProductImageResult =
         "PRODUCT_NOT_FOUND";
     };
 
-const extensionByMimeType:
-  Record<string, string> = {
-    "image/jpeg":
-      "jpg",
-
-    "image/png":
-      "png",
-
-    "image/webp":
-      "webp"
-  };
 
 /**
  * Определяет следующий свободный номер изображения.
@@ -124,10 +114,7 @@ export async function uploadModeratorProductImage(
     };
   }
 
-  const extension =
-    extensionByMimeType[
-      file.mimetype
-    ];
+  const extension = "webp";
 
   if (!extension) {
     throw new Error(
@@ -164,8 +151,8 @@ export async function uploadModeratorProductImage(
   const imageUrl =
     await uploadObjectToStorage(
       objectKey,
-      file.buffer,
-      file.mimetype
+      await optimizeProductImage(file.buffer),
+      "image/webp"
     );
 
   const image =

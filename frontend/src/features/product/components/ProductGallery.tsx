@@ -1,20 +1,9 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  X
-} from "lucide-react";
-
-import {
-  useEffect,
-  useState
-} from "react";
+import { Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import type { TouchEvent } from "react";
 
 type ProductGalleryProps = {
-  images: readonly {
-    url: string;
-    alt: string;
-  }[];
+  images: readonly { url: string; alt: string }[];
   activeIndex: number;
   onChange: (index: number) => void;
 };
@@ -24,72 +13,80 @@ export default function ProductGallery({
   activeIndex,
   onChange
 }: ProductGalleryProps) {
-  const [isZoomOpen, setIsZoomOpen] =
-    useState(false);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    if (!isZoomOpen) {
+  const activeImage = images[activeIndex] ?? images[0];
+
+  const changeImage = (direction: number) => {
+    if (images.length < 2) return;
+
+    const nextIndex =
+      (activeIndex + direction + images.length) % images.length;
+
+    onChange(nextIndex);
+  };
+
+  const handleTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if (event.touches.length !== 1) {
+      touchStart.current = null;
       return;
     }
 
-    const handleKeyDown = (
-      event: KeyboardEvent
-    ) => {
-      if (event.key === "Escape") {
-        setIsZoomOpen(false);
-      }
+    touchStart.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+
+    if (!start || images.length < 2 || !event.changedTouches.length) {
+      return;
+    }
+
+    const dx = event.changedTouches[0].clientX - start.x;
+    const dy = event.changedTouches[0].clientY - start.y;
+
+    if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy) * 1.2) {
+      return;
+    }
+
+    changeImage(dx < 0 ? 1 : -1);
+  };
+
+  useEffect(() => {
+    if (!isZoomOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsZoomOpen(false);
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isZoomOpen]);
 
-  const activeImage =
-    images[activeIndex]
-    ?? images[0];
-
-  const showPrevious = () => {
-    onChange(
-      activeIndex === 0
-        ? images.length - 1
-        : activeIndex - 1
-    );
-  };
-
-  const showNext = () => {
-    onChange(
-      activeIndex === images.length - 1
-        ? 0
-        : activeIndex + 1
-    );
-  };
-
-  if (!activeImage) {
-    return null;
-  }
+  if (!activeImage) return null;
 
   return (
     <section className="product-gallery">
-      <div className="product-gallery__main">
-        <img
-          src={activeImage.url}
-          alt={activeImage.alt}
-        />
+      <div
+        className="product-gallery__main"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={() => { touchStart.current = null; }}
+        style={{ touchAction: "pan-y" }}
+      >
+        <img src={activeImage.url} alt={activeImage.alt} />
 
         <button
           type="button"
           className="product-gallery__zoom"
-          aria-label="Увеличить изображение"
           onClick={() => setIsZoomOpen(true)}
+          aria-label="Увеличить фотографию"
         >
           <Search size={20} />
         </button>
@@ -102,17 +99,13 @@ export default function ProductGallery({
               key={`${image.url}-${index}`}
               type="button"
               className={
-                index === activeIndex
-                  ? "product-gallery__thumb product-gallery__thumb--active"
-                  : "product-gallery__thumb"
+                "product-gallery__thumb" +
+                (index === activeIndex ? " is-active" : "")
               }
               onClick={() => onChange(index)}
-              aria-label={`Открыть изображение ${index + 1}`}
+              aria-label={`Фотография ${index + 1}`}
             >
-              <img
-                src={image.url}
-                alt={image.alt}
-              />
+              <img src={image.url} alt={image.alt} />
             </button>
           ))}
         </div>
@@ -123,47 +116,31 @@ export default function ProductGallery({
           className="product-gallery-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="Увеличенное изображение товара"
-          onMouseDown={() => setIsZoomOpen(false)}
+          aria-label="Просмотр фотографии товара"
+          onClick={() => setIsZoomOpen(false)}
         >
           <button
             type="button"
             className="product-gallery-modal__close"
-            aria-label="Закрыть"
             onClick={() => setIsZoomOpen(false)}
+            aria-label="Закрыть"
           >
             <X size={24} />
           </button>
 
-          {images.length > 1 && (
-            <button
-              type="button"
-              className="product-gallery-modal__previous"
-              aria-label="Предыдущее изображение"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={showPrevious}
-            >
-              <ChevronLeft size={28} />
-            </button>
-          )}
-
-          <img
-            src={activeImage.url}
-            alt={activeImage.alt}
-            onMouseDown={(event) => event.stopPropagation()}
-          />
-
-          {images.length > 1 && (
-            <button
-              type="button"
-              className="product-gallery-modal__next"
-              aria-label="Следующее изображение"
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={showNext}
-            >
-              <ChevronRight size={28} />
-            </button>
-          )}
+          <div
+            onClick={(event) => event.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={() => { touchStart.current = null; }}
+            style={{ touchAction: "pan-y" }}
+          >
+            <img
+              src={activeImage.url}
+              alt={activeImage.alt}
+              draggable={false}
+            />
+          </div>
         </div>
       )}
     </section>

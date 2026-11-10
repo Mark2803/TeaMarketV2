@@ -1,3 +1,4 @@
+import { optimizeProductImage } from "../../../lib/product-image-optimize.js";
 import {
   prisma
 } from "../../../database/prisma.js";
@@ -30,17 +31,6 @@ export type ReplaceModeratorProductImageResult =
         | "INVALID_IMAGE_URL";
     };
 
-const extensionByMimeType:
-  Record<string, string> = {
-    "image/jpeg":
-      "jpg",
-
-    "image/png":
-      "png",
-
-    "image/webp":
-      "webp"
-  };
 
 /**
  * Извлекает ключ объекта из публичного URL.
@@ -53,6 +43,11 @@ function getObjectKeyFromImageUrl(
       new URL(
         imageUrl
       );
+
+    if (!["http:", "https:"].includes(url.protocol) ||
+        !url.pathname.startsWith("/products/")) {
+      return null;
+    }
 
     const objectKey =
       decodeURIComponent(
@@ -209,18 +204,7 @@ export async function replaceModeratorProductImage(
       image.image_url
     );
 
-  if (!oldObjectKey) {
-    return {
-      success: false,
-      error:
-        "INVALID_IMAGE_URL"
-    };
-  }
-
-  const extension =
-    extensionByMimeType[
-      file.mimetype
-    ];
+  const extension = "webp";
 
   if (!extension) {
     throw new Error(
@@ -269,11 +253,12 @@ export async function replaceModeratorProductImage(
   const newImageUrl =
     await uploadObjectToStorage(
       newObjectKey,
-      file.buffer,
-      file.mimetype
+      await optimizeProductImage(file.buffer),
+      "image/webp"
     );
 
   if (
+    oldObjectKey &&
     newObjectKey !==
     oldObjectKey
   ) {
