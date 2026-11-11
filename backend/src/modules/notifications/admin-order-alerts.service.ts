@@ -27,7 +27,11 @@ async function claim(orderId:string,channel:string):Promise<boolean>{
  const rows=await prisma.$queryRaw<{channel:string}[]>`
  INSERT INTO admin_order_alert_deliveries(order_id,channel,status)
  VALUES (${orderId}::uuid,${channel},'sending')
- ON CONFLICT (order_id,channel) DO NOTHING RETURNING channel`;
+ ON CONFLICT (order_id,channel) DO UPDATE
+ SET status='sending',error_message=NULL,updated_at=now()
+ WHERE admin_order_alert_deliveries.status='failed'
+   AND admin_order_alert_deliveries.updated_at < now() - interval '5 minutes'
+ RETURNING channel`;
  return rows.length===1;
 }
 async function record(orderId:string,channel:string,status:"sent"|"failed",error:string|null){
