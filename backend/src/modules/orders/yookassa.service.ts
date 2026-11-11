@@ -1,3 +1,4 @@
+import { notifyAdminAboutOrder } from "../notifications/admin-order-alerts.service.js";
 import { randomUUID } from "node:crypto";
 import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
@@ -185,6 +186,19 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         where: { id: record.order_id }, data: { payment_status: "paid", updated_at: new Date() }
       });
     });
+    // Send admin alerts only for a provider-verified paid order.
+    // The delivery table deduplicates notifications across repeated webhooks.
+    try {
+      const paidOrder = await prisma.orders.findUnique({
+        where: { id: record.order_id },
+        select: { id: true, order_number: true, total_amount: true, payment_status: true }
+      });
+      if (paidOrder?.payment_status === "paid") {
+        await notifyAdminAboutOrder(paidOrder);
+      }
+    } catch (error) {
+      console.error("[ADMIN_ALERT] Failed to notify about paid order", error);
+    }
     // Confirm the order only after YooKassa has verified the payment.
     try {
       await advanceOrderStatus(record.order_id, "confirmed");
