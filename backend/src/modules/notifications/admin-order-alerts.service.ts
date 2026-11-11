@@ -30,7 +30,8 @@ async function claim(orderId:string,channel:string):Promise<boolean>{
  ON CONFLICT (order_id,channel) DO UPDATE
  SET status='sending',error_message=NULL,updated_at=now()
  WHERE admin_order_alert_deliveries.status='failed'
-   AND admin_order_alert_deliveries.updated_at < now() - interval '5 minutes'
+    OR (admin_order_alert_deliveries.status='sending'
+        AND admin_order_alert_deliveries.updated_at < now() - interval '2 minutes')
  RETURNING channel`;
  return rows.length===1;
 }
@@ -43,8 +44,9 @@ export async function notifyAdminAboutOrder(order:{id:string;order_number:string
  const settings=await readAdminAlertSettings();
  const message=`Новый заказ ${order.order_number}\nСумма: ${Number(order.total_amount).toFixed(2)} ₽\nАдминка: /admin/orders/${encodeURIComponent(order.order_number)}`;
  const tasks:Array<[string,boolean,()=>Promise<unknown>]>=[
- ["email",settings.email_enabled&&Boolean(settings.email_recipient),()=>sendEmail(settings.email_recipient,`Новый заказ ${order.order_number}`,message)],
- ["telegram",settings.telegram_enabled&&Boolean(settings.telegram_chat_id),()=>sendTelegramMessage(settings.telegram_chat_id,message)]
+ // Telegram is processed first: an unavailable SMTP server must not delay the alert.
+ ["telegram",settings.telegram_enabled&&Boolean(settings.telegram_chat_id),()=>sendTelegramMessage(settings.telegram_chat_id,message)],
+ ["email",settings.email_enabled&&Boolean(settings.email_recipient),()=>sendEmail(settings.email_recipient,`Новый заказ ${order.order_number}`,message)]
  ];
  // MAX не отправляем, пока не подтверждены API и права бота.
  for(const [channel,enabled,send] of tasks){
