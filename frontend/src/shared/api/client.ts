@@ -87,5 +87,14 @@ export async function apiRequest<T>(
     const message = errorBody?.error?.message ?? `Ошибка API: ${response.status}`;
     throw new Error(message);
   }
-  return response.json() as Promise<T>;
+  // Successful DELETE endpoints may return 204 No Content.
+  // Do not attempt to parse an empty response body as JSON.
+  if (response.status === 204 || response.status === 205) {
+    return undefined as T;
+  }
+  const body = await response.text();
+  if (!body.trim()) {
+    return undefined as T;
+  }
+  return JSON.parse(body) as T;
 }
