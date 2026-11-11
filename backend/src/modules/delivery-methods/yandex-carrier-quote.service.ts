@@ -1,4 +1,5 @@
 import { calculateItemsPacking } from "../moderator/order-packing.service.js";
+import { prisma } from "../../database/prisma.js";
 
 export class CarrierQuoteError extends Error {
   constructor(public readonly code: string, message: string) { super(message); }
@@ -29,8 +30,10 @@ async function quoteYandexCarrier(lines: ReadonlyArray<{sku:string;quantity:numb
     }};
   });
   const totalWeight = places.reduce((sum,p)=>sum+p.physical_dims.weight_gross,0);
-  const source = process.env.YANDEX_DELIVERY_SOURCE_STATION_ID?.trim();
-  if (!source) throw new CarrierQuoteError("SOURCE_MISSING", "Укажите станцию отправителя Яндекс Доставки");
+  const senderRows = await prisma.$queryRaw<Array<{primary_dropoff_id: string | null}>>`
+    SELECT primary_dropoff_id FROM yandex_delivery_settings WHERE id = 1`;
+  const source = senderRows[0]?.primary_dropoff_id?.trim();
+  if (!source) throw new CarrierQuoteError("SOURCE_MISSING", "Основной ПВЗ отправления не настроен. Обратитесь в магазин");
   // Do not reject door addresses locally by a string prefix: the full address
   // may include a country or region before the city. The Yandex API
   // decides whether the complete address is serviceable.
