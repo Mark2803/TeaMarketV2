@@ -43,7 +43,7 @@ router.use("/pricing", pricingRouter);
 router.use("/analytics", analyticsRouter);
 
 router.use("/delivery-methods", deliveryMethodsRouter);
-router.use("/delivery-methods/yandex-points", yandexPickupPointsRouter);
+router.use("/delivery-methods", yandexPickupPointsRouter);
 router.use("/payment-methods", paymentMethodsRouter);
 
 router.use("/auth", authRouter);
