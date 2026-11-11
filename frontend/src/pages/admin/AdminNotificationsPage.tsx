@@ -3,6 +3,7 @@ import {Mail,MessageCircle,Save,Send,Settings2,Trash2,Users,X} from "lucide-reac
 import {checkAdminNotificationChannel,createAdminNotificationCampaign,deleteAdminNotificationCampaign,getAdminNotifications,sendAdminNotificationCampaign,updateAdminNotificationChannel,type AdminNotificationOverview} from "../../shared/api/admin";
 import "./admin-notifications.css";
 import StorefrontMessengersSettings from "./StorefrontMessengersSettings";
+import AdminOrderAlertsSettings from "./AdminOrderAlertsSettings";
 
 const statusLabel=(s:string)=>({draft:"Черновик",sending:"Отправляется",sent:"Отправлена",completed_with_errors:"С ошибками",failed:"Ошибка"}[s]||s);
 export default function AdminNotificationsPage(){
@@ -14,6 +15,7 @@ export default function AdminNotificationsPage(){
  return <div className="admin-page notifications-page">
   <div className="admin-page-heading notification-heading"><div><span>Коммуникации</span><h1>Уведомления</h1><p>Создание рассылок покупателям.</p></div><button className="admin-secondary-button" onClick={()=>setSettings(true)}><Settings2 size={17}/>Настройка каналов</button></div>
   {error&&<div className="admin-error-box">{error}</div>}{ok&&<div className="admin-success-box">{ok}</div>}
+  <AdminOrderAlertsSettings/>
   <StorefrontMessengersSettings/>
   <Campaigns data={data} run={run}/>
   {settings&&<ChannelModal data={data} run={run} close={()=>setSettings(false)}/>} 
