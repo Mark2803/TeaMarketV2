@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
 import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
@@ -147,7 +148,7 @@ export async function initiateYooKassaPayment(orderId: string, returnUrlOverride
   const returnUrl = returnUrlOverride || orderReturnUrl;
   const payment = await providerRequest(API, {
     method: "POST",
-    headers: { "Idempotence-Key": row.id },
+    headers: { "Idempotence-Key": randomUUID() },
     body: JSON.stringify({
       amount: { value: Number(order.total_amount).toFixed(2), currency: "RUB" },
       capture: true,
