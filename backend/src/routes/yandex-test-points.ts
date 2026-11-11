@@ -3,7 +3,7 @@ import { Router } from "express";
 /** Live Yandex pickup points for customer checkout; no shipments are created. */
 const router = Router();
 let cache: { expires: number; points: unknown[] } | null = null;
-router.get("/points", async (_req, res) => {
+router.get("/yandex-points", async (_req, res) => {
   const token = process.env.YANDEX_DELIVERY_TOKEN;
   if (!token) { res.status(503).json({ error: { message: "Токен Яндекс Доставки не настроен" } }); return; }
   try {
