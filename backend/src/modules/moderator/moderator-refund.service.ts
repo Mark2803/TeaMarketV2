@@ -20,7 +20,7 @@ async function request<T>(path: string, method = "GET", body?: unknown, key?: st
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({})) as { code?: string; description?: string };
-    throw new Error(`YOOKASSA_REFUND_API_${response.status}:${error.code ?? "unknown"}`);
+    throw new Error(`YOOKASSA_REFUND_API_${response.status}:${error.code ?? "unknown"}:${method}:${path.split("?")[0]}`);
   }
   return await response.json() as T;
 }
