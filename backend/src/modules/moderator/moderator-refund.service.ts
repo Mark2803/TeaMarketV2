@@ -3,7 +3,7 @@ import { prisma } from "../../database/prisma.js";
 import { updateModeratorOrderStatus } from "./moderator-order.service.js";
 
 type Refund = { id: string; status: string; payment_id: string; amount: { value: string; currency: string } };
-type Payment = { id: string; status: string; paid?: boolean; amount: { value: string; currency: string }; refundable?: boolean };
+type Payment = { id: string; status: string; paid?: boolean; amount: { value: string; currency: string }; refunded_amount?: { value: string; currency: string }; refundable?: boolean };
 
 async function request<T>(path: string, method = "GET", body?: unknown, key?: string): Promise<T> {
   const shop = process.env.YOOKASSA_SHOP_ID;
@@ -48,13 +48,17 @@ export async function refundAndCancelOrder(orderNumber: string, reason: string) 
   if (providerPayment.id !== payment.operation_number || providerPayment.amount.currency !== "RUB" || Number(providerPayment.amount.value).toFixed(2) !== amount) {
     throw new Error("YOOKASSA_PAYMENT_MISMATCH");
   }
-  const refunds = await request<{ items: Refund[] }>(`refunds?payment_id=${encodeURIComponent(payment.operation_number)}&limit=100`);
-  const successful = refunds.items.filter(r => r.status === "succeeded");
-  const pending = refunds.items.filter(r => r.status === "pending");
-  const refundedTotal = successful.reduce((sum, r) => sum + Math.round(Number(r.amount.value) * 100), 0);
+  // YooKassa exposes the refunded total on the payment itself. The refunds
+  // listing is not required to determine whether a full refund is complete,
+  // and some shops cannot access that listing (HTTP 403).
   const total = Math.round(Number(amount) * 100);
-  if (pending.length) throw new Error("YOOKASSA_REFUND_PENDING");
-  if (refundedTotal > total || (refundedTotal > 0 && refundedTotal < total)) throw new Error("YOOKASSA_PARTIAL_REFUND_REQUIRES_REVIEW");
+  const refundedAmount = providerPayment.refunded_amount;
+  if (refundedAmount && refundedAmount.currency !== "RUB") throw new Error("YOOKASSA_REFUND_CURRENCY_MISMATCH");
+  const refundedTotal = refundedAmount ? Math.round(Number(refundedAmount.value) * 100) : 0;
+  if (!Number.isFinite(refundedTotal) || refundedTotal < 0 || refundedTotal > total) {
+    throw new Error("YOOKASSA_REFUND_AMOUNT_MISMATCH");
+  }
+  if (refundedTotal > 0 && refundedTotal < total) throw new Error("YOOKASSA_PARTIAL_REFUND_REQUIRES_REVIEW");
   if (refundedTotal === 0) {
     if (providerPayment.status !== "succeeded" || providerPayment.paid !== true) throw new Error("YOOKASSA_PAYMENT_NOT_SUCCEEDED");
     const key = createHash("sha256").update(`tea-market-full-refund:${payment.operation_number}`).digest("hex").slice(0, 64);
