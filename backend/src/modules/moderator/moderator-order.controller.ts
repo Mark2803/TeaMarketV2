@@ -65,7 +65,16 @@ export async function updateModeratorOrderStatusController(
       } catch (error) {
         const message = error instanceof Error ? error.message : "REFUND_FAILED";
         console.error("[YOOKASSA_REFUND]", message);
-        res.status(409).json({ error: { code: "REFUND_FAILED", message } });
+        // A provider authorization failure is not an order-status error. Never
+        // cancel a paid order until the payment provider confirms the refund.
+        if (message === "YOOKASSA_REFUND_API_403:forbidden") {
+          res.status(409).json({ error: {
+            code: "YOOKASSA_REFUND_ACCESS_DENIED",
+            message: "ЮKassa запретила операцию возврата (403). Проверьте права магазина и соответствие платёжных ключей. Заказ не отменён, деньги не возвращены."
+          } });
+          return;
+        }
+        res.status(409).json({ error: { code: "REFUND_FAILED", message: "Не удалось подтвердить возврат платежа через ЮKassa. Заказ не отменён." } });
       }
       return;
     }
