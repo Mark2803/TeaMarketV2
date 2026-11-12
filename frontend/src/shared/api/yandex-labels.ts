@@ -21,3 +21,21 @@ export async function downloadYandexLabels(orders:string[],size="58x40"):Promise
   const anchor=document.createElement("a");anchor.href=objectUrl;anchor.download=`yandex-labels-${orders.length}.pdf`;document.body.appendChild(anchor);anchor.click();anchor.remove();
   window.setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
 }
+
+/** Submit an existing paid order to Yandex. Backend prevents duplicate shipments. */
+export async function createYandexShipment(orderNumber:string):Promise<void>{
+  const root=String(base).replace(/\/$/,"");
+  const csrfResponse=await fetch(new URL(`${root}/moderator/csrf`,window.location.origin),{credentials:"include",cache:"no-store"});
+  if(!csrfResponse.ok)throw new Error("Не удалось подтвердить административную сессию");
+  const csrfData=await csrfResponse.json() as {token?:string};
+  if(!csrfData.token)throw new Error("Не получен CSRF-токен");
+  const response=await fetch(new URL(`${root}/moderator/yandex-shipments/${encodeURIComponent(orderNumber)}/create`,window.location.origin),{
+    method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-CSRF-Token":csrfData.token}
+  });
+  if(!response.ok){
+    const payload=await response.json().catch(()=>null) as {error?:{code?:string;message?:string;diagnostics?:{upstreamCode?:string;fields?:string[]}}}|null;
+    const error=payload?.error;
+    const details=[error?.diagnostics?.upstreamCode,...(error?.diagnostics?.fields??[])].filter(Boolean).join(", ");
+    throw new Error([error?.message??`Не удалось оформить отправление (HTTP ${response.status})`,details].filter(Boolean).join(": "));
+  }
+}
