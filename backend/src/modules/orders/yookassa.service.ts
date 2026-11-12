@@ -214,9 +214,10 @@ export async function synchronizeYooKassaPayment(paymentId: string): Promise<voi
         include: { order_deliveries: true }
       });
       const delivery = order?.order_deliveries;
-      if (order?.payment_status === "paid" && delivery &&
+      if (order?.payment_status === "paid" && order.status !== "cancelled" && delivery &&
           (/yandex|яндекс/i.test(delivery.delivery_service ?? "") ||
            /^\[ПВЗ Яндекс [a-zA-Z0-9-]{20,80}\]/.test(delivery.full_address ?? ""))) {
+        console.info("YANDEX_AUTO_SHIPMENT_START", order.order_number);
         await createYandexShipmentAfterPayment(order.order_number);
       }
     } catch (error) {

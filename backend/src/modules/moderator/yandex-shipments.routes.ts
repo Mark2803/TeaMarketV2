@@ -1,4 +1,4 @@
-import { advanceOrderStatus } from "../orders/automatic-order-status.js";
+
 import { Router } from "express";
 import { trackingSimulationEnabled, setSimulatedTracking, getSimulatedTracking } from "../orders/tracking-simulation.js";
 import { randomUUID } from "node:crypto";
@@ -233,20 +233,6 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length > 20000000 || bytes.subarray(0,5).toString("ascii") !== "%PDF-")
     return fail(res,"INVALID_LABEL_RESPONSE","Яндекс вернул некорректный PDF",502);
-  // The carrier has successfully generated a valid PDF.
-  // Advance each paid order only once; never regress its status.
-  for (const row of rows) {
-    try {
-      const order = await prisma.orders.findUnique({
-        where: { order_number: row.order_number },
-        select: { id: true }
-      });
-      if (order) await advanceOrderStatus(order.id, "processing");
-    } catch (error) {
-      console.error("YANDEX_LABEL_ORDER_STATUS_ERROR", row.order_number, error);
-    }
-  }
-
   res.setHeader("Content-Type","application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="yandex-labels-${orderNumbers.length}.pdf"`);
   res.setHeader("Cache-Control","no-store");
@@ -305,7 +291,7 @@ export async function submitYandexShipment(orderNumber: string, res: any): Promi
     if (!dropoffId) return fail(res,"SOURCE_MISSING","Выберите основной ПВЗ отгрузки",409);
     // Registered sender station and preferred physical drop-off point are different entities.
     const source = process.env.YANDEX_DELIVERY_SOURCE_STATION_ID?.trim();
-    if (!source) return fail(res,"SOURCE_MISSING","Укажите станцию отправителя Яндекс Доставки",409);
+    if (!source) return fail(res,"SOURCE_MISSING","Не задан YANDEX_DELIVERY_SOURCE_STATION_ID: укажите зарегистрированную станцию отправителя Яндекса",409);
     const plan = await calculateOrderPacking(orderNumber);
     if (plan.status !== "calculated" || !plan.parcels.length) return fail(res,"PACKING_UNAVAILABLE","Не удалось подобрать коробку; проверьте размеры и вес товаров",409);
     const token = process.env.YANDEX_DELIVERY_TOKEN;

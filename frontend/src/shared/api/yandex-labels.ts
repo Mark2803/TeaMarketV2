@@ -8,7 +8,12 @@ export async function loadYandexShipmentMap(): Promise<Map<string,YandexShipment
 export async function downloadYandexLabels(orders:string[],size="58x40"):Promise<void>{
   if (!orders.length) throw new Error("Не выбраны отправления");
   const url = new URL(`${String(base).replace(/\/$/,"")}/moderator/yandex-shipments/labels/batch`,window.location.origin);
-  const response = await fetch(url,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderNumbers:orders,size,layout:orders.length>1?"many":"one"})});
+  const csrfUrl = new URL(`${String(base).replace(/\/$/,"")}/moderator/csrf`,window.location.origin);
+  const csrfResponse = await fetch(csrfUrl,{credentials:"include",cache:"no-store"});
+  if(!csrfResponse.ok)throw new Error("Не удалось подтвердить административную сессию");
+  const csrfData = await csrfResponse.json() as {token?:string};
+  if(!csrfData.token)throw new Error("Не получен CSRF-токен");
+  const response = await fetch(url,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json","X-CSRF-Token":csrfData.token},body:JSON.stringify({orderNumbers:orders,size,layout:orders.length>1?"many":"one"})});
   if (!response.ok) { const data=await response.json().catch(()=>null);throw new Error(data?.error?.message??`Ошибка PDF: ${response.status}`); }
   const blob=await response.blob();
   if (blob.type && !blob.type.includes("pdf")) throw new Error("Сервер не вернул PDF");
