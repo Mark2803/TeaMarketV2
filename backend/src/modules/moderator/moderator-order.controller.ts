@@ -67,10 +67,10 @@ export async function updateModeratorOrderStatusController(
         console.error("[YOOKASSA_REFUND]", message);
         // A provider authorization failure is not an order-status error. Never
         // cancel a paid order until the payment provider confirms the refund.
-        if (message === "YOOKASSA_REFUND_API_403:forbidden") {
+        if (message.startsWith("YOOKASSA_REFUND_API_403:forbidden")) {
           res.status(409).json({ error: {
             code: "YOOKASSA_REFUND_ACCESS_DENIED",
-            message: "ЮKassa запретила операцию возврата (403). Проверьте права магазина и соответствие платёжных ключей. Заказ не отменён, деньги не возвращены."
+            message: `ЮKassa отклонила запрос (${message}). Проверьте доступ магазина к API. Заказ не отменён.`
           } });
           return;
         }
