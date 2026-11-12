@@ -28,7 +28,7 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
     }),
     prisma.orders.findMany({
       where: { ordered_at: { gte: from, lte: to } },
-      select: { id: true, customer_id: true, status: true, total_amount: true, discount_total: true, promo_code: true, loyalty_spent: true, ordered_at: true }
+      select: { id: true, customer_id: true, status: true, total_amount: true, delivery_cost: true, discount_total: true, promo_code: true, loyalty_spent: true, ordered_at: true }
     }),
     prisma.customers.count({ where: { created_at: { gte: from, lte: to } } }),
     prisma.order_items.findMany({
@@ -46,7 +46,8 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
 
   // "Выручка" в управленческой аналитике = сумма созданных и не отменённых заказов.
   // Фактический выкуп отдельно отражается показателем completed/buyout.
-  const revenue = nonCancelled.reduce((sum, o) => sum + Number(o.total_amount), 0);
+  const revenue = nonCancelled.reduce((sum, o) => sum + Number(o.total_amount) - Number(o.delivery_cost), 0);
+  const deliveryRevenue = nonCancelled.reduce((sum, o) => sum + Number(o.delivery_cost), 0);
   const averageCheck = nonCancelled.length ? revenue / nonCancelled.length : 0;
   const visitorCount = new Set(sessions.map(s => s.visitor_id)).size;
   const buyoutRate = nonCancelled.length ? completed.length / nonCancelled.length * 100 : 0;
@@ -122,7 +123,7 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
     const x = sources.get(src) ?? { visitors: new Set(), carts: new Set(), orders: 0, orderVisitors: new Set(), revenue: 0 };
     x.orders++;
     x.orderVisitors.add(a.session.visitor_id);
-    x.revenue += Number(o.total_amount);
+    x.revenue += Number(o.total_amount) - Number(o.delivery_cost);
     sources.set(src, x);
   }
 
@@ -202,19 +203,20 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
     .filter(o => Number(o.discount_total) > 0)
     .reduce((sum, o) => sum + Number(o.total_amount), 0);
 
-  const days = new Map<string, { date: string; visitors: Set<string>; orders: number; revenue: number }>();
+  const days = new Map<string, { date: string; visitors: Set<string>; orders: number; revenue: number; deliveryRevenue: number }>();
   const key = (d: Date) => d.toISOString().slice(0, 10);
   for (const s of sessions) {
     const k = key(s.started_at);
-    const x = days.get(k) ?? { date: k, visitors: new Set(), orders: 0, revenue: 0 };
+    const x = days.get(k) ?? { date: k, visitors: new Set(), orders: 0, revenue: 0, deliveryRevenue: 0 };
     x.visitors.add(s.visitor_id);
     days.set(k, x);
   }
   for (const o of nonCancelled) {
     const k = key(o.ordered_at);
-    const x = days.get(k) ?? { date: k, visitors: new Set(), orders: 0, revenue: 0 };
+    const x = days.get(k) ?? { date: k, visitors: new Set(), orders: 0, revenue: 0, deliveryRevenue: 0 };
     x.orders++;
-    x.revenue += Number(o.total_amount);
+    x.revenue += Number(o.total_amount) - Number(o.delivery_cost);
+    x.deliveryRevenue += Number(o.delivery_cost);
     days.set(k, x);
   }
 
@@ -225,6 +227,7 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
         visitors: visitorCount,
         orders: nonCancelled.length,
         revenue,
+        deliveryRevenue,
         averageCheck,
         orderConversion,
         buyoutRate
@@ -232,7 +235,7 @@ export async function getModeratorAnalyticsController(req: Request, res: Respons
       funnel,
       dynamics: [...days.values()]
         .sort((a, b) => a.date.localeCompare(b.date))
-        .map(x => ({ date: x.date, visitors: x.visitors.size, orders: x.orders, revenue: x.revenue })),
+        .map(x => ({ date: x.date, visitors: x.visitors.size, orders: x.orders, revenue: x.revenue, deliveryRevenue: x.deliveryRevenue })),
       sources: sourceData,
       products,
       customers: {

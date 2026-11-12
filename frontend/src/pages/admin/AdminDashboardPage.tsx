@@ -202,7 +202,7 @@ export default function AdminDashboardPage() {
                 <Link to="/admin/analytics">Подробнее</Link>
               </div>
             </div>
-            <div className="finance-summary"><span>Выручка за период <strong>{finance ? money(finance.overview.revenue) : "—"}</strong></span><span>Заказы <strong>{finance?.overview.orders ?? "—"}</strong></span><span>Средний чек <strong>{finance ? money(finance.overview.averageCheck) : "—"}</strong></span></div>
+            <div className="finance-summary"><span style={{color:"#249b65"}}>Товары <strong>{finance ? money(finance.overview.revenue) : "—"}</strong></span><span style={{color:"#e99b36"}}>Доставка покупателя <strong>{finance ? money(finance.overview.deliveryRevenue) : "—"}</strong></span><span>Всего поступлений по заказам <strong>{finance ? money(finance.overview.revenue + finance.overview.deliveryRevenue) : "—"}</strong></span><span>Заказы <strong>{finance?.overview.orders ?? "—"}</strong></span><span>Средний чек <strong>{finance ? money(finance.overview.averageCheck) : "—"}</strong></span></div>
             {financeError && <p role="alert" className="admin-analytics-warning">{financeError}</p>}
             {financeLoading ? <p>Загрузка отчёта…</p> : <FinanceChart data={week} />}
           </div>

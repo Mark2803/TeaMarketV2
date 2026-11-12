@@ -1,0 +1,64 @@
+/* Scoped promo-code form styling, aligned with the admin editor. */
+.admin-promo-editor .admin-benefit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+  align-items: start;
+}
+.admin-promo-editor .admin-benefit-form-grid > label:not(.admin-promo-toggle) {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+.admin-promo-editor .admin-benefit-form-grid > label:not(.admin-promo-toggle) > span:first-child {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.admin-promo-editor .admin-benefit-form-grid input:not([type="checkbox"]),
+.admin-promo-editor .admin-benefit-form-grid select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #dcd8ce;
+  border-radius: 10px;
+  background: #fff;
+  color: #28372d;
+  font: inherit;
+  line-height: 1.4;
+  outline-offset: 2px;
+}
+.admin-promo-editor .admin-benefit-form-grid input:not([type="checkbox"]):focus-visible,
+.admin-promo-editor .admin-benefit-form-grid select:focus-visible {
+  outline: 2px solid #365b43;
+  border-color: #365b43;
+}
+.admin-promo-editor .admin-benefit-form-grid > .wide {
+  grid-column: 1 / -1;
+}
+.admin-promo-editor .admin-benefit-form-grid .admin-promo-toggle,
+.admin-promo-editor .admin-benefit-form-grid .admin-benefit-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+  margin: 0;
+}
+.admin-promo-editor .admin-benefit-form-grid input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: #2d4b38;
+}
+@media (max-width: 760px) {
+  .admin-promo-editor .admin-benefit-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-promo-editor .admin-benefit-form-grid > .wide { grid-column: auto; }
+}

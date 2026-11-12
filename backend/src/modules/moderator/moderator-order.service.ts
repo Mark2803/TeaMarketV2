@@ -83,7 +83,7 @@ export async function updateModeratorOrderStatus(
       if (order.status === "shipped") {
         return { success: false, error: "INVALID_STATUS_TRANSITION" };
       }
-      if (order.payment_status !== "unpaid") {
+      if (order.payment_status !== "unpaid" && order.payment_status !== "refunded") {
         return { success: false, error: "PAID_ORDER_CANCELLATION_REQUIRES_REFUND" };
       }
 

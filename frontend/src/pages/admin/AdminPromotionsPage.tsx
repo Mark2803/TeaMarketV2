@@ -1,3 +1,4 @@
+import "./admin-promo-design.css";
 import { useEffect, useMemo, useState } from "react";
 import { BadgePercent, Gift, HeartHandshake, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react";
 import {
@@ -109,7 +110,7 @@ export default function AdminPromotionsPage(){
         const ok=await run(()=>editingCodeId?updateAdminPromoCode(editingCodeId,editingCode):createAdminPromoCode(editingCode),editingCodeId?"Промокод сохранён.":"Промокод создан.");
         if(ok){setEditingCode(null);setEditingCodeId(null)}
       }} close={()=>{setEditingCode(null);setEditingCodeId(null)}}/>}
-      <div className="admin-benefit-list">{codes.map(x=><article key={x.id} className="admin-editor-card admin-benefit-card">
+      <div className="admin-benefit-list">{[...codes].sort((a,b)=>Number(b.is_active)-Number(a.is_active)||a.code.localeCompare(b.code,"ru")).map(x=><article key={x.id} className="admin-editor-card admin-benefit-card">
         <div><strong>{x.code} — {x.name}</strong><span>{x.is_active?"Активен":"Выключен"} · {x.discount_type==="percent"?`${x.value}%`:x.discount_type==="fixed"?money(x.value):"Бесплатная доставка"} · от {money(x.min_order_amount)}</span><small>Использован: {x.used_count}{x.usage_limit?` / ${x.usage_limit}`:""} · лимит на покупателя: {x.per_customer_limit}</small></div>
         <div className="admin-benefit-row-actions"><button className="admin-secondary-button" onClick={()=>editCode(x)}><Pencil size={16}/>Изменить</button><button className="admin-secondary-button" disabled={busy} onClick={()=>void run(()=>updateAdminPromoCode(x.id,{isActive:!x.is_active}),x.is_active?"Промокод выключен.":"Промокод включён.")}>{x.is_active?"Выключить":"Включить"}</button><button className="admin-icon-danger" onClick={()=>{if(confirm("Удалить промокод?"))void run(()=>deleteAdminPromoCode(x.id),"Промокод удалён.")}}><Trash2 size={17}/></button></div>
       </article>)}</div>
@@ -155,19 +156,43 @@ function PromotionEditor({value,setValue,id,products,categories,collections,cust
   </div>
 }
 
+
+function PromoNumberInput({value,onChange,min=0,max,placeholder}:{value:number|null;onChange:(v:number|null)=>void;min?:number;max?:number;placeholder?:string}){
+  const [draft,setDraft]=useState(value===null?"":String(value));
+  useEffect(()=>{setDraft(value===null?"":String(value))},[value]);
+  const commit=()=>{
+    if(draft.trim()===""){onChange(null);return;}
+    const parsed=Number(draft.replace(",","."));
+    if(!Number.isFinite(parsed)){setDraft(value===null?"":String(value));return;}
+    const normalized=Math.min(max??Infinity,Math.max(min,parsed));
+    setDraft(String(normalized));
+    onChange(normalized);
+  };
+  return <input type="text" inputMode="decimal" placeholder={placeholder}
+    value={draft} onFocus={e=>e.currentTarget.select()}
+    onChange={e=>setDraft(e.target.value)}
+    onBlur={commit}
+    onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.currentTarget.blur()}}}/>;
+}
+
 function PromoEditor({value,setValue,id,busy,save,close}:{value:AdminPromoCodeInput;setValue:(x:AdminPromoCodeInput)=>void;id:string|null;busy:boolean;save:()=>void;close:()=>void}){
-  return <div className="admin-editor-card admin-benefit-editor"><div className="admin-benefit-editor-head"><h2>{id?"Редактирование промокода":"Новый промокод"}</h2><button className="admin-icon-button" onClick={close}><X size={18}/></button></div><div className="admin-benefit-form-grid">
-    <label><span>Код *</span><input value={value.code} onChange={e=>setValue({...value,code:e.target.value.toUpperCase().replace(/\s+/g,"")})} placeholder="TEA10"/></label>
-    <label><span>Название *</span><input value={value.name} onChange={e=>setValue({...value,name:e.target.value})} placeholder="Скидка для подписчиков"/></label>
-    <label><span>Тип скидки</span><select value={value.discountType} onChange={e=>setValue({...value,discountType:e.target.value as AdminPromoCodeInput["discountType"],value:e.target.value==="free_delivery"?0:value.value})}><option value="percent">Процент</option><option value="fixed">Фиксированная сумма</option><option value="free_delivery">Бесплатная доставка</option></select></label>
-    {value.discountType!=="free_delivery"&&<label><span>{value.discountType==="percent"?"Скидка, %":"Скидка, ₽"}</span><input type="number" min="0" max={value.discountType==="percent"?100:undefined} value={value.value} onChange={e=>setValue({...value,value:Number(e.target.value)})}/></label>}
-    <label><span>Минимальный заказ, ₽</span><input type="number" min="0" value={value.minOrderAmount} onChange={e=>setValue({...value,minOrderAmount:Number(e.target.value)})}/></label>
-    <label><span>Общий лимит использований</span><input type="number" min="1" placeholder="Без лимита" value={value.usageLimit??""} onChange={e=>setValue({...value,usageLimit:e.target.value?Number(e.target.value):null})}/></label>
-    <label><span>Лимит на покупателя</span><input type="number" min="1" value={value.perCustomerLimit} onChange={e=>setValue({...value,perCustomerLimit:Number(e.target.value)})}/></label>
-    <label><span>Начало</span><input type="datetime-local" value={dateInput(value.startsAt)} onChange={e=>setValue({...value,startsAt:apiDate(e.target.value)})}/></label>
-    <label><span>Окончание</span><input type="datetime-local" value={dateInput(value.endsAt)} onChange={e=>setValue({...value,endsAt:apiDate(e.target.value)})}/></label>
-    <label className="admin-benefit-check wide"><input type="checkbox" checked={value.isActive} onChange={e=>setValue({...value,isActive:e.target.checked})}/>Промокод активен</label>
-  </div><p className="admin-benefit-hint">Лимит на покупателя контролируется для зарегистрированных покупателей. Общий лимит действует для всех.</p><div className="admin-benefit-editor-actions"><button className="admin-primary-button" disabled={busy} onClick={save}><Save size={16}/>{busy?"Сохранение…":"Сохранить промокод"}</button><button className="admin-secondary-button" onClick={close}>Отмена</button></div></div>
+  return <div className="admin-editor-card admin-benefit-editor admin-promo-editor">
+    <div className="admin-benefit-editor-head"><h2>{id?"Редактирование промокода":"Новый промокод"}</h2><button className="admin-icon-button" onClick={close}><X size={18}/></button></div>
+    <div className="admin-benefit-form-grid">
+      <label className="admin-field"><span>Код *</span><input value={value.code} onChange={e=>setValue({...value,code:e.target.value.toUpperCase().replace(/\s+/g,"")})} placeholder="TEA10"/></label>
+      <label className="admin-field"><span>Название *</span><input value={value.name} onChange={e=>setValue({...value,name:e.target.value})} placeholder="Скидка для подписчиков"/></label>
+      <label className="admin-field"><span>Тип скидки</span><select value={value.discountType} onChange={e=>setValue({...value,discountType:e.target.value as AdminPromoCodeInput["discountType"],value:e.target.value==="free_delivery"?0:value.value})}><option value="percent">Процент</option><option value="fixed">Фиксированная сумма</option><option value="free_delivery">Бесплатная доставка</option></select></label>
+      {value.discountType!=="free_delivery"&&<label className="admin-field"><span>{value.discountType==="percent"?"Скидка, %":"Скидка, ₽"}</span><PromoNumberInput value={value.value} max={value.discountType==="percent"?100:undefined} onChange={n=>setValue({...value,value:n??0})}/></label>}
+      <label className="admin-field"><span>Минимальный заказ, ₽</span><PromoNumberInput value={value.minOrderAmount} onChange={n=>setValue({...value,minOrderAmount:n??0})}/></label>
+      <label className="admin-field"><span>Общий лимит использований</span><PromoNumberInput value={value.usageLimit??null} min={1} placeholder="Без лимита" onChange={n=>setValue({...value,usageLimit:n===null?null:Math.floor(n)})}/></label>
+      <label className="admin-field"><span>Лимит на покупателя</span><PromoNumberInput value={value.perCustomerLimit??1} min={1} onChange={n=>setValue({...value,perCustomerLimit:Math.floor(n??1)})}/></label>
+      <label className="admin-field"><span>Начало действия</span><input type="datetime-local" value={dateInput(value.startsAt)} onChange={e=>setValue({...value,startsAt:apiDate(e.target.value)})}/></label>
+      <label className="admin-field"><span>Окончание действия</span><input type="datetime-local" value={dateInput(value.endsAt)} onChange={e=>setValue({...value,endsAt:apiDate(e.target.value)})}/></label>
+      <label className="admin-benefit-check wide admin-promo-toggle"><input type="checkbox" checked={value.isActive} onChange={e=>setValue({...value,isActive:e.target.checked})}/>Промокод активен</label>
+    </div>
+    <p className="admin-benefit-hint">Пустой общий лимит означает отсутствие ограничения. Лимит на покупателя контролируется для зарегистрированных покупателей.</p>
+    <div className="admin-benefit-editor-actions"><button className="admin-primary-button" disabled={busy} onClick={save}><Save size={16}/>{busy?"Сохранение…":"Сохранить промокод"}</button><button className="admin-secondary-button" onClick={close}>Отмена</button></div>
+  </div>
 }
 
 function Loyalty({value,save}:{value:AdminBenefitSettings;save:(x:{isActive:boolean;earnPercent:number;maxSpendPercent:number;minOrderAmount:number;bonusLifetimeDays:number|null;minSpendPoints:number;allowWithPromotions:boolean;allowWithPromoCodes:boolean})=>void}){const[x,setX]=useState({isActive:value.loyalty.is_active,earnPercent:Number(value.loyalty.earn_percent),maxSpendPercent:Number(value.loyalty.max_spend_percent),minOrderAmount:Number(value.loyalty.min_order_amount),bonusLifetimeDays:value.loyalty.bonus_lifetime_days,minSpendPoints:Number(value.loyalty.min_spend_points),allowWithPromotions:value.loyalty.allow_with_promotions,allowWithPromoCodes:value.loyalty.allow_with_promo_codes});return <div className="admin-editor-card admin-benefit-form"><h2>Программа лояльности</h2><p>Бонусы начисляются зарегистрированному покупателю после завершения заказа. Списание фиксируется в заказе как отдельная скидка.</p><label className="admin-benefit-check"><input type="checkbox" checked={x.isActive} onChange={e=>setX({...x,isActive:e.target.checked})}/>Включена</label><label><span>Начислять бонусов, %</span><input type="number" min="0" max="100" value={x.earnPercent} onChange={e=>setX({...x,earnPercent:Number(e.target.value)})}/></label><label><span>Максимальная оплата бонусами, % заказа</span><input type="number" min="0" max="100" value={x.maxSpendPercent} onChange={e=>setX({...x,maxSpendPercent:Number(e.target.value)})}/></label><label><span>Минимальная сумма заказа</span><input type="number" min="0" value={x.minOrderAmount} onChange={e=>setX({...x,minOrderAmount:Number(e.target.value)})}/></label><label><span>Минимум бонусов для списания</span><input type="number" min="0" value={x.minSpendPoints} onChange={e=>setX({...x,minSpendPoints:Number(e.target.value)})}/></label><label><span>Срок жизни бонусов, дней</span><input type="number" min="1" placeholder="Без срока" value={x.bonusLifetimeDays??""} onChange={e=>setX({...x,bonusLifetimeDays:e.target.value?Number(e.target.value):null})}/></label><label className="admin-benefit-check"><input type="checkbox" checked={x.allowWithPromotions} onChange={e=>setX({...x,allowWithPromotions:e.target.checked})}/>Разрешить списание вместе с акциями</label><label className="admin-benefit-check"><input type="checkbox" checked={x.allowWithPromoCodes} onChange={e=>setX({...x,allowWithPromoCodes:e.target.checked})}/>Разрешить списание вместе с промокодами</label><button className="admin-primary-button" onClick={()=>save(x)}><Save size={16}/>Сохранить</button></div>}

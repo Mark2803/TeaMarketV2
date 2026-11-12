@@ -7,6 +7,7 @@ import {
 } from "./moderator-order.schemas.js";
 
 import { sendOrderStatusEmail } from "../notifications/notification.service.js";
+import { refundAndCancelOrder } from "./moderator-refund.service.js";
 
 import {
   updateModeratorOrderStatus,
@@ -46,6 +47,28 @@ export async function updateModeratorOrderStatusController(
       message: "Вручную разрешена только отмена заказа с указанием причины"
     }});
     return;
+  }
+
+  if (bodyResult.data.status === "cancelled") {
+    const current = await import("../../database/prisma.js").then(m => m.prisma.orders.findUnique({
+      where: { order_number: paramsResult.data.orderNumber },
+      select: { payment_status: true }
+    }));
+    if (current && (current.payment_status === "paid" || current.payment_status === "refunded")) {
+      try {
+        const refundResult = await refundAndCancelOrder(paramsResult.data.orderNumber, bodyResult.data.cancellationReason!);
+        if (!refundResult.alreadyCancelled) {
+          try { await sendOrderStatusEmail(paramsResult.data.orderNumber, "cancelled"); }
+          catch (error) { console.error("[NOTIFICATIONS] Order cancellation email failed", error); }
+        }
+        res.json({ data: refundResult.order ?? { status: "cancelled" } });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "REFUND_FAILED";
+        console.error("[YOOKASSA_REFUND]", message);
+        res.status(409).json({ error: { code: "REFUND_FAILED", message } });
+      }
+      return;
+    }
   }
 
   const result = await updateModeratorOrderStatus(
