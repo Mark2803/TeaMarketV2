@@ -250,8 +250,9 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
   const allowedSizes = ["210x297", "100x150", "75x120", "58x60", "58x40"];
   if (!allowedSizes.includes(size)) return fail(res, "INVALID_LABEL_SIZE", "Недопустимый размер этикетки");
   if (layout !== "one" && layout !== "many") return fail(res, "INVALID_LABEL_LAYOUT", "Недопустимая компоновка");
-  const token = process.env.YANDEX_DELIVERY_TOKEN;
-  if (!token) return fail(res, "YANDEX_NOT_CONFIGURED", "Не задан токен Яндекс Доставки", 503);
+  const liveToken = process.env.YANDEX_DELIVERY_TOKEN;
+  const testToken = process.env.YANDEX_DELIVERY_TEST_TOKEN;
+  if (!liveToken && !testToken) return fail(res, "YANDEX_NOT_CONFIGURED", "Не заданы токены Яндекс Доставки", 503);
   const placeholders = orderNumbers.map((_, index) => `$${index + 1}`).join(", ");
   const rows = await prisma.$queryRawUnsafe<Array<{order_number:string;yandex_request_id:string|null}>>(
     `SELECT o.order_number, s.yandex_request_id FROM orders o
@@ -262,33 +263,72 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
   const found = new Map(rows.map(r => [r.order_number, r.yandex_request_id]));
   if (orderNumbers.some(n => !found.has(n))) return fail(res, "SHIPMENT_NOT_REGISTERED", "Не все выбранные заказы имеют оформленные отправления", 409);
   const requestIds = [...new Set(orderNumbers.map(n => found.get(n)!))];
+
+  // Legacy shipments may have been created on the test platform. A request ID
+  // is not portable between environments: resolve it read-only before printing.
+  type CarrierEnvironment = "live" | "test";
+  const carrierHosts: Record<CarrierEnvironment,string> = {
+    live: "https://b2b-authproxy.taxi.yandex.net",
+    test: "https://b2b.taxi.tst.yandex.net",
+  };
+  const carrierTokens: Record<CarrierEnvironment,string|undefined> = {
+    live: liveToken, test: testToken,
+  };
+  async function checkEnvironment(requestId: string, environment: CarrierEnvironment): Promise<"found"|"missing"|"unavailable"> {
+    const token = carrierTokens[environment];
+    if (!token) return "unavailable";
+    const url = new URL("/api/b2b/platform/request/info", carrierHosts[environment]);
+    url.searchParams.set("request_id", requestId);
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}`, "Accept-Language": "ru" },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (response.ok) return "found";
+      if (response.status !== 404) return "unavailable";
+      const payload = asRecord(await response.json());
+      return payload.code === "customer_order_not_found" ? "missing" : "unavailable";
+    } catch { return "unavailable"; }
+  }
+
+  const environments = new Set<CarrierEnvironment>();
+  for (const requestId of requestIds) {
+    const live = await checkEnvironment(requestId, "live");
+    if (live === "found") {
+      environments.add("live");
+      continue;
+    }
+    // Never fall back to test when the live environment is inaccessible:
+    // that could mask authentication errors or transient carrier failures.
+    if (live === "unavailable") return fail(res, "YANDEX_ENV_CHECK_FAILED", "Не удалось проверить заявку в боевой среде Яндекса", 502);
+    const test = await checkEnvironment(requestId, "test");
+    if (test === "found") {
+      environments.add("test");
+      continue;
+    }
+    if (test === "unavailable") return fail(res, "YANDEX_TEST_ENV_CHECK_FAILED", "Не удалось проверить заявку в тестовой среде Яндекса", 502);
+    return fail(res, "YANDEX_SHIPMENT_NOT_FOUND", "Заявка не найдена ни в боевой, ни в тестовой среде Яндекса", 404);
+  }
+  if (environments.size !== 1) return fail(res, "YANDEX_MIXED_ENVIRONMENTS", "Выберите отдельно тестовые и боевые отправления для печати этикеток", 409);
+  const environment = [...environments][0]!;
+  const token = carrierTokens[environment]!;
   let response: globalThis.Response;
   try {
-    response = await fetch("https://b2b-authproxy.taxi.yandex.net/api/b2b/platform/request/generate-labels", {
+    response = await fetch(`${carrierHosts[environment]}/api/b2b/platform/request/generate-labels`, {
       method: "POST", headers: {Authorization: `Bearer ${token}`, "Content-Type":"application/json", Accept:"application/pdf"},
       body: JSON.stringify({request_ids: requestIds, generate_type: layout, label_size_mm:size, language:"ru"}),
       signal: AbortSignal.timeout(25000),
     });
   } catch { return fail(res, "YANDEX_LABEL_NETWORK", "Не удалось получить этикетки от Яндекса", 502); }
   if (!response.ok) {
-    // A registered carrier request can still be pending and not printable.
-    // Preserve this distinction instead of reporting every carrier refusal as a gateway failure.
     let carrierCode: string | null = null;
-    try {
-      const payload = asRecord(await response.json());
-      carrierCode = pick(payload.code);
-    } catch { /* The upstream response is not JSON. */ }
+    try { carrierCode = pick(asRecord(await response.json()).code); } catch { /* Non-JSON response */ }
     console.warn("YANDEX_LABELS_REJECTED", {
-      upstreamStatus: response.status,
-      upstreamCode: carrierCode,
-      orderCount: orderNumbers.length,
+      environment, upstreamStatus: response.status, upstreamCode: carrierCode, orderCount: orderNumbers.length,
     });
-    if (response.status === 409) {
-      return fail(res, "YANDEX_LABEL_NOT_READY",
-        "Яндекс пока не разрешает печать этикетки для этого отправления. Проверьте его статус и повторите попытку позже.", 409);
-    }
-    return fail(res, "YANDEX_LABELS_UNAVAILABLE",
-      `Яндекс не выдал этикетки (HTTP ${response.status})`, 502);
+    if (response.status === 409) return fail(res, "YANDEX_LABEL_NOT_READY",
+      "Яндекс пока не разрешает печать этикетки для этого отправления. Проверьте его статус и повторите попытку позже.", 409);
+    return fail(res, "YANDEX_LABELS_UNAVAILABLE", `Яндекс не выдал этикетки (HTTP ${response.status})`, 502);
   }
   const length = Number(response.headers.get("content-length") || 0);
   if (length > 20000000) return fail(res,"LABEL_TOO_LARGE","Документ превышает допустимый размер",502);
