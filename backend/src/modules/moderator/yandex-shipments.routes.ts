@@ -227,7 +227,26 @@ async function sendLabels(res: any, orderNumbers: string[], size: string, layout
       signal: AbortSignal.timeout(25000),
     });
   } catch { return fail(res, "YANDEX_LABEL_NETWORK", "Не удалось получить этикетки от Яндекса", 502); }
-  if (!response.ok) return fail(res, "YANDEX_LABELS_UNAVAILABLE", `Яндекс не выдал этикетки (HTTP ${response.status})`, 502);
+  if (!response.ok) {
+    // A registered carrier request can still be pending and not printable.
+    // Preserve this distinction instead of reporting every carrier refusal as a gateway failure.
+    let carrierCode: string | null = null;
+    try {
+      const payload = asRecord(await response.json());
+      carrierCode = pick(payload.code);
+    } catch { /* The upstream response is not JSON. */ }
+    console.warn("YANDEX_LABELS_REJECTED", {
+      upstreamStatus: response.status,
+      upstreamCode: carrierCode,
+      orderCount: orderNumbers.length,
+    });
+    if (response.status === 409) {
+      return fail(res, "YANDEX_LABEL_NOT_READY",
+        "Яндекс пока не разрешает печать этикетки для этого отправления. Проверьте его статус и повторите попытку позже.", 409);
+    }
+    return fail(res, "YANDEX_LABELS_UNAVAILABLE",
+      `Яндекс не выдал этикетки (HTTP ${response.status})`, 502);
+  }
   const length = Number(response.headers.get("content-length") || 0);
   if (length > 20000000) return fail(res,"LABEL_TOO_LARGE","Документ превышает допустимый размер",502);
   const bytes = Buffer.from(await response.arrayBuffer());
