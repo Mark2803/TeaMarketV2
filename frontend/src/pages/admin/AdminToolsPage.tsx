@@ -6,6 +6,12 @@ const tools = [
     description: "Генератор штрихкодов и этикеток для товаров Wildberries.",
     href: "/tools/wildberries-barcode-generator/index.html",
     Icon: Barcode
+  },
+  {
+    title: "Генератор GTIN-14",
+    description: "Расчёт контрольной цифры GTIN-14 и генерация штрихкода ITF-14.",
+    href: "/tools/gtin14-generator/index.html",
+    Icon: Barcode
   }
 ];
 
