@@ -10,7 +10,7 @@ const tools = [
   {
     title: "Генератор GTIN-14",
     description: "Расчёт контрольной цифры GTIN-14 и генерация штрихкода ITF-14.",
-    href: "/tools/gtin14-generator/index.html",
+    href: "/tools/gtin14-generator/",
     Icon: Barcode
   }
 ];
