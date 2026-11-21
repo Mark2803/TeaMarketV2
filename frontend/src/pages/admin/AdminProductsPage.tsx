@@ -1,9 +1,9 @@
 import { ChevronLeft, ChevronRight, PackageOpen, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getAdminProducts } from "../../shared/api/admin";
+import { getAdminProducts, setAdminProductsIndexing } from "../../shared/api/admin";
 import type {
   AdminProductListItem,
   AdminProductVariantStatus,
@@ -52,6 +52,46 @@ export default function AdminProductsPage() {
   const [status, setStatus] = useState<"" | AdminProductVariantStatus>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Индексация поисковиками: счётчики по всему каталогу и принудительная перезагрузка списка.
+  const [indexing, setIndexing] = useState<{ indexed: number; total: number } | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [savingIndex, setSavingIndex] = useState(false);
+  const allIndexRef = useRef<HTMLInputElement>(null);
+  const allIndexed = Boolean(indexing && indexing.total > 0 && indexing.indexed === indexing.total);
+  const someIndexed = Boolean(indexing && indexing.indexed > 0 && !allIndexed);
+
+  useEffect(() => {
+    if (allIndexRef.current) allIndexRef.current.indeterminate = someIndexed;
+  }, [someIndexed]);
+
+  const toggleProductIndex = async (product: AdminProductListItem, value: boolean) => {
+    setProducts((items) => items.map((item) => (item.id === product.id ? { ...item, is_indexed: value } : item)));
+    setIndexing((current) => current && { ...current, indexed: current.indexed + (value ? 1 : -1) });
+    try {
+      await setAdminProductsIndexing(value, [product.id]);
+    } catch {
+      setError("Не удалось изменить индексацию товара.");
+      setReloadKey((key) => key + 1);
+    }
+  };
+
+  const toggleAllIndex = async () => {
+    if (!indexing) return;
+    const value = !allIndexed;
+    const ok = window.confirm(value
+      ? `Открыть для поисковиков все товары (${indexing.total})?`
+      : `Скрыть от поисковиков все товары (${indexing.total})? На сайте они останутся видны.`);
+    if (!ok) return;
+    setSavingIndex(true);
+    try {
+      await setAdminProductsIndexing(value);
+    } catch {
+      setError("Не удалось изменить индексацию товаров.");
+    } finally {
+      setSavingIndex(false);
+      setReloadKey((key) => key + 1);
+    }
+  };
 
   const query = useMemo(
     () => ({
@@ -79,6 +119,7 @@ export default function AdminProductsPage() {
         setProducts(response.data);
         setTotal(response.pagination.total);
         setPages(Math.max(1, response.pagination.totalPages));
+        setIndexing(response.indexing ?? null);
       })
       .catch(() => {
         if (cancelled) return;
@@ -92,7 +133,7 @@ export default function AdminProductsPage() {
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, reloadKey]);
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -196,6 +237,18 @@ export default function AdminProductsPage() {
             <table className="admin-products-table">
               <thead>
                 <tr>
+                  <th className="admin-index-col" title="Индексация поисковиками (Яндекс, Google)">
+                    <label className="admin-index-toggle">
+                      <input
+                        ref={allIndexRef}
+                        type="checkbox"
+                        checked={allIndexed}
+                        disabled={!indexing || savingIndex}
+                        onChange={() => void toggleAllIndex()}
+                      />
+                      <span>В поиске{indexing ? ` ${indexing.indexed}/${indexing.total}` : ""}</span>
+                    </label>
+                  </th>
                   <th>Товар</th>
                   <th>Варианты</th>
                   <th>Цена</th>
@@ -212,6 +265,15 @@ export default function AdminProductsPage() {
                       className="admin-product-row-clickable"
                       onClick={() => navigate(`/admin/products/${product.id}`)}
                     >
+                      <td className="admin-index-col" onClick={(event) => event.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Индексация товара ${product.name}`}
+                          title={product.is_indexed !== false ? "Открыт для поисковиков" : "Скрыт от поисковиков"}
+                          checked={product.is_indexed !== false}
+                          onChange={(event) => void toggleProductIndex(product, event.target.checked)}
+                        />
+                      </td>
                       <td>
                         <div className="admin-product-cell">
                           <div className="admin-product-thumb">

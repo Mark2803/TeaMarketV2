@@ -698,3 +698,10 @@
 .admin-delivery-alerts-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
 .admin-delivery-alerts-actions button { padding: .4rem .65rem; border: 1px solid var(--color-border); border-radius: .5rem; background: var(--color-surface); color: var(--color-text); cursor: pointer; }
 .admin-delivery-alerts-actions button:disabled { opacity: .5; cursor: wait; }
+
+/* Индексация поисковиками: колонка с галочками в списках товаров и статей */
+.admin-index-col{width:1%;white-space:nowrap;text-align:center!important}
+.admin-index-col input[type="checkbox"],.admin-index-toggle input{width:1.15rem;height:1.15rem;accent-color:var(--color-primary);cursor:pointer}
+.admin-index-toggle{display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;font-weight:700}
+.admin-article-index{display:inline-flex;align-items:center;gap:.35rem;font-size:var(--font-size-xs);color:var(--color-text-muted);cursor:pointer}
+.admin-article-index input{width:1rem;height:1rem;accent-color:var(--color-primary);cursor:pointer}

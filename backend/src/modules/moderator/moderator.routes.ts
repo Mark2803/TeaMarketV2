@@ -1,4 +1,5 @@
 import { previewAccountantReport, downloadAccountantReport, sendAccountantReport } from "./accountant/accountant-report.js";
+import { setProductsIndexingController, setArticlesIndexingController } from "./moderator-indexing.controller.js";
 import adminOrderAlertsRouter from "./notifications/admin-order-alerts.routes.js";
 import yandexReturnsRouter from "./yandex-returns.routes.js";
 import yandexShipmentsRouter from "./yandex-shipments.routes.js";
@@ -298,12 +299,19 @@ router.patch("/content/home-banners/:bannerId", updateHomeBannerAdmin);
 router.delete("/content/home-banners/:bannerId", deleteHomeBannerAdmin);
 router.get("/content/articles", listArticlesAdmin);
 router.post("/content/articles", createArticleAdmin);
+router.patch("/content/articles/indexing", setArticlesIndexingController);
 router.patch("/content/articles/:articleId", updateArticleAdmin);
 router.delete("/content/articles/:articleId", deleteArticleAdmin);
 
 router.post(
   "/products",
   createModeratorProductController
+);
+
+// До "/products/:productId", иначе "indexing" будет принят за id товара.
+router.patch(
+  "/products/indexing",
+  setProductsIndexingController
 );
 
 router.post(

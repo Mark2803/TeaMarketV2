@@ -245,6 +245,9 @@ async function articlePage(slug: string, pathname: string): Promise<Page | null>
     products: { select: { name: true, slug: true, is_active: true, is_indexed: true } }
   } });
   if (!item) return null;
+  // is_indexed добавлен миграцией 340_article_indexing (не в Prisma-клиенте).
+  const flag = await prisma.$queryRaw<Array<{ is_indexed: boolean }>>`SELECT is_indexed FROM articles WHERE id = ${item.id}::uuid`;
+  const articleIndexed = flag[0]?.is_indexed !== false;
   const title = item.seo_title?.trim() || `${item.title} | ${BRAND}`;
   const description = plain(item.seo_description) || plain(item.excerpt) || plain(item.content) || item.title;
   const canonical = SITE + pathname;
@@ -276,7 +279,7 @@ async function articlePage(slug: string, pathname: string): Promise<Page | null>
   ].join("\n");
   return {
     title, description, canonical, body, image: item.cover_url, ogType: "article",
-    indexed: item.status === "published" && (!item.published_at || item.published_at <= new Date()),
+    indexed: articleIndexed && item.status === "published" && (!item.published_at || item.published_at <= new Date()),
     jsonLd: [articleLd, crumbs.jsonLd]
   };
 }

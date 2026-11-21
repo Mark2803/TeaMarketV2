@@ -47,6 +47,9 @@ export async function getModeratorProductsController(
       result.items,
 
     pagination:
-      result.pagination
+      result.pagination,
+
+    indexing:
+      result.indexing
   });
 }

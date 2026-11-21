@@ -34,6 +34,7 @@ export type AdminProductListItem = {
   slug: string;
   short_description?: string | null;
   is_active: boolean;
+  is_indexed?: boolean;
   is_new?: boolean;
   updated_at?: string;
   product_images: AdminProductImage[];
@@ -71,6 +72,7 @@ export type AdminProductsResponse = {
     total: number;
     totalPages: number;
   };
+  indexing?: { indexed: number; total: number };
 };
 
 export type AdminProductResponse = { data: AdminProductDetails };
@@ -417,7 +419,7 @@ export function deleteAdminCategory(categoryId: string) {
 // ===== Admin: content / home page =====
 export type AdminCollection = { id:string; name:string; slug:string; description:string|null; imageUrl:string|null; collectionType:string; isActive:boolean; showOnHome:boolean; startsAt:string|null; endsAt:string|null; sortOrder:number; seoTitle:string|null; seoDescription:string|null; canonicalUrl:string|null; isIndexed:boolean; productCount?:number; products?:Array<{productId:string;sortOrder:number;product:AdminProductListItem}> };
 export type AdminHomeBanner = { id:string; collection_id:string; eyebrow:string|null; title:string; subtitle:string|null; image_url:string|null; image_alt:string|null; is_active:boolean; sort_order:number; starts_at:string|null; ends_at:string|null; collections:{id:string;name:string;slug:string} };
-export type AdminArticle = { id:string; slug:string; title:string; excerpt:string; content:string; cover_url:string|null; cover_alt:string|null; reading_time_minutes:number; status:"draft"|"published"; is_featured:boolean; sort_order:number; published_at:string|null; seo_title:string|null; seo_description:string|null; linked_product_id:string|null; cta_text:string|null; linked_product:{id:string;name:string;slug:string}|null; publish_channels:Array<"website"|"dzen"|"telegram"|"vk"> };
+export type AdminArticle = { id:string; slug:string; title:string; excerpt:string; content:string; cover_url:string|null; cover_alt:string|null; reading_time_minutes:number; status:"draft"|"published"; is_featured:boolean; sort_order:number; published_at:string|null; seo_title:string|null; seo_description:string|null; linked_product_id:string|null; cta_text:string|null; linked_product:{id:string;name:string;slug:string}|null; publish_channels:Array<"website"|"dzen"|"telegram"|"vk">; is_indexed?:boolean };
 export function getAdminCollections(){return apiRequest<{data:AdminCollection[]}>("/moderator/collections",{query:{page:1,limit:100}});}
 export function getAdminCollection(id:string){return apiRequest<{data:AdminCollection}>(`/moderator/collections/${id}`);}
 export function createAdminCollection(input:any){return apiRequest<{data:AdminCollection}>("/moderator/collections",{method:"POST",body:JSON.stringify(input)});}
@@ -433,6 +435,20 @@ export function getAdminArticles(){return apiRequest<{data:AdminArticle[]}>("/mo
 export function createAdminArticle(input:any){return apiRequest("/moderator/content/articles",{method:"POST",body:JSON.stringify(input)});}
 export function updateAdminArticle(id:string,input:any){return apiRequest(`/moderator/content/articles/${id}`,{method:"PATCH",body:JSON.stringify(input)});}
 export function deleteAdminArticle(id:string){return apiRequest(`/moderator/content/articles/${id}`,{method:"DELETE"});}
+
+/** Индексация поисковиками: ids не переданы → для всех товаров/статей. */
+export function setAdminProductsIndexing(isIndexed: boolean, ids?: string[]) {
+  return apiRequest<{ data: { updated: number } }>("/moderator/products/indexing", {
+    method: "PATCH",
+    body: JSON.stringify(ids ? { isIndexed, ids } : { isIndexed }),
+  });
+}
+export function setAdminArticlesIndexing(isIndexed: boolean, ids?: string[]) {
+  return apiRequest<{ data: { updated: number } }>("/moderator/content/articles/indexing", {
+    method: "PATCH",
+    body: JSON.stringify(ids ? { isIndexed, ids } : { isIndexed }),
+  });
+}
 
 
 // ===== Admin: orders =====

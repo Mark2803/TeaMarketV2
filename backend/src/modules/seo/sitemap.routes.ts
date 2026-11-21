@@ -13,7 +13,8 @@ router.get("/sitemap.xml", async (_req, res, next) => {
       prisma.products.findMany({ where: { is_active: true, is_indexed: true }, select: { slug: true, updated_at: true, name: true, product_images: { orderBy: [{ sort_order: "asc" }, { id: "asc" }], take: 10, select: { image_url: true } } } }),
       prisma.categories.findMany({ where: { is_visible: true, is_indexed: true }, select: { slug: true, updated_at: true } }),
       prisma.collections.findMany({ where: { is_active: true, is_indexed: true, AND: [{ OR: [{ starts_at: null }, { starts_at: { lte: now } }] }, { OR: [{ ends_at: null }, { ends_at: { gte: now } }] }] }, select: { slug: true, updated_at: true } }),
-      prisma.articles.findMany({ where: { status: "published", OR: [{ published_at: null }, { published_at: { lte: now } }] }, select: { slug: true, updated_at: true } })
+      // is_indexed добавлен миграцией 340_article_indexing (не в Prisma-клиенте).
+      prisma.$queryRaw<Array<{ slug: string; updated_at: Date }>>`SELECT slug, updated_at FROM articles WHERE status = 'published' AND is_indexed = true AND (published_at IS NULL OR published_at <= ${now})`
     ]);
     const urls: Array<{ path: string; lastmod?: Date; images?: string[] }> = [
       { path: "/" }, { path: "/catalog" }, { path: "/collections" }, { path: "/articles" }, { path: "/new" }, { path: "/contacts" }, { path: "/legal/offer" },

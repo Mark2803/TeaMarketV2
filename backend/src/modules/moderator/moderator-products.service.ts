@@ -124,8 +124,20 @@ export async function getModeratorProducts(
       })
     ]);
 
+  // Сколько товаров открыто для поисковиков (по всему каталогу, без фильтров).
+  const [indexedCount, allCount] =
+    await prisma.$transaction([
+      prisma.products.count({ where: { is_indexed: true } }),
+      prisma.products.count()
+    ]);
+
   return {
     items,
+
+    indexing: {
+      indexed: indexedCount,
+      total: allCount
+    },
 
     pagination: {
       page:
