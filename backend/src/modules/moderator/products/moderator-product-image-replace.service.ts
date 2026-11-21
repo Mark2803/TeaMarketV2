@@ -71,7 +71,7 @@ function getImageNumberFromUrl(
 ): number | null {
   const match =
     imageUrl.match(
-      /\/image-(\d+)\.(?:jpg|jpeg|png|webp)$/i
+      /\/image-(\d+)\.(?:jpg|jpeg|png|webp)(?:\?.*)?$/i
     );
 
   if (!match?.[1]) {
@@ -250,12 +250,13 @@ export async function replaceModeratorProductImage(
       `image-${formattedImageNumber}.${extension}`
     ].join("/");
 
+  // ?v= меняет URL при каждой загрузке, чтобы браузер не показывал старую картинку из кэша.
   const newImageUrl =
-    await uploadObjectToStorage(
+    `${await uploadObjectToStorage(
       newObjectKey,
       await optimizeProductImage(file.buffer),
       "image/webp"
-    );
+    )}?v=${Date.now()}`;
 
   if (
     oldObjectKey &&

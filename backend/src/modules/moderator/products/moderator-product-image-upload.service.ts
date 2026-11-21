@@ -41,7 +41,7 @@ function getNextImageNumber(
   ) {
     const match =
       imageUrl.match(
-        /\/image-(\d+)\.(?:jpg|jpeg|png|webp)$/i
+        /\/image-(\d+)\.(?:jpg|jpeg|png|webp)(?:\?.*)?$/i
       );
 
     if (!match?.[1]) {
@@ -148,12 +148,13 @@ export async function uploadModeratorProductImage(
       fileName
     ].join("/");
 
+  // ?v= меняет URL при каждой загрузке, чтобы браузер не показывал старую картинку из кэша.
   const imageUrl =
-    await uploadObjectToStorage(
+    `${await uploadObjectToStorage(
       objectKey,
       await optimizeProductImage(file.buffer),
       "image/webp"
-    );
+    )}?v=${Date.now()}`;
 
   const image =
     await prisma.product_images.create({
