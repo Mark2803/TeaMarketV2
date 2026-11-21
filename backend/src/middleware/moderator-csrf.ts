@@ -1,12 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
-import { readAdminSession } from "../modules/moderator/moderator-session.js";
+import { isAllowedOrigin, readCookie } from "../config/http.js";
+import { ADMIN_SESSION_COOKIE, readAdminSession } from "../modules/moderator/moderator-session.js";
 
-const allowedOrigins = new Set([
-  "http://localhost:5173",
-  "https://tea-master-team.ru",
-  "https://www.tea-master-team.ru"
-]);
 const publicActions = new Set([
   "/login",
   "/password-reset/request",
@@ -14,9 +10,7 @@ const publicActions = new Set([
 ]);
 
 function sessionCookie(req: Request): string | null {
-  const part = (req.headers.cookie || "").split(";").map(x => x.trim())
-    .find(x => x.startsWith("tea_admin_session="));
-  return part ? part.slice("tea_admin_session=".length) : null;
+  return readCookie(req, ADMIN_SESSION_COOKIE);
 }
 
 function tokenFor(cookie: string): string | null {
@@ -51,7 +45,7 @@ export function moderatorCsrfProtection(req: Request, res: Response, next: NextF
 
   // Unsafe browser requests must originate from our storefront/admin UI.
   const origin = req.get("origin");
-  if (!origin || !allowedOrigins.has(origin)) {
+  if (!isAllowedOrigin(origin)) {
     res.status(403).json({ error: { code: "CSRF_ORIGIN_REJECTED", message: "Недопустимый источник запроса" } });
     return;
   }

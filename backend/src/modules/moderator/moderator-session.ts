@@ -4,10 +4,12 @@ import {
   timingSafeEqual
 } from "node:crypto";
 import type { Request, Response } from "express";
+import { readCookie } from "../../config/http.js";
 import { prisma } from "../../database/prisma.js";
 import { verifyAdminPasswordHash } from "./moderator-password.js";
 
-const COOKIE_NAME = "tea_admin_session";
+export const ADMIN_SESSION_COOKIE = "tea_admin_session";
+const COOKIE_NAME = ADMIN_SESSION_COOKIE;
 const SESSION_TTL_SECONDS = 60 * 60 * 12;
 
 type SessionPayload = {
@@ -85,16 +87,7 @@ export function readAdminSessionToken(
     return null;
   }
 
-  const cookieHeader =
-    req.headers.cookie ?? "";
-
-  const raw = cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) =>
-      part.startsWith(`${COOKIE_NAME}=`)
-    )
-    ?.slice(COOKIE_NAME.length + 1);
+  const raw = readCookie(req, COOKIE_NAME);
 
   if (!raw) {
     return null;

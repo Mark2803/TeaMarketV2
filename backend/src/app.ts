@@ -4,6 +4,7 @@ import express from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 
+import { ALLOWED_ORIGINS } from "./config/http.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { notFoundHandler } from "./middleware/not-found.js";
 import { moderatorCsrfProtection, moderatorCsrfToken } from "./middleware/moderator-csrf.js";
@@ -23,11 +24,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://tea-master-team.ru",
-      "https://www.tea-master-team.ru"
-    ],
+    origin: [...ALLOWED_ORIGINS],
     credentials: true
   })
 );

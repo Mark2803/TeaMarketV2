@@ -1,3 +1,4 @@
+import { HttpError } from "./error-handler.js";
 import multer from "multer";
 
 const MAX_IMAGE_SIZE_BYTES =
@@ -37,7 +38,9 @@ export const uploadProductImage =
         )
       ) {
         callback(
-          new Error(
+          new HttpError(
+            415,
+            "UNSUPPORTED_IMAGE_TYPE",
             "Поддерживаются только JPEG, PNG и WEBP"
           )
         );
