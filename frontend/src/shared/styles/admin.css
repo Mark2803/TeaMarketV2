@@ -705,3 +705,8 @@
 .admin-index-toggle{display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;font-weight:700}
 .admin-article-index{display:inline-flex;align-items:center;gap:.35rem;font-size:var(--font-size-xs);color:var(--color-text-muted);cursor:pointer}
 .admin-article-index input{width:1rem;height:1rem;accent-color:var(--color-primary);cursor:pointer}
+
+/* Карточки инструментов: вся плашка кликабельна */
+a.admin-tool-card{transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+a.admin-tool-card:hover{transform:translateY(-2px);border-color:var(--color-primary);box-shadow:var(--shadow-md,0 10px 24px rgba(0,0,0,.08))}
+a.admin-tool-card:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px}
