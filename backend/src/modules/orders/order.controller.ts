@@ -238,6 +238,16 @@ export async function createOrderController(
       payment: { confirmationUrl, configured: Boolean(process.env.YOOKASSA_SHOP_ID && process.env.YOOKASSA_SECRET_KEY), error: paymentError }
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "PROMO_CODE_EXHAUSTED") {
+      res.status(409).json({
+        error: {
+          code: "PROMO_CODE_EXHAUSTED",
+          message: "Промокод только что закончился. Уберите его и оформите заказ ещё раз."
+        }
+      });
+      return;
+    }
+
     if (
       error instanceof Error
       && error.message.startsWith(

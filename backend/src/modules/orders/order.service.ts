@@ -483,7 +483,13 @@ export async function createOrder(
 
       const promoDiscount = pricing.discounts.find((x) => x.sourceType === "promo_code");
       if (promoDiscount?.sourceId) {
-        await transaction.promo_codes.update({where:{id:promoDiscount.sourceId},data:{used_count:{increment:1}}});
+        // Атомарно занимаем одно использование: при одновременных заказах
+        // лимит промокода не может быть превышен (условие проверяется в самой базе).
+        const reserved = await transaction.$executeRaw`
+          UPDATE promo_codes SET used_count = used_count + 1, updated_at = now()
+          WHERE id = ${promoDiscount.sourceId}::uuid
+            AND (usage_limit IS NULL OR used_count < usage_limit)`;
+        if (reserved !== 1) throw new Error("PROMO_CODE_EXHAUSTED");
       }
 
       if (pricing.loyaltySpent > 0 && customerId) {

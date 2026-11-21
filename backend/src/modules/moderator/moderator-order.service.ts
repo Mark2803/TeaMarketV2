@@ -40,6 +40,7 @@ export async function updateModeratorOrderStatus(
         payment_status: true,
         customer_id: true,
         total_amount: true,
+        loyalty_spent: true,
         referral_code: true,
         updated_at: true
       }
@@ -109,6 +110,42 @@ export async function updateModeratorOrderStatus(
           where: { sku: item.sku },
           data: { stock_quantity: { increment: item.quantity } }
         });
+      }
+
+      // Отменённый заказ возвращает использование промокода:
+      // иначе неоплаченные и отменённые заказы «съедают» лимит промокода.
+      const promoDiscounts = await transaction.order_discounts.findMany({
+        where: { order_id: order.id, source_type: "promo_code", source_id: { not: null } },
+        select: { source_id: true }
+      });
+      for (const discount of promoDiscounts) {
+        await transaction.$executeRaw`
+          UPDATE promo_codes SET used_count = GREATEST(used_count - 1, 0), updated_at = now()
+          WHERE id = ${discount.source_id}::uuid`;
+      }
+
+      // Списанные при оформлении бонусы возвращаются покупателю.
+      const loyaltySpent = Number(order.loyalty_spent ?? 0);
+      if (order.customer_id && loyaltySpent > 0) {
+        const alreadyReturned = await transaction.loyalty_transactions.findFirst({
+          where: { order_id: order.id, type: "refund" }
+        });
+        if (!alreadyReturned) {
+          await transaction.loyalty_accounts.upsert({
+            where: { customer_id: order.customer_id },
+            create: { customer_id: order.customer_id, balance: loyaltySpent },
+            update: { balance: { increment: loyaltySpent } }
+          });
+          await transaction.loyalty_transactions.create({
+            data: {
+              customer_id: order.customer_id,
+              order_id: order.id,
+              type: "refund",
+              amount: loyaltySpent.toFixed(2),
+              comment: "Возврат бонусов за отменённый заказ"
+            }
+          });
+        }
       }
     }
 
