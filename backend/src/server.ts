@@ -1,8 +1,20 @@
-import app from "./app.js";
 import { env } from "./config/env.js";
-import { disconnectDatabase } from "./database/prisma.js";
-import { startYandexDeliverySync } from "./modules/orders/yandex-delivery-sync.js";
-import { startYandexShipmentReconciliation } from "./modules/moderator/yandex-shipments.service.js";
+import { checkEnvironment, printEnvironmentReport } from "./config/env-check.js";
+
+// Проверяем настройки до загрузки остальных модулей: часть из них
+// (например, хранилище изображений) падает с непонятной ошибкой при импорте.
+const environmentReport = checkEnvironment();
+printEnvironmentReport(environmentReport);
+if (environmentReport.errors.length && env.NODE_ENV === "production") {
+  console.error("[НАСТРОЙКИ] Сервер не запущен: исправьте ошибки в .env и запустите снова. Проверка: npm run env:check");
+  process.exit(1);
+}
+
+// Динамические импорты: статические поднялись бы выше и выполнились до проверки.
+const { default: app } = await import("./app.js");
+const { disconnectDatabase } = await import("./database/prisma.js");
+const { startYandexDeliverySync } = await import("./modules/orders/yandex-delivery-sync.js");
+const { startYandexShipmentReconciliation } = await import("./modules/moderator/yandex-shipments.service.js");
 
 startYandexDeliverySync();
 startYandexShipmentReconciliation();

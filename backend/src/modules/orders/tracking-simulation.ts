@@ -1,12 +1,12 @@
-﻿/** Local-only, process-memory preview. Never writes shipment/order tables. */
+/** Local-only, process-memory preview. Never writes shipment/order tables. */
 export const trackingSimulationEnabled = () => process.env.NODE_ENV !== "production" && process.env.TRACKING_SIMULATION_ENABLED === "true";
 const steps = [
-  ["CREATED", "РћС‚РїСЂР°РІР»РµРЅРёРµ РѕС„РѕСЂРјР»РµРЅРѕ"],
-  ["HANDED_OVER", "РџРµСЂРµРґР°РЅРѕ РІ РџР’Р— РЇРЅРґРµРєСЃР°"],
-  ["SORTING", "РќР° СЃРѕСЂС‚РёСЂРѕРІРєРµ"],
-  ["IN_TRANSIT", "Р’ РїСѓС‚Рё"],
-  ["AT_PICKUP_POINT", "РџСЂРёР±С‹Р»Рѕ РІ РџР’Р— РЅР°Р·РЅР°С‡РµРЅРёСЏ"],
-  ["DELIVERED", "РџРѕР»СѓС‡РµРЅРѕ РїРѕРєСѓРїР°С‚РµР»РµРј"],
+  ["CREATED", "Отправление оформлено"],
+  ["HANDED_OVER", "Передано в ПВЗ Яндекса"],
+  ["SORTING", "На сортировке"],
+  ["IN_TRANSIT", "В пути"],
+  ["AT_PICKUP_POINT", "Прибыло в ПВЗ назначения"],
+  ["DELIVERED", "Получено покупателем"],
 ] as const;
 type Simulation = { status: string; updatedAt: string; events: {status:string;timestamp:string}[] };
 const simulations = new Map<string, Simulation>();

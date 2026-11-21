@@ -64,40 +64,70 @@ function dotStuff(message: string): string {
   return message.replace(/(^|\r\n)\./g, "$1..");
 }
 
-export async function sendEmail(to: string, subject: string, body: string): Promise<void> {
+type SmtpSession = { plain: net.Socket; secure: tls.TLSSocket | undefined };
+
+/** Подключается к SMTP, включает TLS и авторизуется. */
+async function openSmtpSession(): Promise<SmtpSession> {
   const host = required("SMTP_HOST");
   const port = Number(process.env.SMTP_PORT || "2525");
   const user = required("SMTP_USER");
   const password = required("SMTP_PASSWORD");
-  const from = required("MAIL_FROM");
-  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Маркет";
-  const recipient = to.trim();
-  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(recipient)) throw new Error("Некорректный email получателя");
-  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from)) throw new Error("Некорректный MAIL_FROM");
 
   const plain = await new Promise<net.Socket>((resolve, reject) => {
     const socket = net.createConnection({ host, port }, () => resolve(socket));
     socket.setTimeout(15000, () => socket.destroy(new Error("SMTP timeout")));
     socket.once("error", reject);
   });
-  let secure: tls.TLSSocket | undefined;
+  const session: SmtpSession = { plain, secure: undefined };
   try {
     await reply(plain);
     await cmd(plain, "EHLO tea-master-team.ru", [250]);
     await cmd(plain, "STARTTLS", [220]);
-    secure = tls.connect({ socket: plain, servername: host, minVersion: "TLSv1.2" });
+    const secure = tls.connect({ socket: plain, servername: host, minVersion: "TLSv1.2" });
+    session.secure = secure;
     await new Promise<void>((resolve, reject) => {
-      secure!.once("secureConnect", resolve);
-      secure!.once("error", reject);
+      secure.once("secureConnect", resolve);
+      secure.once("error", reject);
     });
     await cmd(secure, "EHLO tea-master-team.ru", [250]);
     await cmd(secure, "AUTH LOGIN", [334]);
     await cmd(secure, Buffer.from(user).toString("base64"), [334], "AUTH USER");
     await cmd(secure, Buffer.from(password).toString("base64"), [235], "AUTH PASSWORD");
+    return session;
+  } catch (error) {
+    closeSmtpSession(session);
+    throw error;
+  }
+}
+
+function closeSmtpSession(session: SmtpSession): void {
+  session.secure?.destroy();
+  session.plain.destroy();
+}
+
+/** Проверяет подключение и логин к почтовому серверу, ничего не отправляя. */
+export async function verifySmtpConnection(): Promise<void> {
+  const session = await openSmtpSession();
+  try {
+    await cmd(session.secure!, "QUIT", [221]);
+  } finally {
+    closeSmtpSession(session);
+  }
+}
+
+export async function sendEmail(to: string, subject: string, body: string): Promise<void> {
+  const from = required("MAIL_FROM");
+  const fromName = process.env.MAIL_FROM_NAME?.trim() || "Чайный Маркет";
+  const recipient = to.trim();
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(recipient)) throw new Error("Некорректный email получателя");
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from)) throw new Error("Некорректный MAIL_FROM");
+
+  const session = await openSmtpSession();
+  const secure = session.secure!;
+  try {
     await cmd(secure, `MAIL FROM:<${from}>`, [250]);
     await cmd(secure, `RCPT TO:<${recipient}>`, [250, 251]);
     await cmd(secure, "DATA", [354]);
-
     const html = `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto"><h2>Чайный Маркет</h2><div style="font-size:16px;line-height:1.6;white-space:pre-line">${escapeHtml(body)}</div></div>`;
     const domain = from.split("@")[1];
     const messageId = `<${Date.now()}.${randomBytes(12).toString("hex")}@${domain}>`;
@@ -117,7 +147,6 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
     await cmd(secure, `${dotStuff(message)}\r\n.`, [250], "DATA BODY");
     await cmd(secure, "QUIT", [221]);
   } finally {
-    secure?.destroy();
-    plain.destroy();
+    closeSmtpSession(session);
   }
 }
