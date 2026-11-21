@@ -46,13 +46,37 @@ frontend:
 - Перед коммитом: `npm run typecheck` и `npm run build` в изменённой части (backend/frontend).
 - Деньги, оплата, остатки и доставка — самые чувствительные места: любые изменения там проверять особенно тщательно и описывать Марку простыми словами.
 
-## Выкладка на сервер
+## Сервер (продакшен)
 
-Сервер: backend лежит в `/home/ivanc1539/tea-market-v2/backend` (владелец — пользователь `ivanc1539`), работает как systemd-служба `tea-market-backend` (`node dist/server.js`). Собранный фронтенд и шаблон SEO-страниц — в `/home/ivanc1539/web/tea-master-team.ru/public_html/`.
+- Сайт: https://tea-master-team.ru. Вход на сервер — по SSH под `root`; файлы сайта принадлежат пользователю `ivanc1539`. Папка `/srv/jail/ivanc1539/...` — зеркало домашней папки для хостинг-панели, её не трогать.
+- **Репозиторий на сервере:** `/home/ivanc1539/tea-market-v2` — git-клон, `origin` = `git@github.com:Mark2803/TeaMarketV2.git` (по SSH), рабочая ветка `main`.
+- **Backend:** systemd-служба `tea-market-backend` — `User=ivanc1539`, `WorkingDirectory=/home/ivanc1539/tea-market-v2/backend`, `EnvironmentFile=.../backend/.env`, `ExecStart=/usr/bin/node .../backend/dist/server.js`, `Restart=always`. Перезапуск: `systemctl restart tea-market-backend`; журнал: `journalctl -u tea-market-backend -n 100`.
+- **Frontend:** собирается в `frontend/dist` и копируется в `/home/ivanc1539/web/tea-master-team.ru/public_html/` (владелец `ivanc1539`, группа `www-data`). Там же лежит шаблон для SEO-страниц (`index.html`).
+- В `public_html` есть файлы, которых нет в сборке: `.htaccess`, `Mir.png`, `robots.txt`, `sitemap.xml`, `yandex_487720ddfb1e8777.html` (подтверждение Яндекса). При выкладке копировать сборку **поверх**, папку не очищать.
+- `frontend/.env` на сервере содержит `VITE_API_BASE_URL` и `VITE_YANDEX_MAPS_API_KEY`. В `main` он хранился в git; начиная с ветки `рефакторинг` — нет. При переключении с `main` на новую версию git удалит этот файл — перед переключением сохранить копию и вернуть.
+- **База данных:** PostgreSQL на том же сервере, доступ по `DATABASE_URL` из `backend/.env`. Подключение из терминала:
+  `DB="$(grep -E '^DATABASE_URL=' backend/.env | cut -d= -f2- | tr -d '"')"; psql "${DB%%\?*}"`.
+  SQL передавать через `psql ... <<'SQL' ... SQL` (иначе bash портит `!` в запросах).
+- **Резервная копия перед выкладкой:** `/home/ivanc1539/backup-ГГГГ-ММ-ДД/` — `backend-dist`, `frontend.env`, `public_html`.
 
-Порядок обновления backend: в папке backend `git pull` → `npm ci --include=dev` → `npm run build` → `npm run env:check` → `systemctl restart tea-market-backend` (только если проверка написала «ошибок нет»). Для сборки нужен `.env` с `DATABASE_URL` (на сервере он есть). `--include=dev` обязателен: если в терминале задано `NODE_ENV=production`, обычный `npm ci` не ставит TypeScript и Vite, и сборка падает. Не загружать `.env` в терминал через `set -a; . ./.env` перед сборкой.
+### Ловушки (уже приводили к ложным ошибкам)
 
-Проверка от 21.11.2026 (`npm run env:check` на ветке `рефакторинг`): ошибок нет, сборка проходит. Замечания: сервер не может связаться с api.telegram.org (уведомления в Telegram не доходят); не заданы `GUEST_ORDER_ACCESS_SECRET`, `PUBLIC_SITE_URL`, `YANDEX_DELIVERY_SOURCE_STATION_ID`; администраторы только из `.env` (в базе 0); способы доставки СДЭК, 5Post, Ozon и «Курьерская доставка» удалены из базы 21.11.2026, остался только «Яндекс Доставка — ПВЗ».
+- Не загружать `.env` в терминал (`set -a; . ./.env`): значения с `$` (хэш пароля админки) портятся, а `NODE_ENV=production` ломает установку пакетов. Если это уже сделано — выйти с сервера и зайти заново.
+- Ставить пакеты только `npm ci --include=dev`, иначе при `NODE_ENV=production` не установятся TypeScript и Vite.
+- `npm run env:check` перед каждым перезапуском; перезапускать, только если «ошибок нет».
+
+### Порядок обновления backend
+
+в папке backend `git pull` → `npm ci --include=dev` → `npm run build` → `npm run env:check` → `systemctl restart tea-market-backend`.
+Подробная пошаговая выкладка с откатом будет записана сюда после первой выкладки ветки `рефакторинг` (проверяем, от какого пользователя работают git и сборка).
+
+### Состояние на 21.11.2026
+
+`npm run env:check` на ветке `рефакторинг`: ошибок нет, backend и frontend собираются. Замечания: сервер не может связаться с api.telegram.org (уведомления в Telegram не доходят); не заданы `GUEST_ORDER_ACCESS_SECRET`, `PUBLIC_SITE_URL`, `YANDEX_DELIVERY_SOURCE_STATION_ID`; администраторы только из `.env` (в базе 0); способы доставки СДЭК, 5Post, Ozon и «Курьерская доставка» удалены из базы, остался только «Яндекс Доставка — ПВЗ». На сервере в `main` был не закоммиченный `frontend/package-lock.json` (копия сохранена в резервной папке).
+
+## Документация
+
+Этот файл (`CLAUDE.md` в корне репозитория) — **единственный источник правды** о сайте. Его читает Claude при работе с кодом, он же подключается к проектам в claude.ai («Программирование Марк», «Маркетплейсы Марк») через синхронизацию с GitHub. Любое новое решение или факт о сервере — сразу дописывать сюда и пушить.
 
 ## История и открытые задачи
 
