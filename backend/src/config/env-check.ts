@@ -51,7 +51,8 @@ export function checkEnvironment(): EnvironmentReport {
   }
   const adminUser = value("ADMIN_USERNAME");
   const adminHash = value("ADMIN_PASSWORD_HASH");
-  if (adminHash && !/^scrypt\$[0-9a-f]+\$[0-9a-f]+$/i.test(adminHash)) {
+  // Тот же формат, который принимает moderator-password.ts: scrypt$соль$хэш.
+  if (adminHash && !/^scrypt\$[^$\s]+\$[0-9a-f]+$/i.test(adminHash)) {
     errors.push("ADMIN_PASSWORD_HASH в неверном формате — создайте его командой npm run admin:hash-password");
   }
   if (!adminUser || !adminHash) {
