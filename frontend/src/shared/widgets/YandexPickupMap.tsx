@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import "./yandex-pickup-map.css";
 
 export type PickupPoint = {
@@ -16,13 +16,17 @@ type Props = {
   selectedId: string;
   onSelect: (point: PickupPoint) => void;
   title?: string;
+  /** Растянуть на всю доступную высоту (для полноэкранного окна выбора). */
+  fill?: boolean;
 };
 
-type YMap = any;
+// API Яндекс Карт 2.1 не поставляет типы для TypeScript.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type YandexApi = any;
 
 declare global {
   interface Window {
-    ymaps?: any;
+    ymaps?: YandexApi;
   }
 }
 
@@ -30,7 +34,7 @@ let mapsScript: Promise<void> | null = null;
 
 function loadMaps(key: string): Promise<void> {
   if (window.ymaps) {
-    return new Promise(resolve => window.ymaps!.ready(resolve));
+    return new Promise(resolve => window.ymaps.ready(resolve));
   }
 
   if (!mapsScript) {
@@ -55,6 +59,8 @@ function loadMaps(key: string): Promise<void> {
 }
 
 const SPB_CENTER = [59.9386, 30.3141];
+const DEFAULT_PRESET = "islands#blueDotIcon";
+const SELECTED_PRESET = "islands#redDotIcon";
 
 function coordinates(p: PickupPoint): number[] | null {
   const lat = Number(p.latitude);
@@ -66,46 +72,54 @@ function coordinates(p: PickupPoint): number[] | null {
     : null;
 }
 
+/**
+ * Карта ПВЗ Яндекс Доставки.
+ *
+ * Метки выводятся через ObjectManager: он сам рисует только видимые точки
+ * и объединяет их в кластеры, поэтому карта не тормозит даже на десятках
+ * тысяч пунктов. Размер карты подстраивается под окно (ResizeObserver).
+ */
 export default function YandexPickupMap({
   points,
   selectedId,
   onSelect,
-  title = "Выбор пункта выдачи"
+  title = "Выбор пункта выдачи",
+  fill = false
 }: Props) {
   const node = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<YMap>(null);
-  const clusterRef = useRef<YMap>(null);
+  const mapRef = useRef<YandexApi>(null);
+  const managerRef = useRef<YandexApi>(null);
   const onSelectRef = useRef(onSelect);
-  const pointsRef = useRef(points);
-  const selectedRef = useRef(selectedId);
-  const updateRef = useRef<() => void>(() => {});
+  const pointsByIdRef = useRef(new Map<string, PickupPoint>());
+  const shownSelectedRef = useRef("");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
   const [listLimit, setListLimit] = useState(100);
+  const deferredFilter = useDeferredValue(filter);
 
   onSelectRef.current = onSelect;
-  pointsRef.current = points;
-  selectedRef.current = selectedId;
 
   const key = import.meta.env.VITE_YANDEX_MAPS_API_KEY as string | undefined;
 
+  const pointsById = useMemo(() => new Map(points.map(p => [p.id, p])), [points]);
+  pointsByIdRef.current = pointsById;
+
   const visible = useMemo(() => {
-    const q = filter.trim().toLocaleLowerCase("ru");
+    const q = deferredFilter.trim().toLocaleLowerCase("ru");
     return q
       ? points.filter(p =>
           `${p.name} ${p.address}`.toLocaleLowerCase("ru").includes(q)
         )
       : points;
-  }, [points, filter]);
+  }, [points, deferredFilter]);
 
-  useEffect(() => { setListLimit(100); }, [filter, points]);
+  useEffect(() => { setListLimit(100); }, [deferredFilter, points]);
 
-  const visibleRef = useRef(visible);
-  visibleRef.current = visible;
-
+  // Создание карты — один раз за время показа окна.
   useEffect(() => {
     let cancelled = false;
+    let resizeObserver: ResizeObserver | null = null;
 
     if (!key) {
       setError("Не настроен ключ Яндекс Карт");
@@ -116,91 +130,52 @@ export default function YandexPickupMap({
       if (cancelled || !node.current || !window.ymaps) return;
 
       const ymaps = window.ymaps;
+      const selectedPoint = pointsByIdRef.current.get(selectedId);
+      const selectedCoords = selectedPoint ? coordinates(selectedPoint) : null;
 
       const map = new ymaps.Map(
         node.current,
         {
-          center: SPB_CENTER,
-          zoom: 11,
-          controls: ["zoomControl"]
+          center: selectedCoords ?? SPB_CENTER,
+          zoom: selectedCoords ? 15 : 11,
+          controls: ["zoomControl", "geolocationControl"]
         },
-        { suppressMapOpenBlock: false }
+        { suppressMapOpenBlock: true }
       );
-
       mapRef.current = map;
 
-      const clusterer = new ymaps.Clusterer({
-        preset: "islands#blueClusterIcons",
-        groupByCoordinates: false,
-        clusterDisableClickZoom: false,
-        clusterOpenBalloonOnClick: false
+      const manager = new ymaps.ObjectManager({
+        clusterize: true,
+        gridSize: 64,
+        clusterDisableClickZoom: false
       });
+      manager.objects.options.set({ preset: DEFAULT_PRESET, hasBalloon: false });
+      manager.clusters.options.set({ preset: "islands#blueClusterIcons", hasBalloon: false });
+      manager.objects.events.add("click", (event: YandexApi) => {
+        const point = pointsByIdRef.current.get(String(event.get("objectId")));
+        if (point) onSelectRef.current(point);
+      });
+      map.geoObjects.add(manager);
+      managerRef.current = manager;
 
-      clusterRef.current = clusterer;
-      map.geoObjects.add(clusterer);
+      // Карта должна занимать весь контейнер, даже если окно поменяло размер
+      // (поворот телефона, анимация открытия, изменение окна браузера).
+      resizeObserver = new ResizeObserver(() => map.container.fitToViewport());
+      resizeObserver.observe(node.current);
 
-      let updateTimer: ReturnType<typeof setTimeout> | null = null;
+      // Без выбранного пункта показываем город покупателя (по IP, без запроса разрешения).
+      if (!selectedCoords) {
+        ymaps.geolocation
+          .get({ provider: "yandex", mapStateAutoApply: false })
+          .then((result: YandexApi) => {
+            if (cancelled || !mapRef.current) return;
+            const coords = result.geoObjects.get(0)?.geometry.getCoordinates();
+            if (coords) mapRef.current.setCenter(coords, 11);
+          })
+          .catch(() => { /* Город не определился — остаёмся в Санкт-Петербурге. */ });
+      }
 
-      const updateMarkers = () => {
-        if (cancelled || !mapRef.current || !clusterRef.current) return;
-
-        const bounds = map.getBounds();
-        if (!bounds) return;
-
-        const selected = selectedRef.current;
-        const matches = visibleRef.current.filter(p => {
-          const c = coordinates(p);
-          if (!c) return false;
-          return c[0] >= bounds[0][0] - 0.15 &&
-            c[0] <= bounds[1][0] + 0.15 &&
-            c[1] >= bounds[0][1] - 0.2 &&
-            c[1] <= bounds[1][1] + 0.2;
-        });
-
-        const limited = matches;
-        const selectedPoint = visibleRef.current.find(p => p.id === selected);
-
-        if (selectedPoint && !limited.some(p => p.id === selectedPoint.id)) {
-          limited.push(selectedPoint);
-        }
-
-        const markers = limited.flatMap(p => {
-          const c = coordinates(p);
-          if (!c) return [];
-
-          const marker = new ymaps.Placemark(
-            c,
-            {
-              hintContent: p.name,
-              balloonContentHeader: p.name,
-              balloonContentBody: p.address
-            },
-            {
-              preset: p.id === selected
-                ? "islands#redIcon"
-                : "islands#blueIcon"
-            }
-          );
-
-          marker.events.add("click", () => onSelectRef.current(p));
-          return [marker];
-        });
-
-        clusterer.removeAll();
-        clusterer.add(markers);
-      };
-
-      updateRef.current = () => {
-        if (updateTimer) clearTimeout(updateTimer);
-        updateTimer = setTimeout(updateMarkers, 120);
-      };
-
-      map.events.add("boundschange", updateRef.current);
-
-      updateMarkers();
       setReady(true);
-
-      return undefined;
     }).catch(e => {
       if (!cancelled) {
         setError(e instanceof Error ? e.message : "Ошибка карты");
@@ -209,92 +184,136 @@ export default function YandexPickupMap({
 
     return () => {
       cancelled = true;
-      updateRef.current = () => {};
-      clusterRef.current = null;
+      resizeObserver?.disconnect();
+      managerRef.current = null;
+      shownSelectedRef.current = "";
       if (mapRef.current) {
         mapRef.current.destroy();
         mapRef.current = null;
       }
     };
+    // Карта создаётся заново только при смене ключа; точки и выбор обновляются ниже.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  // Метки: передаём найденные точки целиком, ObjectManager сам решает, что рисовать.
   useEffect(() => {
-    if (ready) updateRef.current();
-  }, [ready, visible, selectedId]);
+    const manager = managerRef.current;
+    if (!ready || !manager) return;
 
-  const selected = points.find(p => p.id === selectedId);
+    const features = visible.flatMap(p => {
+      const c = coordinates(p);
+      return c ? [{
+        type: "Feature",
+        id: p.id,
+        geometry: { type: "Point", coordinates: c },
+        properties: { hintContent: `${p.name}<br>${p.address}` },
+        options: p.id === selectedId ? { preset: SELECTED_PRESET } : {}
+      }] : [];
+    });
+
+    manager.removeAll();
+    manager.add({ type: "FeatureCollection", features });
+    shownSelectedRef.current = selectedId;
+
+    // При поиске показываем найденные пункты целиком.
+    if (deferredFilter.trim() && features.length) {
+      const bounds = manager.getBounds();
+      if (bounds) mapRef.current?.setBounds(bounds, { checkZoomRange: true, zoomMargin: 40 });
+    }
+    // selectedId обрабатывается отдельным эффектом, чтобы не пересобирать все метки.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, visible]);
+
+  // Подсветка выбранного пункта без пересборки всех меток.
+  useEffect(() => {
+    const manager = managerRef.current;
+    if (!ready || !manager) return;
+    const previous = shownSelectedRef.current;
+    if (previous && previous !== selectedId && manager.objects.getById(previous)) {
+      manager.objects.setObjectOptions(previous, { preset: DEFAULT_PRESET });
+    }
+    if (selectedId && manager.objects.getById(selectedId)) {
+      manager.objects.setObjectOptions(selectedId, { preset: SELECTED_PRESET });
+    }
+    shownSelectedRef.current = selectedId;
+  }, [ready, selectedId]);
+
+  const selected = pointsById.get(selectedId);
 
   const choosePoint = (p: PickupPoint) => {
     onSelect(p);
     const c = coordinates(p);
     if (mapRef.current && c) {
-      mapRef.current.setCenter(c, 15);
+      mapRef.current.setCenter(c, 16, { duration: 300 });
     }
   };
 
   return (
-    <div className="yandex-pickup-picker">
-      <label className="yandex-pickup-search">
-        {title}
-        <input
-          type="search"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          placeholder="Поиск по названию или адресу"
-        />
-      </label>
+    <div className={`yandex-pickup-picker${fill ? " yandex-pickup-picker--fill" : ""}`}>
+      <div className="yandex-pickup-side">
+        <label className="yandex-pickup-search">
+          {title}
+          <input
+            type="search"
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            placeholder="Город, улица или название пункта"
+          />
+        </label>
+
+        <div
+          className="yandex-pickup-list"
+          role="listbox"
+          aria-label="Пункты выдачи"
+        >
+          {visible.slice(0, listLimit).map(p => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={selectedId === p.id}
+              className={selectedId === p.id ? "is-selected" : ""}
+              key={p.id}
+              onClick={() => choosePoint(p)}
+            >
+              <strong>{p.name}</strong>
+              <span>{p.address}</span>
+            </button>
+          ))}
+
+          {visible.length > listLimit && (
+            <button type="button" onClick={() => setListLimit(current => current + 100)}>
+              Показать ещё 100 пунктов (всего {visible.length})
+            </button>
+          )}
+          {!visible.length && <p>Подходящих пунктов нет.</p>}
+        </div>
+
+        {selected && (
+          <div className="yandex-pickup-selected">
+            <strong>Выбрано: {selected.name}</strong>
+            <span>{selected.address}</span>
+            <a
+              href={`https://yandex.ru/maps/?pt=${encodeURIComponent(
+                String(selected.longitude)
+              )},${encodeURIComponent(String(selected.latitude))}&z=16`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Открыть в Картах
+            </a>
+          </div>
+        )}
+      </div>
 
       {error
-        ? <p role="alert">{error}</p>
+        ? <p role="alert" className="yandex-pickup-map-error">{error}</p>
         : <div
             ref={node}
             className="yandex-pickup-map"
             aria-label="Интерактивная карта пунктов выдачи"
           />
       }
-
-      <div
-        className="yandex-pickup-list"
-        role="listbox"
-        aria-label="Пункты выдачи"
-      >
-        {visible.slice(0, listLimit).map(p => (
-          <button
-            type="button"
-            role="option"
-            aria-selected={selectedId === p.id}
-            className={selectedId === p.id ? "is-selected" : ""}
-            key={p.id}
-            onClick={() => choosePoint(p)}
-          >
-            <strong>{p.name}</strong>
-            <span>{p.address}</span>
-          </button>
-        ))}
-
-        {visible.length > listLimit && (
-          <button type="button" onClick={() => setListLimit(current => current + 100)}>
-            Показать ещё 100 пунктов (всего {visible.length})
-          </button>
-        )}
-        {!visible.length && <p>Подходящих пунктов нет.</p>}
-      </div>
-
-      {selected && (
-        <div className="yandex-pickup-selected">
-          <strong>Выбрано: {selected.name}</strong>
-          <span>{selected.address}</span>
-          <a
-            href={`https://yandex.ru/maps/?pt=${encodeURIComponent(
-              String(selected.longitude)
-            )},${encodeURIComponent(String(selected.latitude))}&z=16`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Открыть в Картах
-          </a>
-        </div>
-      )}
     </div>
   );
 }

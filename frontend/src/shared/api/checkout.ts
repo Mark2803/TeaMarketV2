@@ -19,18 +19,6 @@ export interface DeliveryMethodApi {
 }
 
 
-export interface DeliveryQuoteApi {
-  deliveryMethodId: string;
-  deliveryMethodName: string;
-  cost: string;
-  deliveryTerm: string | null;
-  source: string;
-}
-
-interface DeliveryQuoteResponse {
-  data: DeliveryQuoteApi;
-}
-
 export interface PaymentMethodApi {
   id: string;
   name: string;
@@ -87,19 +75,6 @@ export function getDeliveryMethods():
 Promise<DeliveryMethodsResponse> {
   return apiRequest<DeliveryMethodsResponse>(
     "/delivery-methods"
-  );
-}
-
-export function getDeliveryQuote(
-  deliveryMethodId: string,
-  fullAddress: string
-): Promise<DeliveryQuoteResponse> {
-  return apiRequest<DeliveryQuoteResponse>(
-    "/delivery-methods/quote",
-    {
-      method: "POST",
-      body: JSON.stringify({ deliveryMethodId, fullAddress })
-    }
   );
 }
 

@@ -62,7 +62,6 @@ import {
 
 import {
   createOrder,
-  getDeliveryQuote,
   getDeliveryMethods,
   getPricingQuote,
   getYandexPickupQuote,
@@ -71,7 +70,6 @@ import {
 
 import type {
   CreatedOrderApi,
-  DeliveryQuoteApi,
   DeliveryMethodApi,
   PricingQuoteApi
 } from "../shared/api/checkout";
@@ -225,10 +223,6 @@ function CheckoutForm() {
   const [orderResult, setOrderResult] =
     useState<CreatedOrderApi | null>(null);
 
-  const [deliveryQuote, setDeliveryQuote] =
-    useState<DeliveryQuoteApi | null>(null);
-  const [quoteLoading, setQuoteLoading] = useState(false);
-  const [quoteError, setQuoteError] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [pricingQuote, setPricingQuote] = useState<PricingQuoteApi | null>(null);
@@ -275,53 +269,10 @@ function CheckoutForm() {
   const doorAddress = [guestAddress.city,guestAddress.street,guestAddress.house].map(v => v.trim()).filter(Boolean).join(", ").trim();
   const doorAddressComplete = Boolean(guestAddress.city.trim() && guestAddress.street.trim() && guestAddress.house.trim());
   const yandexReady = !isYandex || ((yandexMode === "door" ? doorAddressComplete : Boolean(deliveryDestination)) && Boolean(yandexQuote) && !yandexError && !yandexLoading);
-  const deliveryCost = deliveryQuote
-    ? Number(deliveryQuote.cost)
-    : 0;
-
   const effectiveItemsTotal = pricingQuote?.itemsTotal ?? totalAmount;
-  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? (isYandex ? (yandexQuote?.price ?? 0) : deliveryCost);
+  const effectiveDeliveryCost = pricingQuote?.deliveryCost ?? (yandexQuote?.price ?? 0);
   const discountTotal = pricingQuote?.discountTotal ?? 0;
   const total = pricingQuote?.totalAmount ?? (totalAmount + effectiveDeliveryCost);
-
-  const deliveryQuoteAddress = selectedLocation
-    ? formatAddress(selectedLocation)
-    : "";
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!selectedDeliveryMethodId || isYandex || deliveryQuoteAddress.trim().length < 5) {
-      setDeliveryQuote(null);
-      setQuoteError(null);
-      setQuoteLoading(false);
-      return;
-    }
-
-    setQuoteLoading(true);
-    setQuoteError(null);
-    setDeliveryQuote(null);
-
-    const timer = window.setTimeout(() => {
-      void getDeliveryQuote(selectedDeliveryMethodId, deliveryQuoteAddress)
-        .then((response) => {
-          if (!cancelled) setDeliveryQuote(response.data);
-        })
-        .catch((error) => {
-          if (!cancelled) {
-            setQuoteError(error instanceof Error ? error.message : "Не удалось рассчитать доставку");
-          }
-        })
-        .finally(() => {
-          if (!cancelled) setQuoteLoading(false);
-        });
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [selectedDeliveryMethodId, deliveryQuoteAddress, isYandex]);
 
   useEffect(() => {
     let cancelled=false;
@@ -1311,17 +1262,13 @@ function CheckoutForm() {
               <dd>
                 {!selectedDeliveryMethod
                   ? "Не выбрана"
-                  : quoteLoading
-                    ? "Рассчитывается…"
-                    : quoteError
-                      ? "Ошибка расчёта"
-                      : isYandex && yandexLoading
+                  : yandexLoading
                         ? "Рассчитывается…"
                         : isYandex && yandexError
                           ? "ПВЗ недоступен"
-                          : (isYandex ? yandexQuote : deliveryQuote)
+                          : yandexQuote
                             ? formatPrice(effectiveDeliveryCost)
-                            : isYandex ? "Выберите доступный ПВЗ" : "Укажите адрес"}
+                            : yandexMode === "door" ? "Укажите адрес" : "Выберите доступный ПВЗ"}
               </dd>
             </div>
 
@@ -1339,9 +1286,9 @@ function CheckoutForm() {
             disabled={
               optionsLoading
               || Boolean(optionsError)
-              || quoteLoading
-              || Boolean(quoteError)
-              || (isYandex ? !yandexReady || !pricingQuote : !deliveryQuote)
+              || !isYandex
+              || !yandexReady
+              || !pricingQuote
             }
             onClick={handleReview}
           >
@@ -1367,7 +1314,7 @@ function CheckoutForm() {
               {pickupLoading && <p>Загружаем пункты выдачи…</p>}
               {pickupError && <p role="alert">{pickupError} <button type="button" onClick={() => void loadPickupPoints()}>Повторить</button></p>}
               {pickupPoints.length > 0 && (
-                <YandexPickupMap points={pickupPoints} selectedId={pickupSelected} onSelect={p => setPickupSelected(p.id)} title="Поиск по адресу или названию" />
+                <YandexPickupMap fill points={pickupPoints} selectedId={pickupSelected} onSelect={p => setPickupSelected(p.id)} title="Поиск по адресу или названию" />
               )}
             </div>
             <footer className="checkout-pickup-dialog__footer">
