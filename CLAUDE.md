@@ -50,7 +50,7 @@ frontend:
 
 Сервер: backend лежит в `/home/ivanc1539/tea-market-v2/backend` (владелец — пользователь `ivanc1539`), работает как systemd-служба `tea-market-backend` (`node dist/server.js`). Собранный фронтенд и шаблон SEO-страниц — в `/home/ivanc1539/web/tea-master-team.ru/public_html/`.
 
-Порядок обновления backend: в папке backend `git pull` → `npm ci` → `npm run build` → `npm run env:check` → `systemctl restart tea-market-backend` (только если проверка написала «ошибок нет»). Для сборки нужен `.env` с `DATABASE_URL` (на сервере он есть).
+Порядок обновления backend: в папке backend `git pull` → `npm ci --include=dev` → `npm run build` → `npm run env:check` → `systemctl restart tea-market-backend` (только если проверка написала «ошибок нет»). Для сборки нужен `.env` с `DATABASE_URL` (на сервере он есть). `--include=dev` обязателен: если в терминале задано `NODE_ENV=production`, обычный `npm ci` не ставит TypeScript и Vite, и сборка падает. Не загружать `.env` в терминал через `set -a; . ./.env` перед сборкой.
 
 Проверка от 21.11.2026 (`npm run env:check` на ветке `рефакторинг`): ошибок нет, сборка проходит. Замечания: сервер не может связаться с api.telegram.org (уведомления в Telegram не доходят); не заданы `GUEST_ORDER_ACCESS_SECRET`, `PUBLIC_SITE_URL`, `YANDEX_DELIVERY_SOURCE_STATION_ID`; администраторы только из `.env` (в базе 0); были активны способы доставки СДЭК, 5Post, Ozon и «Курьерская доставка» — убираются (см. историю).
 
