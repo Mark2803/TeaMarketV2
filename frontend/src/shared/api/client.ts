@@ -65,7 +65,9 @@ export async function apiRequest<T>(
   const { query, headers, ...requestOptions } = options;
   const method = (requestOptions.method || "GET").toUpperCase();
   const requestHeaders = new Headers(headers);
-  if (!(requestOptions.body instanceof FormData) && !requestHeaders.has("Content-Type")) {
+  // JSON-заголовок нужен только для тела-строки. На GET он лишь заставлял
+  // браузер слать лишний preflight-запрос OPTIONS перед каждым запросом.
+  if (typeof requestOptions.body === "string" && !requestHeaders.has("Content-Type")) {
     requestHeaders.set("Content-Type", "application/json");
   }
   if (

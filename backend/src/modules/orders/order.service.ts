@@ -551,7 +551,11 @@ export async function createOrder(
         success: true,
         order: createdOrder
       };
-    }
+    },
+    // Внутри транзакции выполняется запрос расчёта к Яндекс Доставке
+    // (таймаут 15 с). Стандартных 5 с Prisma не хватает: при медленном
+    // ответе транзакция закрывалась и заказ падал с ошибкой 500.
+    { maxWait: 10_000, timeout: 30_000 }
   );
 
   if (result.success && result.order.email) {

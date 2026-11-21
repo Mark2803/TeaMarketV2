@@ -11,11 +11,17 @@ export async function handleYooKassaWebhook(
     !event ||
     event.type !== "notification" ||
     typeof event.event !== "string" ||
-    !event.event.startsWith("payment.") ||
     typeof event.object?.id !== "string" ||
     !/^[a-zA-Z0-9-]{1,100}$/.test(event.object.id)
   ) {
     res.status(400).json({ error: "INVALID_NOTIFICATION" });
+    return;
+  }
+
+  // Уведомления о возвратах и прочих объектах здесь не обрабатываются.
+  // Отвечаем 200, иначе ЮKassa будет бесконечно повторять доставку.
+  if (!event.event.startsWith("payment.")) {
+    res.status(200).json({ success: true, ignored: true });
     return;
   }
 
