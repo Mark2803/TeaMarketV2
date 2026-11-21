@@ -116,7 +116,7 @@ function PendingOrders({ authenticated, onPendingChange }: { authenticated: bool
       {!authenticated && <p>Здесь отображаются заказы, оформленные в этом браузере. Если данные браузера были очищены, восстановить доступ можно по сохранённой ссылке на заказ.</p>}
     </div> : <div className="cart-pending__list">{orders.map(order => <article className="cart-pending__order" key={order.id}>
       <div className="cart-pending__order-top"><strong>Заказ № {order.number}</strong><span className="cart-pending__status">Ожидает оплаты</span></div>
-      <p className="cart-pending__date">{new Date(order.date).toLocaleDateString("ru-RU")}</p>
+      <p className="cart-pending__date">{new Date(order.date).toLocaleDateString("ru-RU")} · без оплаты отменится через 24 часа после оформления</p>
       <div className="cart-pending__items">{order.items.map((item, index) => <div key={index}>{item.name} × {item.quantity}</div>)}</div>
       <div className="cart-pending__order-bottom"><strong>{formatMoney(order.amount)}</strong><div className="cart-pending__actions">
         <Link to={order.link}>Подробнее</Link>

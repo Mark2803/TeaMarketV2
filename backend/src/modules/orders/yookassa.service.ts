@@ -166,6 +166,12 @@ export async function initiateYooKassaPayment(orderId: string, returnUrlOverride
   return payment.confirmation.confirmation_url;
 }
 
+/** Текущий статус платежа у ЮKassa (pending, waiting_for_capture, succeeded, canceled). */
+export async function getYooKassaPaymentStatus(paymentId: string): Promise<string> {
+  const payment = await providerRequest(`${API}/${encodeURIComponent(paymentId)}`);
+  return payment.status;
+}
+
 /** Never trust a webhook payload alone: fetch the payment from YooKassa before changing status. */
 export async function synchronizeYooKassaPayment(paymentId: string): Promise<void> {
   if (!credentials()) throw new Error("YOOKASSA_NOT_CONFIGURED");

@@ -15,9 +15,11 @@ const { default: app } = await import("./app.js");
 const { disconnectDatabase } = await import("./database/prisma.js");
 const { startYandexDeliverySync } = await import("./modules/orders/yandex-delivery-sync.js");
 const { startYandexShipmentReconciliation } = await import("./modules/moderator/yandex-shipments.service.js");
+const { startUnpaidOrderExpiration } = await import("./modules/orders/unpaid-order-expiration.js");
 
 startYandexDeliverySync();
 startYandexShipmentReconciliation();
+startUnpaidOrderExpiration();
 
 const server = app.listen(env.PORT, () => {
   console.log(

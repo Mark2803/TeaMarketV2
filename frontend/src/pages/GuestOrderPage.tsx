@@ -58,7 +58,10 @@ export default function GuestOrderPage() {
           <small style={{ color: "#746b60" }}>Статус обновляется по данным магазина.</small>
         </div>)}
       </section>}
-      {order.payment_status !== "paid" && order.status !== "cancelled" && <button type="button" disabled={paying} onClick={() => void pay()} style={{ padding: "14px 24px", cursor: "pointer" }}>{paying ? "Открываем ЮKassa…" : "Оплатить заказ"}</button>}
+      {order.payment_status !== "paid" && order.status !== "cancelled" && <>
+        <button type="button" disabled={paying} onClick={() => void pay()} style={{ padding: "14px 24px", cursor: "pointer" }}>{paying ? "Открываем ЮKassa…" : "Оплатить заказ"}</button>
+        <p style={{ color: "#746b60", fontSize: 13 }}>Неоплаченный заказ автоматически отменяется через 24 часа после оформления.</p>
+      </>}
       {order.payment_status === "paid" && <p>Спасибо! Оплата подтверждена.</p>}
       {error && <p role="alert">{error}</p>}
     </>}

@@ -10,8 +10,10 @@ export async function sendTemplateEmail(eventKey:string,to:string,vars:Record<st
  const subject=render(t.subject,vars),body=render(t.body,vars);const d=await db.notification_deliveries.create({data:{customer_id:customerId??null,event_key:eventKey,recipient:to,subject,body,status:"pending"}});
  try{await sendEmail(to,subject,body);await db.notification_deliveries.update({where:{id:d.id},data:{status:"sent",sent_at:new Date()}});return{sent:true}}catch(e){await db.notification_deliveries.update({where:{id:d.id},data:{status:"failed",error_message:e instanceof Error?e.message:String(e)}});return{sent:false,reason:"failed" as const}}
 }
+// В письмах покупателю — русские названия статусов, а не служебные коды.
+const ORDER_STATUS_LABELS:Record<string,string>={new:"новый",confirmed:"подтверждён",processing:"собирается",shipped:"передан в доставку",completed:"получен",delivered:"получен",cancelled:"отменён"};
 export async function sendOrderStatusEmail(orderNumber:string,status:string){
  const o=await prisma.orders.findUnique({where:{order_number:orderNumber},select:{email:true,customer_id:true,order_number:true,order_deliveries:{select:{tracking_number:true}}}});if(!o?.email)return;
  const key=status==="shipped"?"order_shipped":status==="delivered"||status==="completed"?"order_delivered":"order_status_changed";
- await sendTemplateEmail(key,o.email,{order_number:o.order_number,status,tracking_number:o.order_deliveries?.tracking_number??""},o.customer_id);
+ await sendTemplateEmail(key,o.email,{order_number:o.order_number,status:ORDER_STATUS_LABELS[status]??status,tracking_number:o.order_deliveries?.tracking_number??""},o.customer_id);
 }
