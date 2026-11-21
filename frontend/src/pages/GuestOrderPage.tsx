@@ -21,7 +21,20 @@ export default function GuestOrderPage() {
         const response = await getAccessibleOrder(orderId, access || undefined);
         if (!active) return;
         setOrder(response.data); setError("");
-        if (access) saveOrderAccess({ id: orderId, orderNumber: response.data.order_number, accessToken: access });
+        if (access) {
+          try {
+            saveOrderAccess({ id: orderId, orderNumber: response.data.order_number, accessToken: access });
+            // Ключ доступа сохранён в браузере — убираем его из адресной строки,
+            // чтобы он не оставался в истории и не уходил дальше со ссылкой или скриншотом.
+            const url = new URL(window.location.href);
+            if (url.searchParams.has("access")) {
+              url.searchParams.delete("access");
+              window.history.replaceState(window.history.state, "", url.toString());
+            }
+          } catch {
+            // Браузер не даёт сохранить данные (например, приватный режим) — оставляем ключ в адресе.
+          }
+        }
       } catch (e) { if (active) setError(e instanceof Error ? e.message : "Не удалось получить заказ"); }
       finally { if (active) setLoading(false); }
     };
