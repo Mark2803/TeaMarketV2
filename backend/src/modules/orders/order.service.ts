@@ -8,6 +8,7 @@ import { prisma } from "../../database/prisma.js";
 import { calculatePricing } from "../pricing/pricing.service.js";
 import { quoteYandexPickup,quoteYandexDoor,CarrierQuoteError } from "../delivery-methods/yandex-carrier-quote.service.js";
 import { sendTemplateEmail } from "../notifications/notification.service.js";
+import { isYandexDeliveryMethod } from "../delivery-methods/delivery-methods.service.js";
 
 import type {
   CreateOrderInput
@@ -275,18 +276,19 @@ export async function createOrder(
           }
         });
 
-      const yandexMethod = /яндекс|yandex/i.test(deliveryMethod.name);
-      if (yandexMethod && (input.deliveryMode === "door" ? !input.delivery.fullAddress : !input.destinationStationId)) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
-      let carrierPrice = Number(deliveryMethod.base_cost);
-      if (yandexMethod) {
-        try {
-          const lines = freshItems.map(i=>({sku:i.product_variants.sku,quantity:i.quantity}));
-          const carrier = input.deliveryMode === "door" ? await quoteYandexDoor(lines,input.delivery.fullAddress) : await quoteYandexPickup(lines,input.destinationStationId!);
-          carrierPrice = carrier.price;
-        } catch (error) {
-          if (error instanceof CarrierQuoteError) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
-          throw error;
-        }
+      // Магазин работает только с Яндекс Доставкой: стоимость всегда считает API Яндекса.
+      if (!isYandexDeliveryMethod(deliveryMethod.name)) {
+        return { success: false, error: "DELIVERY_METHOD_NOT_FOUND" };
+      }
+      if (input.deliveryMode === "door" ? !input.delivery.fullAddress : !input.destinationStationId) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
+      let carrierPrice: number;
+      try {
+        const lines = freshItems.map(i=>({sku:i.product_variants.sku,quantity:i.quantity}));
+        const carrier = input.deliveryMode === "door" ? await quoteYandexDoor(lines,input.delivery.fullAddress) : await quoteYandexPickup(lines,input.destinationStationId!);
+        carrierPrice = carrier.price;
+      } catch (error) {
+        if (error instanceof CarrierQuoteError) return {success:false,error:"DELIVERY_QUOTE_UNAVAILABLE"} as const;
+        throw error;
       }
       const pricing = await calculatePricing(
         freshItems.map((item) => ({
@@ -419,7 +421,7 @@ export async function createOrder(
                   deliveryCost.toFixed(2),
 
                 delivery_service:
-                  yandexMethod ? "Yandex Delivery" : deliveryMethod.name,
+                  "Yandex Delivery",
 
                 recipient_name:
                   input.delivery
@@ -429,7 +431,7 @@ export async function createOrder(
                   input.delivery.phone,
 
                 full_address:
-                  yandexMethod && input.deliveryMode !== "door" ? `[ПВЗ Яндекс ${input.destinationStationId}] ${input.delivery.fullAddress}` : input.delivery
+                  input.deliveryMode !== "door" ? `[ПВЗ Яндекс ${input.destinationStationId}] ${input.delivery.fullAddress}` : input.delivery
                     .fullAddress,
 
                 comment:

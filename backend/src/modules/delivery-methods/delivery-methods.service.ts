@@ -1,10 +1,16 @@
 import { prisma } from "../../database/prisma.js";
 
 /**
- * Возвращает доступные покупателю способы доставки.
+ * Магазин работает только с Яндекс Доставкой. Доставка в ПВЗ и до двери —
+ * режимы одного способа «Яндекс Доставка», стоимость считает API Яндекса.
  */
+export function isYandexDeliveryMethod(name: string): boolean {
+  return /яндекс|yandex/i.test(name);
+}
+
+/** Возвращает доступные покупателю способы доставки (только Яндекс Доставка). */
 export async function getActiveDeliveryMethods() {
-  return prisma.delivery_methods.findMany({
+  const methods = await prisma.delivery_methods.findMany({
     where: {
       is_active: true
     },
@@ -25,29 +31,6 @@ export async function getActiveDeliveryMethods() {
       delivery_term: true
     }
   });
-}
-/**
- * Единая точка расчёта доставки.
- * Сейчас использует тестовый базовый тариф из БД.
- * При подключении CDEK/Ozon/5Post здесь будет вызов API провайдера,
- * а контракт endpoint для checkout останется прежним.
- */
-export async function calculateDeliveryQuote(
-  deliveryMethodId: string,
-  _fullAddress: string
-) {
-  const method = await prisma.delivery_methods.findFirst({
-    where: { id: deliveryMethodId, is_active: true },
-    select: { id: true, name: true, base_cost: true, delivery_term: true }
-  });
 
-  if (!method) return null;
-
-  return {
-    deliveryMethodId: method.id,
-    deliveryMethodName: method.name,
-    cost: method.base_cost,
-    deliveryTerm: method.delivery_term,
-    source: "test_base_cost" as const
-  };
+  return methods.filter((method) => isYandexDeliveryMethod(method.name));
 }

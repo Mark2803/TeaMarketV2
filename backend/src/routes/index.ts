@@ -27,7 +27,6 @@ import customerAddressesRouter from "../modules/customer-addresses/customer-addr
 
 import moderatorRouter from "../modules/moderator/moderator.routes.js";
 import { publicMessengerRouter } from "../modules/messengers/messenger.routes.js";
-import yandexPickupPointsRouter from "./yandex-test-points.js";
 
 const router = Router();
 
@@ -45,7 +44,6 @@ router.use("/pricing", pricingRouter);
 router.use("/analytics", analyticsRouter);
 
 router.use("/delivery-methods", deliveryMethodsRouter);
-router.use("/delivery-methods", yandexPickupPointsRouter);
 router.use("/payment-methods", paymentMethodsRouter);
 
 router.use("/auth", authRouter);

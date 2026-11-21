@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { getDeliveryMethodsController, getDeliveryQuoteController } from "./delivery-methods.controller.js";
-
+import { getDeliveryMethodsController } from "./delivery-methods.controller.js";
 import { yandexCheckoutQuoteController } from "./yandex-checkout-quote.controller.js";
+import { yandexPickupPointsController } from "./yandex-pickup-points.controller.js";
+
 const router = Router();
 router.get("/", getDeliveryMethodsController);
-router.post("/quote", getDeliveryQuoteController);
+router.get("/yandex-points", yandexPickupPointsController);
 router.post("/yandex-quote", yandexCheckoutQuoteController);
 export default router;

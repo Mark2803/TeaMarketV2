@@ -1120,10 +1120,8 @@ async function upsertReferenceData(): Promise<{
   const payment = new Map<string, string>();
 
   for (const item of [
-    { name: "СДЭК — пункт выдачи", cost: 290, term: "2–5 дней", order: 10 },
-    { name: "5Post — пункт выдачи", cost: 240, term: "3–7 дней", order: 20 },
-    { name: "Ozon — пункт выдачи", cost: 260, term: "2–6 дней", order: 30 },
-    { name: "Курьерская доставка", cost: 490, term: "1–3 дня", order: 40 }
+    // Магазин работает только с Яндекс Доставкой (ПВЗ и до двери — внутри одного способа).
+    { name: "Яндекс Доставка — ПВЗ", cost: 0, term: "По расчёту Яндекса", order: 10 }
   ]) {
     const record = await prisma.delivery_methods.upsert({
       where: { name: item.name },
@@ -1431,14 +1429,14 @@ async function upsertOrders(
   await prisma.order_deliveries.create({
     data: {
       order_id: order1.id,
-      delivery_method_id: deliveryIds.get("СДЭК — пункт выдачи")!,
+      delivery_method_id: deliveryIds.get("Яндекс Доставка — ПВЗ")!,
       cost: deliveryCost1,
       recipient_name: "Тестовый Покупатель",
       phone: DEMO_CUSTOMER_PHONES[0],
-      full_address: "Санкт-Петербург, демонстрационный ПВЗ СДЭК №101",
+      full_address: "Санкт-Петербург, демонстрационный ПВЗ Яндекса №101",
       comment: "Позвонить перед выдачей",
-      tracking_number: "DEMO-CDEK-100001",
-      delivery_service: "СДЭК",
+      tracking_number: "DEMO-YANDEX-100001",
+      delivery_service: "Yandex Delivery",
       status: "handed_over",
       handed_over_at: new Date(Date.now() - 24 * 60 * 60 * 1000)
     }
@@ -1506,12 +1504,12 @@ async function upsertOrders(
   await prisma.order_deliveries.create({
     data: {
       order_id: order2.id,
-      delivery_method_id: deliveryIds.get("5Post — пункт выдачи")!,
+      delivery_method_id: deliveryIds.get("Яндекс Доставка — ПВЗ")!,
       cost: deliveryCost2,
       recipient_name: "Демо Клиент",
       phone: DEMO_CUSTOMER_PHONES[1],
-      full_address: "Москва, демонстрационный ПВЗ 5Post №202",
-      delivery_service: "5Post",
+      full_address: "Москва, демонстрационный ПВЗ Яндекса №202",
+      delivery_service: "Yandex Delivery",
       status: "pending"
     }
   });
