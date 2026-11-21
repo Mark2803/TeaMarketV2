@@ -200,6 +200,7 @@ import {
 } from "./notifications/moderator-notifications.controller.js";
 
 import { getModeratorAnalyticsController } from "./analytics/moderator-analytics.controller.js";
+import { getModeratorFinanceReportController } from "./analytics/moderator-finance-report.controller.js";
 
 const router = Router();
 
@@ -237,6 +238,7 @@ router.use("/yandex-shipments", yandexShipmentsRouter);
 router.use("/yandex-alerts", yandexAlertsRouter);
 router.use("/yandex-returns", yandexReturnsRouter);
 router.get("/analytics", getModeratorAnalyticsController);
+router.get("/analytics/finance-report", getModeratorFinanceReportController);
 router.get("/accountant-report", previewAccountantReport);
 router.get("/accountant-report/download", downloadAccountantReport);
 router.post("/accountant-report/send", sendAccountantReport);
