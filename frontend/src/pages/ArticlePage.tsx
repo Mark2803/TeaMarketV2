@@ -12,6 +12,7 @@ import {
 import {
   useArticle
 } from "../shared/hooks/useArticles";
+import { usePageSeo } from "../shared/hooks/usePageSeo";
 
 function renderArticleContent(
   content: string
@@ -43,6 +44,14 @@ export default function ArticlePage() {
 
   const articleQuery =
     useArticle(articleSlug);
+
+  const seoArticle = articleQuery.data?.data;
+  usePageSeo(seoArticle ? {
+    title: seoArticle.seo_title?.trim() || `${seoArticle.title} | Чайный Маркет`,
+    description: seoArticle.seo_description || seoArticle.excerpt,
+    canonicalPath: `/articles/${encodeURIComponent(seoArticle.slug)}`,
+    indexed: true
+  } : null);
 
   if (
     articleQuery.isError
