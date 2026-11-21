@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminSeoHints from "./AdminSeoHints";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -137,6 +138,10 @@ export default function AdminCategoryEditPage() {
           <label className="admin-field admin-field-wide"><span>SEO title</span><input value={form.seoTitle} onChange={(e)=>set("seoTitle",e.target.value)}/></label>
           <label className="admin-field admin-field-wide"><span>SEO description</span><textarea rows={4} value={form.seoDescription} onChange={(e)=>set("seoDescription",e.target.value)}/></label>
           <label className="admin-field admin-field-wide"><span>Canonical URL</span><input value={form.canonicalUrl} onChange={(e)=>set("canonicalUrl",e.target.value)}/></label>
+          <AdminSeoHints seoTitle={form.seoTitle} seoDescription={form.seoDescription}
+            autoTitle={form.name.trim() ? `${form.name.trim()} — купить в интернет-магазине | Чайный Маркет` : ""}
+            autoDescription={form.description || (form.name.trim() ? `${form.name.trim()} в интернет-магазине Чайный Маркет: описание, цены, доставка по России.` : "")}
+            path={`/catalog/${form.slug}`} indexed={form.isVisible && form.isIndexed}/>
         </div>
       </section>
     </form>

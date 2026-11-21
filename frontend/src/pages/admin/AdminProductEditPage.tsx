@@ -1,4 +1,5 @@
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import AdminSeoHints from "./AdminSeoHints";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -564,6 +565,15 @@ export default function AdminProductEditPage() {
                 onChange={(e) => setField("canonicalUrl", e.target.value)}
               />
             </label>
+
+            <AdminSeoHints
+              seoTitle={form.seoTitle}
+              seoDescription={form.seoDescription}
+              autoTitle={form.name.trim() ? `${form.name.trim()} — купить с доставкой | Чайный Маркет` : ""}
+              autoDescription={form.shortDescription || form.aboutTea || form.name}
+              path={`/products/${form.slug}`}
+              indexed={form.isActive && form.isIndexed}
+            />
           </div>
         </section>
 

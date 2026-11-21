@@ -283,8 +283,10 @@ async function articlePage(slug: string, pathname: string): Promise<Page | null>
 
 /** Главная и списковые страницы. */
 async function staticPage(pathname: string): Promise<Page | null> {
+  // Описание выводится и текстом сразу после H1: Яндекс часто берёт сниппет из текста страницы.
   const page = (title: string, description: string, body: string, jsonLd: object[] = []): Page => ({
-    title, description, body, jsonLd, canonical: SITE + pathname, indexed: true, ogType: "website"
+    title, description, jsonLd, canonical: SITE + pathname, indexed: true, ogType: "website",
+    body: body.replace(/<h1>[\s\S]*?<\/h1>/, (h1) => `${h1}\n<p>${esc(description)}</p>`)
   });
   const now = new Date();
   const categoryLinks = async () => {
@@ -299,7 +301,7 @@ async function staticPage(pathname: string): Promise<Page | null> {
       const list = productList("Чай в магазине", products);
       return page(
         `${BRAND} — интернет-магазин чая с доставкой по России`,
-        "Китайские пуэры и улуны, тайваньская ГАБА, редкие сорта и чайная смола. Подберите чай по вкусу и закажите с доставкой по России.",
+        "Откройте для себя разнообразие настоящего чая: китайские пуэры и улуны, тайваньская ГАБА, редкие сорта и чайная смола. Подберите чай по своему вкусу.",
         [`<h1>${BRAND} — интернет-магазин чая</h1>`, await categoryLinks(), list.html,
           `<p><a href="/articles">Статьи о чае</a> · <a href="/collections">Подборки</a> · <a href="/contacts">Контакты</a></p>`].join("\n"),
         [{ "@context": "https://schema.org", "@type": "WebSite", name: BRAND, url: SITE },
