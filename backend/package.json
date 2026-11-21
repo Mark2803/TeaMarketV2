@@ -11,6 +11,7 @@
     "prisma:generate": "prisma generate",
     "typecheck": "prisma generate && tsc --noEmit",
     "env:check": "tsx src/tools/check-environment.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
     "db:demo:seed": "tsx prisma/demo-seed.ts",
     "db:demo:clear": "tsx prisma/demo-clear.ts",
     "db:demo:fix-images": "tsx prisma/fix-demo-images.ts",
