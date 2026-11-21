@@ -209,7 +209,7 @@ export default function AdminDeliveryPage() {
         <p className="admin-returns-note">Сведения поступают из Яндекс Доставки. Отсутствующие причины, даты и расходы не подменяются расчётными значениями. Возврат денег через ЮKassa автоматически не выполняется.</p>
       </div> : section === "shipments" ? <div>
         <div className="admin-delivery-actions"><button type="button" className="admin-secondary-button" disabled={shipmentsLoading} onClick={() => void loadShipments()}>{shipmentsLoading ? "Загрузка…" : "Обновить список"}</button></div>
-        <p>После подтверждения оплаты система автоматически создаёт заявку в тестовом API Яндекса. При ошибке проверьте причину и повторите создание вручную. Не повторяйте заявки со статусом «Требует проверки».</p>
+        <p>После подтверждения оплаты система автоматически создаёт заявку в Яндекс Доставке. При ошибке проверьте причину и повторите создание вручную. Не повторяйте заявки со статусом «Требует проверки».</p>
         {shipmentsError && <p className="admin-editor-message is-error" role="alert">{shipmentsError}</p>}
         <div className="admin-delivery-table-wrap"><table className="admin-delivery-table"><thead><tr><th>Заказ</th><th>Получатель</th><th>ПВЗ назначения</th><th>Оплата</th><th>Статус заявки</th><th>ID Яндекса</th><th>Действие</th></tr></thead><tbody>
         {shipments.map(sh => <tr key={sh.order_number}>
@@ -222,15 +222,15 @@ export default function AdminDeliveryPage() {
         {!shipments.length && <tr><td colSpan={7}>{shipmentsLoading ? "Загрузка…" : "Заказы Яндекс Доставки не найдены"}</td></tr>}
         </tbody></table></div>
       </div> : section === "dropoff-points" ? <div className="admin-pvz-layout">
-        <div className="admin-pvz-heading"><div><h3>Пункт самостоятельной отгрузки</h3><p>Выберите пункт, принимающий посылки от продавцов. Забор курьером не используется.</p></div><span className="admin-pvz-mode">Тестовый режим · Москва</span></div>
+        <div className="admin-pvz-heading"><div><h3>Пункт самостоятельной отгрузки</h3><p>Выберите пункт, принимающий посылки от продавцов. Забор курьером не используется.</p></div><span className="admin-pvz-mode">Яндекс Доставка</span></div>
         <div className="admin-pvz-primary"><div><strong>Основной пункт отгрузки</strong>{primaryDropoff ? <p>{primaryDropoff.name} · {primaryDropoff.address}</p> : <p>Пока не выбран</p>}</div>{primaryDropoff && <button type="button" className="admin-secondary-button" disabled={primaryBusy} onClick={() => void clearPrimary()}>Сбросить</button>}</div>
         <div className="admin-pvz-map-heading"><div><h3>Выбор пункта на карте</h3><p>{pointsTotal === null ? "Загружаем доступные пункты…" : `Доступно пунктов: ${pointsTotal}`}</p></div><button type="button" className="admin-secondary-button" disabled={pointsLoading} onClick={() => void loadPoints("dropoff")}>{pointsLoading ? "Обновляем…" : "Обновить ПВЗ"}</button></div>
         {pointsError && <p className="admin-editor-message is-error" role="alert">{pointsError}</p>}
-        {pointsTotal !== null && pointKind === "dropoff" && <YandexPickupMap points={points} selectedId={selectedPoint} onSelect={p => setSelectedPoint(p.id)} title="Поиск ПВЗ по адресу или названию" />}
+        {pointsTotal !== null && pointKind === "dropoff" && <div className="admin-pvz-map"><YandexPickupMap fill points={points} selectedId={selectedPoint} onSelect={p => setSelectedPoint(p.id)} title="Поиск ПВЗ по адресу или названию" /></div>}
         {(() => { const chosen = pointKind === "dropoff" ? points.find(p => p.id === selectedPoint) : undefined; return chosen ? <div className="admin-pvz-choice"><div><strong>{chosen.name}</strong><p>{chosen.address}</p></div><button type="button" className="admin-primary-button" disabled={primaryBusy} onClick={() => void savePrimary(chosen)}>Сохранить основной ПВЗ</button></div> : null; })()}
         {primaryError && <p className="admin-editor-message is-error" role="alert">{primaryError}</p>}
         {primaryNotice && <p className="admin-editor-message is-success" role="status">{primaryNotice}</p>}
-        <p className="admin-pvz-note">Основной ПВЗ сохраняется в PostgreSQL. Отправления создаются вручную в разделе «Отправления» через тестовый API Яндекса.</p>
+        <p className="admin-pvz-note">В этот пункт вы сдаёте посылки. Отправления создаются автоматически после оплаты; их состояние — в разделе «Отправления».</p>
         {/* Диагностика API и пробный расчёт тарифа отключены в рабочем интерфейсе. */}
       </div> : section !== "packaging" ? <p className="admin-delivery-empty">Раздел находится в разработке.</p> : <>
         {error && <p className="admin-editor-message is-error" role="alert">{error}</p>}

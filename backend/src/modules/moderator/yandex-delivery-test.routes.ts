@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { calculateOrderPacking } from "./order-packing.service.js";
 import { prisma } from "../../database/prisma.js";
+import { getPickupPoints } from "../delivery-methods/yandex-pickup-points.controller.js";
 
 /** Sandbox-only diagnostics. No offer confirmation or shipment creation. */
 const router = Router();
@@ -122,6 +123,17 @@ router.get("/points", async (req, res) => {
   if (!kind) return failure(res, "INVALID_KIND", "Укажите kind=dropoff или kind=destination");
   const query = typeof req.query.search === "string" ? req.query.search.trim().toLowerCase().slice(0, 100) : "";
   try {
+    // ПВЗ отгрузки берём из общего списка, который сервер хранит час, — карта открывается сразу.
+    const token = liveToken();
+    if (kind === "dropoff" && token) {
+      const cached = (await getPickupPoints(token)).filter(p => p.availableForDropoff);
+      if (cached.length) {
+        const found = query ? cached.filter(p => `${p.name} ${p.address}`.toLowerCase().includes(query)) : cached;
+        res.json({ data: { ok: true, kind, total: found.length, points: found, truncated: false,
+          note: "Полный список доступных пунктов Яндекс Доставки." } });
+        return;
+      }
+    }
     const body: JsonRecord = { type: "pickup_point", payment_method: "already_paid" };
     if (kind === "dropoff") body.available_for_dropoff = true;
     const result = await request("/api/b2b/platform/pickup-points/list", body, true);

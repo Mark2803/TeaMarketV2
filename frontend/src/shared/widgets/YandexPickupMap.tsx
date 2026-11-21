@@ -307,7 +307,11 @@ export default function YandexPickupMap({
       </div>
 
       {error
-        ? <p role="alert" className="yandex-pickup-map-error">{error}</p>
+        ? <div role="alert" className="yandex-pickup-map-error">
+            <strong>{error}</strong>
+            <p>Пункт можно выбрать из списка — поиск по городу или улице работает и без карты.
+              Если карта не открывается, проверьте блокировщик рекламы или VPN в браузере.</p>
+          </div>
         : <div
             ref={node}
             className="yandex-pickup-map"

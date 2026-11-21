@@ -3,7 +3,7 @@
 .yandex-pickup-search{display:grid;gap:6px;font-weight:600}
 .yandex-pickup-search input{width:100%;min-height:42px;padding:8px 12px;border:1px solid #c9c9c9;border-radius:8px;background:transparent;color:inherit}
 .yandex-pickup-map{height:360px;width:100%;min-width:0;border-radius:10px;overflow:hidden;background:#eef0ea}
-.yandex-pickup-map-error{margin:0}
+.yandex-pickup-map-error{margin:0;padding:16px;border:1px dashed #c9bba8;border-radius:10px;display:grid;gap:6px;align-content:start}.yandex-pickup-map-error p{margin:0;font-size:14px;color:#6e7069}
 .yandex-pickup-list{max-height:200px;overflow:auto;display:grid;gap:5px;align-content:start}
 .yandex-pickup-list button{display:grid;text-align:left;gap:3px;padding:10px 12px;background:transparent;color:inherit;border:1px solid #ddd;border-radius:8px;cursor:pointer}
 .yandex-pickup-list button.is-selected{border-color:#87623e;background:rgba(135,98,62,.08)}

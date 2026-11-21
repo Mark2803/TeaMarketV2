@@ -10,13 +10,15 @@ import type { Request, Response } from "express";
  * - если Яндекс временно недоступен, отдаём последний успешный список.
  */
 
-type PickupPoint = {
+export type PickupPoint = {
   id: string;
   name: string;
   address: string;
   city: string;
   latitude: number | null;
   longitude: number | null;
+  /** Пункт принимает посылки от продавца (нужно для выбора ПВЗ отгрузки в админке). */
+  availableForDropoff: boolean;
 };
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
@@ -56,13 +58,15 @@ async function fetchPickupPoints(token: string): Promise<PickupPoint[]> {
       address: typeof address.full_address === "string" ? address.full_address : "",
       city: typeof address.locality === "string" ? address.locality : "",
       latitude: coordinate(position.latitude),
-      longitude: coordinate(position.longitude)
+      longitude: coordinate(position.longitude),
+      availableForDropoff: point.available_for_dropoff === true
     });
   }
   return points;
 }
 
-async function getPickupPoints(token: string): Promise<PickupPoint[]> {
+/** Общий кэшированный список ПВЗ: для карты покупателя и для выбора ПВЗ отгрузки в админке. */
+export async function getPickupPoints(token: string): Promise<PickupPoint[]> {
   if (cache && Date.now() < cache.expires) return cache.points;
   if (!loading) {
     loading = fetchPickupPoints(token)
