@@ -14,8 +14,8 @@ dist/
 *.log
 npm-debug.log*
 
-# Prisma generated client
-backend/src/generated/prisma/
+# Prisma generated client (создаётся командой prisma generate при build/dev)
+src/generated/prisma/
 
 # Служебные файлы
 .DS_Store
