@@ -283,7 +283,8 @@ async function articlePage(slug: string, pathname: string): Promise<Page | null>
 
 const TOOLS_LINKS = `<section><h2>Бесплатные инструменты для продавцов</h2><ul>
 <li><a href="/tools/wildberries-barcode-generator/">Генератор штрихкодов и этикеток для Wildberries (PDF)</a></li>
-<li><a href="/tools/gtin14-generator/">Генератор GTIN-14 и штрихкода ITF-14</a></li></ul></section>`;
+<li><a href="/tools/gtin14-generator/">Генератор GTIN-14 и штрихкода ITF-14</a></li>
+<li><a href="/tools/">Все бесплатные инструменты для селлеров</a></li></ul></section>`;
 
 /** Главная и списковые страницы. */
 async function staticPage(pathname: string): Promise<Page | null> {
