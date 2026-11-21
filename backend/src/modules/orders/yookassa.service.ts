@@ -2,7 +2,7 @@ import { notifyAdminAboutOrder } from "../notifications/admin-order-alerts.servi
 import { randomUUID } from "node:crypto";
 import { advanceOrderStatus } from "./automatic-order-status.js";
 import { prisma } from "../../database/prisma.js";
-import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.routes.js";
+import { createYandexShipmentAfterPayment } from "../moderator/yandex-shipments.service.js";
 
 const API = "https://api.yookassa.ru/v3/payments";
 
