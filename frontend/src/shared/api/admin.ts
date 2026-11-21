@@ -497,8 +497,6 @@ export function getAdminOrders(query:{page?:number;limit?:number;search?:string;
 export function getAdminOrder(orderNumber:string){return apiRequest<{data:AdminOrderDetails}>(`/moderator/orders/${encodeURIComponent(orderNumber)}`);}
 export function updateAdminOrderStatus(orderNumber:string,status:AdminOrderStatus,cancellationReason?:string|null){return apiRequest(`/moderator/orders/${encodeURIComponent(orderNumber)}/status`,{method:"PATCH",body:JSON.stringify({status,cancellationReason})});}
 export function updateAdminOrderArchive(orderNumber:string,archived:boolean){return apiRequest(`/moderator/orders/${encodeURIComponent(orderNumber)}/archive`,{method:"PATCH",body:JSON.stringify({archived})});}
-export function updateAdminOrderDelivery(orderNumber:string,input:{status:AdminDeliveryStatus;deliveryService?:string|null;trackingNumber?:string|null;handedOverAt?:string|null;receivedAt?:string|null}){return apiRequest(`/moderator/orders/${encodeURIComponent(orderNumber)}/delivery`,{method:"PATCH",body:JSON.stringify(input)});}
-export function updateAdminOrderPayment(orderNumber:string,input:{status:AdminPaymentOperationStatus;operationNumber?:string|null;paidAt?:string|null}){return apiRequest(`/moderator/orders/${encodeURIComponent(orderNumber)}/payment`,{method:"PATCH",body:JSON.stringify(input)});}
 
 
 // ===== Admin: customers =====

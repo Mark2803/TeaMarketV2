@@ -41,14 +41,6 @@ import {
 } from "./moderator-orders.controller.js";
 
 import {
-  updateModeratorDeliveryController
-} from "./moderator-delivery.controller.js";
-
-import {
-  updateModeratorPaymentController
-} from "./moderator-payment.controller.js";
-
-import {
   createModeratorProductController
 } from "./moderator-product-create.controller.js";
 
