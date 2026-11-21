@@ -65,14 +65,41 @@ frontend:
 - Ставить пакеты только `npm ci --include=dev`, иначе при `NODE_ENV=production` не установятся TypeScript и Vite.
 - `npm run env:check` перед каждым перезапуском; перезапускать, только если «ошибок нет».
 
-### Порядок обновления backend
+### Выкладка (проверено 21.11.2026)
 
-в папке backend `git pull` → `npm ci --include=dev` → `npm run build` → `npm run env:check` → `systemctl restart tea-market-backend`.
-Подробная пошаговая выкладка с откатом будет записана сюда после первой выкладки ветки `рефакторинг` (проверяем, от какого пользователя работают git и сборка).
+Выполнять под `root` в **свежем** SSH-терминале. Git и сборка — от имени `ivanc1539` (`runuser`), чтобы не испортить права. У `ivanc1539` нет SSH-ключа GitHub, поэтому код забирается по HTTPS (репозиторий публичный).
+
+0. Резервная копия:
+   ```
+   B=/home/ivanc1539/backup-$(date +%F); mkdir -p $B
+   cd /home/ivanc1539/tea-market-v2
+   cp -a backend/dist $B/backend-dist; cp -a frontend/.env $B/frontend.env
+   cp -a /home/ivanc1539/web/tea-master-team.ru/public_html $B/public_html
+   ```
+1. Код и сборка backend (сайт продолжает работать):
+   ```
+   U="runuser -u ivanc1539 --"
+   $U git pull https://github.com/Mark2803/TeaMarketV2.git ВЕТКА
+   cd backend && $U npm ci --include=dev && $U npm run build && $U env -u NODE_ENV -u ADMIN_PASSWORD_HASH npm run env:check
+   ```
+2. Только если «ошибок нет» — перезапуск и проверка:
+   ```
+   systemctl restart tea-market-backend && sleep 6 && systemctl is-active tea-market-backend
+   curl -s http://127.0.0.1:3000/api/health
+   ```
+3. Сайт:
+   ```
+   cd ../frontend && $U npm ci --include=dev && $U npm run build
+   cp -r dist/. /home/ivanc1539/web/tea-master-team.ru/public_html/
+   chown -R ivanc1539:www-data /home/ivanc1539/web/tea-master-team.ru/public_html
+   ```
+4. Откат: `runuser -u ivanc1539 -- git checkout -f ПРЕЖНЯЯ_ВЕТКА`, вернуть `frontend/.env` и `backend/dist` из резервной копии, `systemctl restart tea-market-backend`, скопировать `public_html` из резервной копии поверх.
 
 ### Состояние на 21.11.2026
 
-`npm run env:check` на ветке `рефакторинг`: ошибок нет, backend и frontend собираются. Замечания: сервер не может связаться с api.telegram.org (уведомления в Telegram не доходят); не заданы `GUEST_ORDER_ACCESS_SECRET`, `PUBLIC_SITE_URL`, `YANDEX_DELIVERY_SOURCE_STATION_ID`; администраторы только из `.env` (в базе 0); способы доставки СДЭК, 5Post, Ozon и «Курьерская доставка» удалены из базы, остался только «Яндекс Доставка — ПВЗ». На сервере в `main` был не закоммиченный `frontend/package-lock.json` (копия сохранена в резервной папке).
+- На сервере выложена ветка `рефакторинг` (коммит `c3e6597d`, 15:05 МСК): backend перезапущен, сайт обновлён, `/api/health` отвечает. Резервная копия прежней версии — `/home/ivanc1539/backup-2026-11-21`. Правки после `c3e6597d` (промокоды, автоотмена, гостевые ссылки, скрытие cookie в журнале) ещё нужно выложить.
+- `npm run env:check`: ошибок нет. Замечания: сервер не может связаться с api.telegram.org (уведомления в Telegram не доходят); не заданы `GUEST_ORDER_ACCESS_SECRET`, `PUBLIC_SITE_URL`, `YANDEX_DELIVERY_SOURCE_STATION_ID`; администраторы только из `.env` (в базе 0); способы доставки СДЭК, 5Post, Ozon и «Курьерская доставка» удалены из базы, остался только «Яндекс Доставка — ПВЗ».
+- До исправления журнал backend записывал cookie сессии админки целиком (`journalctl`). Старые записи остаются в журнале; сессия действует 12 часов.
 
 ## Документация
 
@@ -91,6 +118,7 @@ frontend:
 - промокоды: лимит использований проверяется и занимается атомарно в базе (одновременные заказы не превысят лимит); при отмене заказа использование промокода возвращается, а списанные бонусы возвращаются покупателю (запись `loyalty_transactions` с типом `refund`);
 - автоотмена неоплаченных заказов через 24 часа (решение Марка; `UNPAID_ORDER_TTL_HOURS`, `modules/orders/unpaid-order-expiration.ts`, проверка раз в 15 минут): товар, промокод и бонусы возвращаются, покупателю уходит письмо. Заказ не отменяется, пока у ЮKassa есть незавершённый платёж; если платёж прошёл без уведомления — заказ отмечается оплаченным. Покупателю на странице заказа и в корзине показано предупреждение про 24 часа;
 - письма о смене статуса заказа показывают русские названия статусов;
+- журнал запросов больше не сохраняет cookie сессий и ключи доступа (`pino-http` redact в `app.ts`);
 - страница гостевого заказа: ключ доступа (`?access=`) после открытия сохраняется в браузере и убирается из адресной строки. Ключ по-прежнему передаётся в адресе возврата ЮKassa — иначе гость, вернувшийся после оплаты в другом браузере (например, из банковского приложения), не увидит заказ. Риск низкий: страница не показывает имя, телефон и адрес (только состав, сумму и статус).
 
 После слияния ветки `рефакторинг` у разработчика локально удалятся `node_modules`, `docs-site/node_modules` и `frontend/.env` — нужно восстановить `.env` и выполнить `npm install`.

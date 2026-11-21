@@ -31,7 +31,22 @@ app.use(
 
 app.use(compression());
 app.use(express.json());
-app.use(pinoHttp());
+// В журнал не попадают cookie сессий и ключи доступа: по ним можно войти
+// в админку или открыть чужой заказ.
+app.use(pinoHttp({
+  redact: {
+    paths: [
+      "req.headers.cookie",
+      "req.headers.authorization",
+      'req.headers["x-csrf-token"]',
+      'req.headers["x-order-access-token"]',
+      'req.headers["x-management-token"]',
+      'req.headers["x-guest-token"]',
+      'res.headers["set-cookie"]'
+    ],
+    censor: "[скрыто]"
+  }
+}));
 
 // Apply CSRF checks before any moderator route, including nested delivery routes.
 app.get("/api/moderator/csrf", moderatorCsrfToken);
