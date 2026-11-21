@@ -1,4 +1,5 @@
 import { previewAccountantReport, downloadAccountantReport, sendAccountantReport } from "./accountant/accountant-report.js";
+import managementRouter from "./management/management.routes.js";
 import { setProductsIndexingController, setArticlesIndexingController } from "./moderator-indexing.controller.js";
 import adminOrderAlertsRouter from "./notifications/admin-order-alerts.routes.js";
 import yandexReturnsRouter from "./yandex-returns.routes.js";
@@ -228,6 +229,7 @@ router.use(
 );
 
 
+router.use("/management", managementRouter);
 router.use("/yandex-delivery-test", yandexDeliveryTestRouter);
 router.use("/shipping-packages", shippingPackagesRouter);
 router.use("/order-packing", orderPackingRouter);

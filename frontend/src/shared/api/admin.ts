@@ -572,3 +572,25 @@ export type AdminFinanceReport = {
 export function getAdminFinanceReport(from: string, to: string) {
   return apiRequest<{ data: AdminFinanceReport }>("/moderator/analytics/finance-report", { query: { from, to } });
 }
+
+/** Раздел «Менеджмент» (PIN-код). Токен доступа передаётся в заголовке X-Management-Token. */
+export type ManagementStatus = { pinSet: boolean; email: string; lockedUntil: string | null };
+export type ManagementTool = { id: string; title: string; description: string };
+export function getManagementStatus() {
+  return apiRequest<{ data: ManagementStatus }>("/moderator/management/status");
+}
+export function requestManagementPinCode() {
+  return apiRequest<{ data: { sent: boolean; email: string } }>("/moderator/management/pin/request-code", { method: "POST", body: "{}" });
+}
+export function setManagementPin(code: string, pin: string) {
+  return apiRequest<{ data: { pinSet: boolean } }>("/moderator/management/pin", { method: "POST", body: JSON.stringify({ code, pin }) });
+}
+export function unlockManagement(pin: string) {
+  return apiRequest<{ data: { token: string } }>("/moderator/management/unlock", { method: "POST", body: JSON.stringify({ pin }) });
+}
+export function getManagementTools(token: string) {
+  return apiRequest<{ data: ManagementTool[] }>("/moderator/management/tools", { headers: { "X-Management-Token": token } });
+}
+export function lockManagement(token: string) {
+  return apiRequest<{ data: { locked: boolean } }>("/moderator/management/lock", { method: "POST", body: "{}", headers: { "X-Management-Token": token } });
+}

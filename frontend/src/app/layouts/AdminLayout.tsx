@@ -14,6 +14,7 @@ import {
   BookOpen,
   Truck,
   Wrench,
+  LockKeyhole,
 } from "lucide-react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 
@@ -32,6 +33,7 @@ const items = [
   ["/admin/notifications", "Уведомления", Bell],
   ["/admin/analytics", "Аналитика", BarChart3],
   ["/admin/tools", "Инструменты", Wrench],
+  ["/admin/management", "Менеджмент", LockKeyhole],
   ["/admin/guide", "Инструкция", BookOpen],
   ["/admin/settings", "Настройки", Settings],
 ] as const;
