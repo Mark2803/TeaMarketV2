@@ -189,7 +189,7 @@ async function productPage(slug: string, pathname: string): Promise<Page | null>
   ].join("\n");
 
   return {
-    title, description, canonical, body, image: images[0], ogType: "product",
+    title, description, canonical, body, image: images[0] ?? null, ogType: "product",
     indexed: item.is_active && item.is_indexed,
     jsonLd: [product, crumbs.jsonLd]
   };
