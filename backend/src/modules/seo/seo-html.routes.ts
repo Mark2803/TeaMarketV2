@@ -281,6 +281,10 @@ async function articlePage(slug: string, pathname: string): Promise<Page | null>
   };
 }
 
+const TOOLS_LINKS = `<section><h2>Бесплатные инструменты для продавцов</h2><ul>
+<li><a href="/tools/wildberries-barcode-generator/">Генератор штрихкодов и этикеток для Wildberries (PDF)</a></li>
+<li><a href="/tools/gtin14-generator/">Генератор GTIN-14 и штрихкода ITF-14</a></li></ul></section>`;
+
 /** Главная и списковые страницы. */
 async function staticPage(pathname: string): Promise<Page | null> {
   // Описание выводится и текстом сразу после H1: Яндекс часто берёт сниппет из текста страницы.
@@ -303,7 +307,8 @@ async function staticPage(pathname: string): Promise<Page | null> {
         `${BRAND} — интернет-магазин чая с доставкой по России`,
         "Откройте для себя разнообразие настоящего чая: китайские пуэры и улуны, тайваньская ГАБА, редкие сорта и чайная смола. Подберите чай по своему вкусу.",
         [`<h1>${BRAND} — интернет-магазин чая</h1>`, await categoryLinks(), list.html,
-          `<p><a href="/articles">Статьи о чае</a> · <a href="/collections">Подборки</a> · <a href="/contacts">Контакты</a></p>`].join("\n"),
+          `<p><a href="/articles">Статьи о чае</a> · <a href="/collections">Подборки</a> · <a href="/contacts">Контакты</a></p>`,
+          TOOLS_LINKS].join("\n"),
         [{ "@context": "https://schema.org", "@type": "WebSite", name: BRAND, url: SITE },
           { "@context": "https://schema.org", "@type": "Organization", name: BRAND, url: SITE, logo: LOGO },
           ...(list.jsonLd ? [list.jsonLd] : [])]
@@ -333,7 +338,7 @@ async function staticPage(pathname: string): Promise<Page | null> {
         ["<h1>Статьи о чае</h1>", `<ul>${articles.map((item) => `<li><a href="/articles/${encodeURIComponent(item.slug)}">${esc(item.title)}</a> — ${esc(plain(item.excerpt, 200))}</li>`).join("")}</ul>`].join("\n"));
     }
     case "/contacts":
-      return page(`Контакты | ${BRAND}`, "Контакты интернет-магазина Чайный Маркет: как связаться, доставка и оплата.", "<h1>Контакты</h1>");
+      return page(`Контакты | ${BRAND}`, "Контакты интернет-магазина Чайный Маркет: как связаться, доставка и оплата.", `<h1>Контакты</h1>\n${TOOLS_LINKS}`);
     case "/legal/offer":
       return page(`Публичная оферта | ${BRAND}`, "Публичная оферта интернет-магазина Чайный Маркет.", "<h1>Публичная оферта</h1>");
     default:

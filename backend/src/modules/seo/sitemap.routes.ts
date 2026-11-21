@@ -17,6 +17,7 @@ router.get("/sitemap.xml", async (_req, res, next) => {
     ]);
     const urls: Array<{ path: string; lastmod?: Date; images?: string[] }> = [
       { path: "/" }, { path: "/catalog" }, { path: "/collections" }, { path: "/articles" }, { path: "/new" }, { path: "/contacts" }, { path: "/legal/offer" },
+      { path: "/tools/wildberries-barcode-generator/" }, { path: "/tools/gtin14-generator/" },
       ...products.map((item) => ({ path: `/products/${encodeURIComponent(item.slug)}`, lastmod: item.updated_at, images: item.product_images.map((image) => image.image_url) })),
       ...categories.map((item) => ({ path: `/catalog/${encodeURIComponent(item.slug)}`, lastmod: item.updated_at })),
       ...collections.map((item) => ({ path: `/collections/${encodeURIComponent(item.slug)}`, lastmod: item.updated_at })),

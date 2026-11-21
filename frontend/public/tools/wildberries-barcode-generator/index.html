@@ -32,7 +32,7 @@
 <details><summary>Как распечатать штрихкод на термопринтере?</summary><p>Выберите «Термонаклейка», укажите размер бумаги, скачайте PDF и при печати установите тот же формат в настройках принтера и масштаб 100%.</p></details>
 <details><summary>Почему штрихкод может не считываться?</summary><p>Причиной могут быть слишком мелкие полосы, низкое качество печати, смазывание, повреждение этикетки или несоответствие кода товару. Проверьте читаемость сканером до массовой печати.</p></details>
 <details><summary>Можно ли использовать буквенно-цифровой баркод?</summary><p>В этой версии генератора поддерживается только EAN-13: 12 цифр с автоматическим расчётом контрольной или готовые 13 цифр. Буквенно-цифровые коды программа не кодирует.</p></details>
-</section></div><div class="footer">Генератор работает локально в браузере. Введённые данные не отправляются на сервер.</div></div><script>
+</section></div><div class="footer">Генератор работает локально в браузере. Введённые данные не отправляются на сервер. Ещё инструмент: <a href="/tools/gtin14-generator/">генератор GTIN-14 и ITF-14</a> для коробов. Предоставлено магазином <a href="/">Чайный Маркет</a>.</div></div><script>
 const $=id=>document.getElementById(id), ids=['barcode','seller','product','article'];
 const selectedPaper=()=>document.querySelector('input[name=paper]:checked').value;
 function dimensions(){const [w,h]=document.querySelector('input[name=size]:checked').value.split('x').map(Number);$('w').value=w;$('h').value=h;return {w,h}}

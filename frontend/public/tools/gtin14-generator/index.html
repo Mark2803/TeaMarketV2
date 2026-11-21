@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Генератор GTIN-14 и ITF-14 — бесплатно</title>
 <meta name="description" content="Бесплатный генератор GTIN-14 с расчётом контрольной цифры и построением штрихкода ITF-14. Работает в браузере без отправки данных на сервер.">
-<meta name="robots" content="noindex,nofollow">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<link rel="canonical" href="https://tea-master-team.ru/tools/gtin14-generator/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Генератор GTIN-14 и ITF-14 — бесплатно онлайн">
+<meta property="og:description" content="Расчёт контрольной цифры GTIN-14 и штрихкод ITF-14 для коробок. SVG и PNG, без регистрации.">
+<meta property="og:url" content="https://tea-master-team.ru/tools/gtin14-generator/">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Генератор GTIN-14 и штрихкода ITF-14", "description": "Бесплатный онлайн-генератор GTIN-14: расчёт контрольной цифры и штрихкод ITF-14 в SVG и PNG.", "url": "https://tea-master-team.ru/tools/gtin14-generator/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "isAccessibleForFree": true, "inLanguage": "ru", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "publisher": {"@type": "Organization", "name": "Чайный Маркет", "url": "https://tea-master-team.ru/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Что такое GTIN-14?", "acceptedAnswer": {"@type": "Answer", "text": "GTIN-14 — 14-значный глобальный номер товара по стандарту GS1. Обычно он обозначает транспортную или групповую упаковку: коробку, гофрокороб, паллету с одинаковыми товарами. Первая цифра — индикатор упаковки (1–8), затем 12 цифр кода товара (как правило, это EAN-13 без контрольной цифры) и в конце контрольная цифра."}}, {"@type": "Question", "name": "Как рассчитывается контрольная цифра GTIN-14?", "acceptedAnswer": {"@type": "Answer", "text": "Цифры первых 13 разрядов умножаются по очереди на 3 и 1, начиная с первой цифры. Произведения складываются, и контрольная цифра — это число, которое нужно добавить к сумме, чтобы получилось ближайшее число, кратное 10. Генератор делает этот расчёт автоматически."}}, {"@type": "Question", "name": "Чем GTIN-14 отличается от EAN-13?", "acceptedAnswer": {"@type": "Answer", "text": "EAN-13 (GTIN-13) ставится на единицу товара, которую покупает покупатель. GTIN-14 добавляет к коду индикатор упаковки и используется для коробок и упаковок с несколькими единицами одного товара. Из одного EAN-13 можно получить несколько GTIN-14 для разных видов упаковки."}}, {"@type": "Question", "name": "Что такое штрихкод ITF-14?", "acceptedAnswer": {"@type": "Answer", "text": "ITF-14 — штрихкод, которым обычно печатают GTIN-14 на гофрокоробах. Он хорошо читается сканером даже при печати на картоне. Генератор строит ITF-14 с защитной рамкой и сохраняет его в SVG или PNG."}}, {"@type": "Question", "name": "Можно ли использовать сгенерированный код для реального товара?", "acceptedAnswer": {"@type": "Answer", "text": "Генератор считает контрольную цифру и строит штрихкод, но не выдаёт новые номера. Для реального товара используйте код, назначенный вашей компании в ассоциации GS1 (в России — ГС1 РУС), или GTIN-14, полученный из вашего зарегистрированного EAN-13."}}, {"@type": "Question", "name": "Нужно ли регистрироваться или платить?", "acceptedAnswer": {"@type": "Answer", "text": "Нет. Генератор бесплатный и работает прямо в браузере: введённые цифры не отправляются на сервер."}}]}</script>
 <style>
 :root{font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#19243a;background:#f6f8fc}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 88% 0%,#e8efff 0,transparent 36%),#f6f8fc;font-size:15px}
@@ -22,10 +31,11 @@ label{display:block;font-weight:650;margin:15px 0 7px;font-size:13px}input{width
 .preview{overflow:auto;background:repeating-linear-gradient(45deg,#f1f4f9,#f1f4f9 12px,#e9eef6 12px,#e9eef6 24px);padding:34px 20px;border-radius:14px;display:flex;justify-content:center;align-items:center;min-height:390px}
 .barcode-card{background:#fff;padding:22px 20px 18px;box-shadow:0 8px 24px #263a5926;min-width:500px;max-width:100%}.barcode-card svg{display:block;width:100%;height:auto}.number{text-align:center;font:600 17px/1.2 Arial,sans-serif;letter-spacing:1.8px;margin-top:8px}.previewnote{font-size:12px;color:#8995a7;margin-top:15px;line-height:1.5}
 .info{margin-top:24px;padding:24px 28px;background:#fff;border:1px solid #e7ecf4;border-radius:18px}.info h2{font-size:19px;margin:0 0 10px}.info p,.info li{line-height:1.7;color:#5f6e86;font-size:14px}.info p{margin:0}.info ul{margin:10px 0 0;padding-left:20px}
+.info h3{font-size:16px;margin:18px 0 6px}.info details{padding:12px 0;border-top:1px solid #e7ecf4}.info summary{cursor:pointer;font-weight:700;font-size:14px}.info details p{margin:8px 0 0}.info a{color:#315fc9}
 .footer{margin-top:26px;color:#8a95a7;font-size:12px;text-align:center}
 @media(max-width:820px){.layout{grid-template-columns:1fr}.wrap{padding:26px 15px 50px}.panel{padding:20px}.topinner{padding:0 15px}.topnote{display:none}.preview{min-height:290px;padding:25px 12px}.barcode-card{min-width:420px}.hero h1{letter-spacing:-.8px}}
 @media(max-width:520px){.barcode-card{min-width:330px;padding:16px 13px 14px}.number{font-size:14px}}
-@media print{body{background:#fff}.topbar,.hero,.controls,.panelhead,.previewnote,.info,.footer{display:none!important}.wrap,.layout,.panel,.preview{display:block;margin:0!important;padding:0!important;background:#fff!important;box-shadow:none!important;border:0!important;border-radius:0!important;max-width:none!important}.barcode-card{min-width:0;width:100%;max-width:none;padding:0;box-shadow:none}.preview{overflow:visible!important}.barcode-card svg{width:180mm;max-width:100%}}
+@media print{body{background:#fff}.topbar,.hero,.controls,.panelhead,.previewnote,.info,.footer,.seo-info{display:none!important}.wrap,.layout,.panel,.preview{display:block;margin:0!important;padding:0!important;background:#fff!important;box-shadow:none!important;border:0!important;border-radius:0!important;max-width:none!important}.barcode-card{min-width:0;width:100%;max-width:none;padding:0;box-shadow:none}.preview{overflow:visible!important}.barcode-card svg{width:180mm;max-width:100%}}
 </style>
 </head>
 <body>
@@ -67,7 +77,26 @@ label{display:block;font-weight:650;margin:15px 0 7px;font-size:13px}input{width
 </ul>
 <p><strong>Важно:</strong> генератор рассчитывает структуру и контрольную цифру GTIN-14, но не выдаёт новый номер GS1 и не проверяет регистрацию идентификатора. Для реального товара используйте GTIN, назначенный вашей организации в соответствии с правилами GS1.</p>
 </section>
-<div class="footer">Введённые данные обрабатываются только в браузере и не отправляются на сервер.</div>
+<section class="info seo-info">
+<h2>Как получить GTIN-14 из EAN-13</h2>
+<ol>
+<li>Выберите индикатор упаковки — цифру от 1 до 8. Например, 1 для коробки с 6 штуками, 2 для коробки с 12 штуками.</li>
+<li>Добавьте к ней первые 12 цифр вашего EAN-13 (без его контрольной цифры).</li>
+<li>Введите получившиеся 13 цифр в генератор — он рассчитает 14-ю контрольную цифру и построит штрихкод ITF-14.</li>
+<li>Скачайте SVG или PNG и проверьте штрихкод сканером перед печатью на коробах.</li>
+</ol>
+<h3>Где используется GTIN-14</h3>
+<p>Код GTIN-14 нужен для транспортных и групповых упаковок: поставки на склады маркетплейсов (Wildberries, Ozon, Яндекс Маркет), приёмка в торговых сетях, складской учёт и логистика. Штрихкод ITF-14 печатают прямо на гофрокоробе или на этикетке, наклеенной на короб.</p>
+<h2>Вопросы и ответы</h2>
+<details><summary>Что такое GTIN-14?</summary><p>GTIN-14 — 14-значный глобальный номер товара по стандарту GS1. Обычно он обозначает транспортную или групповую упаковку: коробку, гофрокороб, паллету с одинаковыми товарами. Первая цифра — индикатор упаковки (1–8), затем 12 цифр кода товара (как правило, это EAN-13 без контрольной цифры) и в конце контрольная цифра.</p></details>
+<details><summary>Как рассчитывается контрольная цифра GTIN-14?</summary><p>Цифры первых 13 разрядов умножаются по очереди на 3 и 1, начиная с первой цифры. Произведения складываются, и контрольная цифра — это число, которое нужно добавить к сумме, чтобы получилось ближайшее число, кратное 10. Генератор делает этот расчёт автоматически.</p></details>
+<details><summary>Чем GTIN-14 отличается от EAN-13?</summary><p>EAN-13 (GTIN-13) ставится на единицу товара, которую покупает покупатель. GTIN-14 добавляет к коду индикатор упаковки и используется для коробок и упаковок с несколькими единицами одного товара. Из одного EAN-13 можно получить несколько GTIN-14 для разных видов упаковки.</p></details>
+<details><summary>Что такое штрихкод ITF-14?</summary><p>ITF-14 — штрихкод, которым обычно печатают GTIN-14 на гофрокоробах. Он хорошо читается сканером даже при печати на картоне. Генератор строит ITF-14 с защитной рамкой и сохраняет его в SVG или PNG.</p></details>
+<details><summary>Можно ли использовать сгенерированный код для реального товара?</summary><p>Генератор считает контрольную цифру и строит штрихкод, но не выдаёт новые номера. Для реального товара используйте код, назначенный вашей компании в ассоциации GS1 (в России — ГС1 РУС), или GTIN-14, полученный из вашего зарегистрированного EAN-13.</p></details>
+<details><summary>Нужно ли регистрироваться или платить?</summary><p>Нет. Генератор бесплатный и работает прямо в браузере: введённые цифры не отправляются на сервер.</p></details>
+<p>Ещё бесплатный инструмент: <a href="/tools/wildberries-barcode-generator/">генератор штрихкодов и этикеток для Wildberries</a> с сохранением в PDF.</p>
+</section>
+<div class="footer">Введённые данные обрабатываются только в браузере и не отправляются на сервер. Инструмент предоставлен магазином <a href="/">Чайный Маркет</a>.</div>
 </main>
 <script>
 const bodyInput=document.getElementById('body');
