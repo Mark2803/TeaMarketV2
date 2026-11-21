@@ -7,6 +7,7 @@ import {
   uploadAdminProductImage,
 } from "../../shared/api/admin";
 import type { AdminProductImage } from "../../shared/api/admin";
+import AdminImageCropper from "./AdminImageCropper";
 
 export type ProductImagesEditorHandle = { save: () => Promise<void> };
 type Props = {
@@ -27,6 +28,7 @@ const AdminProductImagesEditor = forwardRef<ProductImagesEditorHandle, Props>(fu
   const [alts, setAlts] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [cropTask, setCropTask] = useState<{ file: File; image?: AdminProductImage } | null>(null);
   const addRef = useRef<HTMLInputElement>(null);
   const replaceRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const dragId = useRef<string | null>(null);
@@ -100,6 +102,23 @@ const AdminProductImagesEditor = forwardRef<ProductImagesEditorHandle, Props>(fu
     }
   };
 
+  const resetInputs = () => {
+    if (addRef.current) addRef.current.value = "";
+    Object.values(replaceRefs.current).forEach((input) => { if (input) input.value = ""; });
+  };
+
+  const pick = (file?: File, image?: AdminProductImage) => {
+    if (file) setCropTask({ file, image });
+    resetInputs();
+  };
+
+  const applyCrop = async (file: File) => {
+    const task = cropTask;
+    setCropTask(null);
+    if (task?.image) await replace(task.image, file);
+    else await upload(file);
+  };
+
   const remove = async (image: AdminProductImage) => {
     if (!window.confirm("Удалить это изображение товара?")) return;
     setBusy(true); setMessage("");
@@ -121,7 +140,7 @@ const AdminProductImagesEditor = forwardRef<ProductImagesEditorHandle, Props>(fu
         <button className="admin-secondary-button" type="button" disabled={busy} onClick={() => addRef.current?.click()}>
           <ImagePlus size={18} /> Добавить фото
         </button>
-        <input ref={addRef} className="admin-hidden-file-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => void upload(e.target.files?.[0])} />
+        <input ref={addRef} className="admin-hidden-file-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => pick(e.target.files?.[0])} />
       </div>
       {message ? <div className="admin-image-message">{message}</div> : null}
       {!items.length ? <div className="admin-images-empty">У товара пока нет изображений.</div> : (
@@ -169,7 +188,7 @@ const AdminProductImagesEditor = forwardRef<ProductImagesEditorHandle, Props>(fu
                   <RefreshCw size={16} /> Заменить
                 </button>
                 <input ref={(node) => { replaceRefs.current[image.id] = node; }} className="admin-hidden-file-input"
-                  type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => void replace(image, e.target.files?.[0])} />
+                  type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => pick(e.target.files?.[0], image)} />
                 <button className="admin-danger-button" type="button" disabled={busy} onClick={() => void remove(image)}>
                   <Trash2 size={16} /> Удалить
                 </button>
@@ -178,6 +197,7 @@ const AdminProductImagesEditor = forwardRef<ProductImagesEditorHandle, Props>(fu
           ))}
         </div>
       )}
+      {cropTask ? <AdminImageCropper file={cropTask.file} onCancel={() => setCropTask(null)} onApply={applyCrop} /> : null}
     </section>
   );
 });
