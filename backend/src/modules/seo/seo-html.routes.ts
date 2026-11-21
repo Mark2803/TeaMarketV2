@@ -9,6 +9,18 @@ import { prisma } from "../../database/prisma.js";
  * и текстовое содержимое страницы. React при загрузке заменяет содержимое #root.
  */
 const router = Router();
+
+// helmet() ставит на все ответы API строгую политику безопасности (CSP), которая
+// разрешает картинки и скрипты только с нашего домена. Для JSON это безопасно,
+// но эти ответы — сами страницы сайта: с такой политикой браузер блокировал
+// фото товаров (storage.yandexcloud.net) и Яндекс Карты, причём и после перехода
+// на другие страницы без перезагрузки. Страницы, которые nginx отдаёт напрямую,
+// этой политики не имеют — делаем так же.
+router.use("/html", (_req, res, next) => {
+  res.removeHeader("Content-Security-Policy");
+  next();
+});
+
 const SITE = "https://tea-master-team.ru";
 const BRAND = "Чайный Маркет";
 const LOGO = `${SITE}/brand-logo.svg`;
